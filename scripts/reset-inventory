@@ -1,0 +1,13 @@
+#!/bin/sh
+
+set -eu
+
+set -x
+
+systemctl stop xyz.openbmc_project.EntityManager
+rm -f /var/configuration/system.json
+systemctl stop xyz.openbmc_project.Inventory.Manager
+rm -rf /var/lib/phosphor-inventory-manager/*
+systemctl start xyz.openbmc_project.Inventory.Manager
+systemctl start xyz.openbmc_project.EntityManager
+systemctl restart system-vpd

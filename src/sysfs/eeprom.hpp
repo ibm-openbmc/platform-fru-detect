@@ -1,0 +1,21 @@
+/* SPDX-License-Identifier: Apache-2.0 */
+#pragma once
+
+#include "sysfs/sysfs.hpp"
+#include "sysfs/i2c.hpp"
+
+#include <filesystem>
+
+class SysfsEEPROM : public SysfsEntry {
+    public:
+	static bool isEEPROM(std::filesystem::path path);
+
+	SysfsEEPROM(const SysfsEEPROM& eeprom) : SysfsEntry(eeprom.path) { }
+	SysfsEEPROM(std::filesystem::path path) : SysfsEntry(path) { }
+	SysfsEEPROM(SysfsI2CDevice device) :
+	    SysfsEntry(device.getPath() / "eeprom") { }
+
+	SysfsEEPROM(SysfsEEPROM &other) = default;
+
+	SysfsI2CDevice getDevice();
+};

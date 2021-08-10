@@ -1,0 +1,12 @@
+[Unit]
+Description=Detect undiscoverable platform FRUs
+Wants=xyz.openbmc_project.Inventory.Manager.service
+After=xyz.openbmc_project.Inventory.Manager.service
+
+[Service]
+Type=simple
+RemainAfterExit=true
+ExecStart=/usr/bin/platform-fru-detect
+
+[Install]
+WantedBy=default.target
