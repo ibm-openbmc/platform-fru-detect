@@ -1,13 +1,16 @@
 /* SPDX-License-Identifier: Apache-2.0 */
 #include "devices/nvme.hpp"
-#include "log.hpp"
 #include "platforms/rainier.hpp"
 #include "sysfs/i2c.hpp"
 #include "sysfs/gpio.hpp"
 
+#include <phosphor-logging/lg2.hpp>
+
 #include <cassert>
 #include <map>
 #include <string>
+
+PHOSPHOR_LOG2_USING;
 
 static constexpr const char *name = "foo";
 
@@ -34,7 +37,7 @@ static const std::map<int, int> flett_slot_eeprom_map = {
 
 Flett::Flett(int slot) : slot(slot)
 {
-    log_debug("Instantiated Flett in slot %d\n", slot);
+    debug("Instantiated Flett in slot {PCIE_SLOT}", "PCIE_SLOT", slot);
 }
 
 int Flett::getSlot() const

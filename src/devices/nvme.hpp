@@ -1,8 +1,9 @@
 /* SPDX-License-Identifier: Apache-2.0 */
 #pragma once
 
-#include "log.hpp"
 #include "platforms/rainier.hpp"
+
+#include <phosphor-logging/lg2.hpp>
 
 #include "sysfs/eeprom.hpp"
 #include "sysfs/i2c.hpp"
@@ -31,7 +32,8 @@ class NVMeDrive {
 	{
 	    SysfsI2CBus bus = backplane.getFlett().getDriveBus(index);
 	    SysfsI2CDevice eeprom = bus.probeDevice("24c02", NVMeDrive::eepromAddress);
-	    log_info("EEPROM device exists at %s\n", eeprom.getPath().string().c_str());
+	    lg2::info("EEPROM device exists at '{EEPROM_PATH}'", "EEPROM_PATH",
+		      eeprom.getPath().string());
 
 	    return 0;
 	}

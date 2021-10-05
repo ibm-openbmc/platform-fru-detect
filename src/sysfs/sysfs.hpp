@@ -1,7 +1,7 @@
 /* SPDX-License-Identifier: Apache-2.0 */
 #pragma once
 
-#include "log.hpp"
+#include <phosphor-logging/lg2.hpp>
 
 #include <filesystem>
 #include <iostream>
@@ -11,10 +11,14 @@ class SysfsEntry {
 	SysfsEntry(const SysfsEntry& entry) : path(entry.path) { }
 	SysfsEntry(std::filesystem::path path) : path(path)
 	{
-	    log_debug("%s\n", path.string().c_str());
 
-	    if (!std::filesystem::exists(path))
+	    if (!std::filesystem::exists(path)) {
+		lg2::error("sysfs path '{SYSFS_PATH}' does not exist", "SYSFS_PATH", path.string());
+
 		throw -1;
+	    }
+
+	    lg2::debug("Instantiated SysfsEntry for '{SYSFS_PATH}'", "SYSFS_PATH", path.string());
 	}
 
 	virtual ~SysfsEntry() = default;
