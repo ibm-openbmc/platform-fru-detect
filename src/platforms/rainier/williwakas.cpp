@@ -1,12 +1,14 @@
 /* SPDX-License-Identifier: Apache-2.0 */
-#include "log.hpp"
 #include "devices/nvme.hpp"
 #include "platforms/rainier.hpp"
 #include "sysfs/gpio.hpp"
 
 #include <gpiod.hpp>
+#include <phosphor-logging/lg2.hpp>
 
 #include <iostream>
+
+PHOSPHOR_LOG2_USING;
 
 static constexpr const char *name = "foo";
 
@@ -39,7 +41,7 @@ Williwakas::Williwakas(Nisqually nisqually, Flett flett) : nisqually(nisqually),
 		    gpiod::line::DIRECTION_INPUT,
 		    gpiod::line::ACTIVE_LOW });
 
-    log_debug("Constructed drive backplane for index %d\n", getIndex());
+    debug("Constructed drive backplane for index {WILLIWAKAS_ID}", "WILLIWAKAS_ID", getIndex());
 }
 
 bool Williwakas::isDrivePresent(int index)
@@ -57,16 +59,19 @@ std::vector<NVMeDrive> Williwakas::getDrives(void) const
 	/* FIXME: work around libgpiod bug */
 	if (presence.at(index))
 	{
-	    log_info("Found drive %zu\n", index);
+	    info("Found drive {NVME_ID} on backplane {WILLIWAKAS_ID}", "NVME_ID", index,
+		 "WILLIWAKAS_ID", getIndex());
 	    drives.emplace_back(flett.getDrive(*this, index));
 	}
 	else
 	{
-	    log_debug("Drive %zu not present\n", index);
+	    debug("Drive {NVME_ID} not present on backplane {WILLIWAKAS_ID}", "NVME_ID", index,
+		      "WILLIWAKAS_ID", getIndex());
 	}
     }
 
-    log_debug("Found %zu drives for backplane %d\n", drives.size(), getIndex());
+    debug("Found {NVME_COUNT} drives for backplane {WILLIWAKAS_ID}", "NVME_COUNT",
+	      drives.size(), "WILLIWAKAS_ID", getIndex());
 
     return drives;
 }

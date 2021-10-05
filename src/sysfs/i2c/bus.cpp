@@ -4,11 +4,15 @@
 /* TODO: Try to remove this */
 #include "platforms/rainier.hpp"
 
+#include <phosphor-logging/lg2.hpp>
+
 #include <array>
 #include <cassert>
 #include <fstream>
 #include <iostream>
 #include <sstream>
+
+PHOSPHOR_LOG2_USING_WITH_FLAGS;
 
 static constexpr std::array<const char *, 8> mux_channel_map = {
     "channel-0",
@@ -85,8 +89,8 @@ SysfsI2CDevice SysfsI2CBus::newDevice(std::string type, int address)
     std::fstream new_device(path / "new_device", new_device.out);
     if (!new_device.is_open())
     {
-	log_warn("Failed to open new_device for %s\n",
-		 path.string().c_str());
+	warning("Failed to open '{SYSFS_I2C_NEW_DEVICE_PATH}'", "SYSFS_I2C_NEW_DEVICE_PATH",
+	     path.string());
 	throw -1;
     }
 
@@ -95,7 +99,10 @@ SysfsI2CDevice SysfsI2CBus::newDevice(std::string type, int address)
 
     if (new_device.bad() || new_device.fail())
     {
-	log_warn("Failed to add new device %s at 0x%02x\n", type.c_str(), address);
+	warning("Failed to add new device {I2C_DEVICE_TYPE} at {I2C_DEVICE_ADDRESS} via '{SYSFS_I2C_NEW_DEVICE_PATH}'",
+	     "I2C_DEVICE_TYPE", type,
+	     "I2C_DEVICE_ADDRESS", hex | field8, address,
+	     "SYSFS_I2C_NEW_DEVICE_PATH", path);
 	throw -1;
     }
 
@@ -107,8 +114,8 @@ void SysfsI2CBus::deleteDevice(int address)
     std::fstream delete_device(path / "delete_device", delete_device.out);
     if (!delete_device.is_open())
     {
-	log_warn("Failed to open new_device for %s\n",
-		 path.string().c_str());
+	warning("Failed to open '{SYSFS_I2C_DELETE_DEVICE_PATH}'",
+	     "SYSFS_I2C_DELETE_DEVICE_PATH", path);
 	throw -1;
     }
 
@@ -117,7 +124,8 @@ void SysfsI2CBus::deleteDevice(int address)
 
     if (delete_device.bad() || delete_device.fail())
     {
-	log_warn("Failed to delete device at 0x%02x\n", address);
+	warning("Failed to delete device at {I2C_DEVICE_ADDRESS} via '{SYFS_I2C_DELETE_DEVICE_PATH}'",
+		 "I2C_DEVICE_ADDRESS", address, "SYSFS_I2C_DELETE_DEVICE_PATH", path);
 	throw -1;
     }
 }
@@ -126,8 +134,9 @@ SysfsI2CDevice SysfsI2CBus::probeDevice(std::string type, int address)
 {
     if (isDevicePresent(address))
     {
-	log_debug("Device already exists at address 0x%02x\n", address);
-	return SysfsI2CDevice(getDevicePath(address));
+	std::filesystem::path path = getDevicePath(address);
+	debug("Device already exists at '{SYSFS_I2C_DEVICE_PATH}'", "SYSFS_I2C_DEVICE_PATH", path);
+	return SysfsI2CDevice(path);
     }
 
     return newDevice(type, address);
@@ -141,6 +150,7 @@ void SysfsI2CBus::removeDevice(int address)
     }
     else
     {
-	log_warn("No device exists at address 0x%02x\n", address);
+	warning("No device exists at '{SYSFS_I2C_DEVICE_PATH}'", "SYSFS_I2C_DEVICE_PATH",
+	     getDevicePath(address));
     }
 }
