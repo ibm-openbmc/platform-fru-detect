@@ -8,6 +8,8 @@
 #include <array>
 #include <chrono>
 #include <map>
+#include <set>
+#include <string>
 #include <vector>
 
 class NVMeDrive;
@@ -135,4 +137,10 @@ class Ingraham
         "/sys/bus/i2c/devices/i2c-14",
         "/sys/bus/i2c/devices/i2c-15",
     };
+};
+
+class Rainier
+{
+  public:
+    static std::set<std::string> getSupportedModels();
 };
