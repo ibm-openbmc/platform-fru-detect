@@ -27,23 +27,33 @@ Williwakas::Williwakas(Nisqually nisqually, Flett flett) :
 {
     SysfsI2CBus bus(Williwakas::drive_backplane_bus.at(getIndex()));
 
-    SysfsI2CDevice dev =
-        bus.probeDevice("pca9552", Williwakas::drivePresenceDeviceAddress);
+    try
+    {
+        SysfsI2CDevice dev =
+            bus.probeDevice("pca9552", Williwakas::drivePresenceDeviceAddress);
 
-    std::string chipName = SysfsGPIOChip(dev).getName().string();
+        std::string chipName = SysfsGPIOChip(dev).getName().string();
 
-    gpiod::chip chip(chipName, gpiod::chip::OPEN_BY_NAME);
+        gpiod::chip chip(chipName, gpiod::chip::OPEN_BY_NAME);
 
-    std::vector<unsigned int> offsets(Williwakas::drive_presence_map.begin(),
-                                      Williwakas::drive_presence_map.end());
+        std::vector<unsigned int> offsets(
+            Williwakas::drive_presence_map.begin(),
+            Williwakas::drive_presence_map.end());
 
-    lines = chip.get_lines(offsets);
+        lines = chip.get_lines(offsets);
 
-    lines.request(
-        {name, gpiod::line::DIRECTION_INPUT, gpiod::line::ACTIVE_LOW});
+        lines.request(
+            {name, gpiod::line::DIRECTION_INPUT, gpiod::line::ACTIVE_LOW});
 
-    debug("Constructed drive backplane for index {WILLIWAKAS_ID}",
-          "WILLIWAKAS_ID", getIndex());
+        debug("Constructed drive backplane for index {WILLIWAKAS_ID}",
+              "WILLIWAKAS_ID", getIndex());
+    }
+    catch (const SysfsI2CDeviceDriverBindException& ex)
+    {
+        nisqually.~Nisqually();
+        flett.~Flett();
+        throw ex;
+    }
 }
 
 bool Williwakas::isDrivePresent(int index)

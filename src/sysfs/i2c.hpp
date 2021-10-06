@@ -3,11 +3,32 @@
 
 #include "sysfs/sysfs.hpp"
 
+#include <exception>
 #include <filesystem>
 #include <string>
 
 class SysfsI2CMux;
 class SysfsI2CDevice;
+
+class SysfsI2CDeviceDriverBindException : public std::exception
+{
+  public:
+    SysfsI2CDeviceDriverBindException(SysfsEntry entry)
+    {
+        description.append("No driver bound for ");
+        description.append(entry.getPath().string());
+    }
+
+    ~SysfsI2CDeviceDriverBindException() = default;
+
+    virtual const char* what() const noexcept
+    {
+        return description.c_str();
+    }
+
+  private:
+    std::string description;
+};
 
 class SysfsI2CBus : public SysfsEntry
 {
@@ -30,6 +51,10 @@ class SysfsI2CBus : public SysfsEntry
     void deleteDevice(int address);
 
     /* Succeed if post-conditions are already met */
+    SysfsI2CDevice requireDevice(std::string type, int address);
+    void releaseDevice(int address);
+
+    /* Require driver be bound */
     SysfsI2CDevice probeDevice(std::string type, int address);
     void removeDevice(int address);
 };

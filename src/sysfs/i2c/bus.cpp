@@ -126,7 +126,7 @@ void SysfsI2CBus::deleteDevice(int address)
     }
 }
 
-SysfsI2CDevice SysfsI2CBus::probeDevice(std::string type, int address)
+SysfsI2CDevice SysfsI2CBus::requireDevice(std::string type, int address)
 {
     if (isDevicePresent(address))
     {
@@ -139,7 +139,7 @@ SysfsI2CDevice SysfsI2CBus::probeDevice(std::string type, int address)
     return newDevice(type, address);
 }
 
-void SysfsI2CBus::removeDevice(int address)
+void SysfsI2CBus::releaseDevice(int address)
 {
     if (isDevicePresent(address))
     {
@@ -150,4 +150,29 @@ void SysfsI2CBus::removeDevice(int address)
         warning("No device exists at '{SYSFS_I2C_DEVICE_PATH}'",
                 "SYSFS_I2C_DEVICE_PATH", getDevicePath(address));
     }
+}
+
+SysfsI2CDevice SysfsI2CBus::probeDevice(std::string type, int address)
+{
+    SysfsI2CDevice device = requireDevice(type, address);
+
+    std::filesystem::path driver = device.getPath() / "driver";
+
+    debug(
+        "Testing whether a driver is bound via symlink '{SYSFS_I2C_DEVICE_DRIVER_SYMLINK}'",
+        "SYSFS_I2C_DEVICE_DRIVER_SYMLINK", driver.string());
+
+    if (!std::filesystem::exists(driver))
+    {
+        error("No driver bound for '{SYSFS_I2C_DEVICE_PATH}'",
+              "SYSFS_I2C_DEVICE_PATH", device.getPath());
+        throw SysfsI2CDeviceDriverBindException(device);
+    }
+
+    return device;
+}
+
+void SysfsI2CBus::removeDevice(int address)
+{
+    releaseDevice(address);
 }

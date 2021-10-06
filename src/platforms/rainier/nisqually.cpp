@@ -8,6 +8,7 @@
 
 #include <cassert>
 #include <filesystem>
+#include <string>
 
 PHOSPHOR_LOG2_USING;
 
@@ -101,8 +102,23 @@ std::vector<Williwakas> Nisqually::getDriveBackplanes() const
             continue;
         }
 
-        debug("Found Williwakas {WILLIWAKAS_ID}", "WILLIWAKAS_ID", index);
-        dbps.emplace_back(Williwakas(*this, flett));
+        try
+        {
+            Williwakas williwakas(*this, flett);
+            dbps.push_back(williwakas);
+            debug("Initialised Williwakas {WILLIWAKAS_ID}", "WILLIWAKAS_ID",
+                  index);
+        }
+        catch (const SysfsI2CDeviceDriverBindException& ex)
+        {
+            std::string what(ex.what());
+            error(
+                "Required drivers failed to bind for devices on Williwakas {WILLIWAKAS_ID}: {EXCEPTION_DESCRIPTION}",
+                "WILLIWAKAS_ID", index, "EXCEPTION_DESCRIPTION", what);
+            warning("Skipping FRU detection on Williwakas {WILLIWAKAS_ID}",
+                    "WILLIWAKAS_ID", index);
+            continue;
+        }
     }
 
     debug("Found {WILLIWAKAS_COUNT} Williwakas drive backplanes",
@@ -223,16 +239,30 @@ std::vector<Flett> Nisqually::getExpanderCards() const
     for (auto& index : expander_indexes)
     {
         int slot = getFlettSlot(index);
-        if (isFlettSlot(slot))
-        {
-            debug("Found Flett {FLETT_ID} in slot {PCIE_SLOT}", "FLETT_ID",
-                  index, "PCIE_SLOT", slot);
-            expanders.emplace_back(Flett(slot));
-            expanders.back().probe();
-        }
-        else
+
+        if (!isFlettSlot(slot))
         {
             debug("No Flett for index {FLETT_ID}", "FLETT_ID", index);
+            continue;
+        }
+
+        try
+        {
+            Flett flett(slot);
+            flett.probe();
+            expanders.push_back(flett);
+            debug("Initialised Flett {FLETT_ID} in slot {PCIE_SLOT}",
+                  "FLETT_ID", index, "PCIE_SLOT", slot);
+        }
+        catch (const SysfsI2CDeviceDriverBindException& ex)
+        {
+            std::string what(ex.what());
+            error(
+                "Required drivers failed to bind for devices on Flett {FLETT_ID}: {EXCEPTION_DESCRIPTION}",
+                "FLETT_ID", index, "EXCEPTION_DESCRIPTION", what);
+            warning("Skipping FRU detection on Flett {FLETT_ID}", "FLETT_ID",
+                    index);
+            continue;
         }
     }
 
