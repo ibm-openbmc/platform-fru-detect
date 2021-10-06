@@ -3,135 +3,136 @@
 
 #include "sysfs/i2c.hpp"
 
+#include <gpiod.hpp>
+
 #include <array>
 #include <chrono>
-#include <gpiod.hpp>
 #include <map>
 #include <vector>
 
 class NVMeDrive;
 class Williwakas;
 
-class Flett {
-    public:
-	Flett(int index);
-	~Flett() = default;
+class Flett
+{
+  public:
+    Flett(int index);
+    ~Flett() = default;
 
-	int getSlot() const;
-	int getIndex() const;
+    int getSlot() const;
+    int getIndex() const;
 
-	SysfsI2CBus getDriveBus(int index) const;
-	bool isDriveEEPROMPresent(int index) const;
-	NVMeDrive getDrive(Williwakas backplane, int index) const;
+    SysfsI2CBus getDriveBus(int index) const;
+    bool isDriveEEPROMPresent(int index) const;
+    NVMeDrive getDrive(Williwakas backplane, int index) const;
 
-	int probe();
+    int probe();
 
-    private:
-	int slot;
-	int expander;
+  private:
+    int slot;
+    int expander;
 };
 
 class Williwakas;
 
-class Nisqually {
-    public:
-	static int getFlettIndex(int slot);
-	static SysfsI2CBus getFlettSlotI2CBus(int slot);
+class Nisqually
+{
+  public:
+    static int getFlettIndex(int slot);
+    static SysfsI2CBus getFlettSlotI2CBus(int slot);
 
-	Nisqually();
-	~Nisqually() = default;
+    Nisqually();
+    ~Nisqually() = default;
 
-	void probe();
+    void probe();
 
-	std::vector<Williwakas> getDriveBackplanes() const;
-	std::string getInventoryPath() const;
-    private:
-	static constexpr int slotMuxAddress = 0x70;
+    std::vector<Williwakas> getDriveBackplanes() const;
+    std::string getInventoryPath() const;
 
-	static constexpr const char *flett_presence_device_path =
-	    "/sys/bus/i2c/devices/8-0061";
-	gpiod::chip flett_presence;
+  private:
+    static constexpr int slotMuxAddress = 0x70;
 
-	static constexpr const char *williwakas_presence_device_path =
-	    "/sys/bus/i2c/devices/0-0020";
-	static constexpr std::array<int, 3> williwakas_presence_map = { 7, 6, 5 };
-	gpiod::chip williwakas_presence;
+    static constexpr const char* flett_presence_device_path =
+        "/sys/bus/i2c/devices/8-0061";
+    gpiod::chip flett_presence;
 
-	bool isFlettPresentAt(int slot) const;
-	int getFlettSlot(int index) const;
-	bool isFlettSlot(int slot) const;
+    static constexpr const char* williwakas_presence_device_path =
+        "/sys/bus/i2c/devices/0-0020";
+    static constexpr std::array<int, 3> williwakas_presence_map = {7, 6, 5};
+    gpiod::chip williwakas_presence;
 
-	bool isWilliwakasPresent(int index) const;
+    bool isFlettPresentAt(int slot) const;
+    int getFlettSlot(int index) const;
+    bool isFlettSlot(int slot) const;
 
-	std::vector<Flett> getExpanderCards() const;
+    bool isWilliwakasPresent(int index) const;
+
+    std::vector<Flett> getExpanderCards() const;
 };
 
-class Williwakas {
-    public:
-	Williwakas(Nisqually backplane, Flett flett);
-	~Williwakas() = default;
+class Williwakas
+{
+  public:
+    Williwakas(Nisqually backplane, Flett flett);
+    ~Williwakas() = default;
 
-	const Nisqually& getSystemBackplane() const;
-	const Flett& getFlett() const;
-	std::vector<NVMeDrive> getDrives() const;
-	std::string getInventoryPath() const;
-	int getIndex() const;
-    private:
-	static constexpr int drivePresenceDeviceAddress = 0x60;
+    const Nisqually& getSystemBackplane() const;
+    const Flett& getFlett() const;
+    std::vector<NVMeDrive> getDrives() const;
+    std::string getInventoryPath() const;
+    int getIndex() const;
 
-	static constexpr std::array<const char *, 3> drive_backplane_bus = {
-	    "/sys/bus/i2c/devices/i2c-13",
-	    "/sys/bus/i2c/devices/i2c-14",
-	    "/sys/bus/i2c/devices/i2c-15",
-	};
+  private:
+    static constexpr int drivePresenceDeviceAddress = 0x60;
 
-	static constexpr std::array<int, 8> drive_presence_map = {
-	    8, 9, 10, 11, 12, 13, 14, 15,
-	};
+    static constexpr std::array<const char*, 3> drive_backplane_bus = {
+        "/sys/bus/i2c/devices/i2c-13",
+        "/sys/bus/i2c/devices/i2c-14",
+        "/sys/bus/i2c/devices/i2c-15",
+    };
 
-	Nisqually nisqually;
-	Flett flett;
-	gpiod::chip chip;
-	gpiod::line_bulk lines;
+    static constexpr std::array<int, 8> drive_presence_map = {
+        8, 9, 10, 11, 12, 13, 14, 15,
+    };
 
-	bool isDrivePresent(int index);
+    Nisqually nisqually;
+    Flett flett;
+    gpiod::chip chip;
+    gpiod::line_bulk lines;
+
+    bool isDrivePresent(int index);
 };
 
-class Ingraham {
-    public:
-	static SysfsI2CBus getPCIeSlotI2CBus(int slot);
+class Ingraham
+{
+  public:
+    static SysfsI2CBus getPCIeSlotI2CBus(int slot);
 
-	Ingraham() = default;
-	~Ingraham() = default;
+    Ingraham() = default;
+    ~Ingraham() = default;
 
-	Nisqually getBackplane() const;
+    Nisqually getBackplane() const;
 
-    private:
-	static constexpr std::array<const char *, 4> pcie_slot_busses = {
-	    "i2c-4",
-	    "i2c-5",
-	    "i2c-6",
-	    "i2c-11",
-	};
+  private:
+    static constexpr std::array<const char*, 4> pcie_slot_busses = {
+        "i2c-4",
+        "i2c-5",
+        "i2c-6",
+        "i2c-11",
+    };
 
-	static constexpr std::array<const char *, 12> pcie_slot_bus_map = {
-	    "/sys/bus/i2c/devices/i2c-4",
-	    "/sys/bus/i2c/devices/i2c-4",
-	    "/sys/bus/i2c/devices/i2c-4",
-	    "/sys/bus/i2c/devices/i2c-5",
-	    "/sys/bus/i2c/devices/i2c-5",
-	    nullptr,
-	    "/sys/bus/i2c/devices/i2c-6",
-	    "/sys/bus/i2c/devices/i2c-6",
-	    "/sys/bus/i2c/devices/i2c-6",
-	    "/sys/bus/i2c/devices/i2c-6",
-	    "/sys/bus/i2c/devices/i2c-11",
-	    "/sys/bus/i2c/devices/i2c-11",
-	};
+    static constexpr std::array<const char*, 12> pcie_slot_bus_map = {
+        "/sys/bus/i2c/devices/i2c-4",  "/sys/bus/i2c/devices/i2c-4",
+        "/sys/bus/i2c/devices/i2c-4",  "/sys/bus/i2c/devices/i2c-5",
+        "/sys/bus/i2c/devices/i2c-5",  nullptr,
+        "/sys/bus/i2c/devices/i2c-6",  "/sys/bus/i2c/devices/i2c-6",
+        "/sys/bus/i2c/devices/i2c-6",  "/sys/bus/i2c/devices/i2c-6",
+        "/sys/bus/i2c/devices/i2c-11", "/sys/bus/i2c/devices/i2c-11",
+    };
 
-	static constexpr std::array<const char *, 3> williwakas_bus_map = {
-	    "/sys/bus/i2c/devices/i2c-13",
-	    "/sys/bus/i2c/devices/i2c-14",
-	    "/sys/bus/i2c/devices/i2c-15",
-	};
+    static constexpr std::array<const char*, 3> williwakas_bus_map = {
+        "/sys/bus/i2c/devices/i2c-13",
+        "/sys/bus/i2c/devices/i2c-14",
+        "/sys/bus/i2c/devices/i2c-15",
+    };
 };
