@@ -7,11 +7,10 @@
 
 #include <array>
 #include <chrono>
+#include <cstdlib>
 #include <iostream>
 #include <variant>
 #include <vector>
-
-#include <cstdlib>
 
 PHOSPHOR_LOG2_USING;
 
@@ -28,7 +27,8 @@ int main(void)
 
             if ((rc = drive.probe()))
             {
-                error("Failed to probe drive: {ERROR_CODE}\n", "ERROR_CODE", rc);
+                error("Failed to probe drive: {ERROR_CODE}\n", "ERROR_CODE",
+                      rc);
                 continue;
             }
 

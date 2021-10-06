@@ -1,8 +1,8 @@
 /* SPDX-License-Identifier: Apache-2.0 */
 #include "devices/nvme.hpp"
 #include "platforms/rainier.hpp"
-#include "sysfs/i2c.hpp"
 #include "sysfs/gpio.hpp"
+#include "sysfs/i2c.hpp"
 
 #include <phosphor-logging/lg2.hpp>
 
@@ -12,27 +12,25 @@
 
 PHOSPHOR_LOG2_USING;
 
-static constexpr const char *name = "foo";
+static constexpr const char* name = "foo";
 
 static const std::map<std::string, std::map<int, int>> flett_mux_slot_map = {
-    { "i2c-6",  { { 0x74, 9 },
-		  { 0x75, 8 } } },
-    { "i2c-11", { { 0x74, 10 },
-		  { 0x75, 11 } } },
+    {"i2c-6", {{0x74, 9}, {0x75, 8}}},
+    {"i2c-11", {{0x74, 10}, {0x75, 11}}},
 };
 
 static const std::map<int, int> flett_slot_mux_map = {
-    {  8, 0x75 },
-    {  9, 0x74 },
-    { 10, 0x74 },
-    { 11, 0x75 },
+    {8, 0x75},
+    {9, 0x74},
+    {10, 0x74},
+    {11, 0x75},
 };
 
 static const std::map<int, int> flett_slot_eeprom_map = {
-    {  8, 0x51 },
-    {  9, 0x50 },
-    { 10, 0x50 },
-    { 11, 0x51 },
+    {8, 0x51},
+    {9, 0x50},
+    {10, 0x50},
+    {11, 0x51},
 };
 
 Flett::Flett(int slot) : slot(slot)
@@ -65,7 +63,7 @@ int Flett::probe()
 SysfsI2CBus Flett::getDriveBus(int index) const
 {
     SysfsI2CMux flettMux(Nisqually::getFlettSlotI2CBus(slot),
-			 flett_slot_mux_map.at(slot));
+                         flett_slot_mux_map.at(slot));
 
     return SysfsI2CBus(flettMux, index);
 }
