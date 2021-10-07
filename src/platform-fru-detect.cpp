@@ -48,4 +48,6 @@ int main(void)
             inventory.decorateWithVINI(drive);
         }
     }
+
+    return 0;
 }
