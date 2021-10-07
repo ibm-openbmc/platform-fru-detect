@@ -30,7 +30,7 @@ class SysfsEntry
 
     std::filesystem::path getPath() const
     {
-        return std::filesystem::path(path);
+        return path;
     }
 
   protected:
