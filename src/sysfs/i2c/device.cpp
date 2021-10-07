@@ -10,17 +10,15 @@ std::string SysfsI2CDevice::generateI2CDeviceID(SysfsI2CBus bus, int address)
 {
     std::ostringstream oss;
 
-    oss << bus.getAddress()
-	<< "-"
-	<< std::setfill('0') << std::setw(4) << std::hex << address;
+    oss << bus.getAddress() << "-" << std::setfill('0') << std::setw(4)
+        << std::hex << address;
 
     return oss.str();
 }
 
 SysfsI2CDevice::SysfsI2CDevice(SysfsI2CBus bus, int address) :
     SysfsEntry(fs::path(bus.getPath() / generateI2CDeviceID(bus, address)))
-{
-}
+{}
 
 std::string SysfsI2CDevice::getID()
 {
