@@ -132,6 +132,12 @@ std::string Nisqually::getInventoryPath() const
     return "/system/chassis/motherboard";
 }
 
+/*
+ * Note that Bear River and Bear Lake cards also assert the presence GPIO.
+ * However, if they are present in slots that can also house Flett cards there
+ * will be no associated Williwakas card and as such there will be no drives
+ * detected.
+ */
 bool Nisqually::isFlettPresentAt(int slot) const
 {
     debug("Looking up Flett presence GPIO index for slot {PCIE_SLOT}",
