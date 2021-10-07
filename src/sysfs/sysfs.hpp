@@ -28,7 +28,7 @@ class SysfsEntry
 
     virtual ~SysfsEntry() = default;
 
-    std::filesystem::path getPath()
+    std::filesystem::path getPath() const
     {
         return std::filesystem::path(path);
     }
