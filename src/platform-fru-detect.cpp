@@ -27,8 +27,8 @@ int main(void)
     info("Detecting FRUs for '{PLATFORM_MODEL}'", "PLATFORM_MODEL",
          Platform::getModel());
 
-    Inventory inventory{};
-    Ingraham ingraham{};
+    Inventory inventory;
+    Ingraham ingraham;
     Nisqually systemBackplane = ingraham.getBackplane();
     for (auto& driveBackplane : systemBackplane.getDriveBackplanes())
     {
