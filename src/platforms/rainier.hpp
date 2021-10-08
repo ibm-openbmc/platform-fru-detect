@@ -78,7 +78,6 @@ class Williwakas
     Williwakas(Nisqually backplane, Flett flett);
     ~Williwakas() = default;
 
-    const Nisqually& getSystemBackplane() const;
     const Flett& getFlett() const;
     std::vector<NVMeDrive> getDrives() const;
     std::string getInventoryPath() const;

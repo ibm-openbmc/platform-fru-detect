@@ -12,11 +12,6 @@ PHOSPHOR_LOG2_USING;
 
 static constexpr const char* name = "foo";
 
-const Nisqually& Williwakas::getSystemBackplane() const
-{
-    return nisqually;
-}
-
 const Flett& Williwakas::getFlett() const
 {
     return flett;
