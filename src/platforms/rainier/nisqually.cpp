@@ -53,7 +53,7 @@ SysfsI2CBus Nisqually::getFlettSlotI2CBus(int slot)
     return SysfsI2CBus(mux, channel);
 }
 
-Nisqually::Nisqually() :
+Nisqually::Nisqually(Inventory& inventory) :
     flett_presence(SysfsGPIOChip(std::filesystem::path(
                                      Nisqually::flett_presence_device_path))
                        .getName()
@@ -64,7 +64,8 @@ Nisqually::Nisqually() :
             std::filesystem::path(Nisqually::williwakas_presence_device_path))
             .getName()
             .string(),
-        gpiod::chip::OPEN_BY_NAME)
+        gpiod::chip::OPEN_BY_NAME),
+    inventory(inventory)
 {}
 
 void Nisqually::probe()

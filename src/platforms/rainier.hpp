@@ -44,7 +44,7 @@ class Nisqually
     static int getFlettIndex(int slot);
     static SysfsI2CBus getFlettSlotI2CBus(int slot);
 
-    Nisqually();
+    Nisqually(Inventory& inventory);
     ~Nisqually() = default;
 
     void probe();
@@ -71,6 +71,7 @@ class Nisqually
     bool isWilliwakasPresent(int index) const;
 
     std::vector<Flett> getExpanderCards() const;
+    Inventory& inventory;
 };
 
 class Williwakas

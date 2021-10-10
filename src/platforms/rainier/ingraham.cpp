@@ -17,7 +17,7 @@ SysfsI2CBus Ingraham::getPCIeSlotI2CBus(int slot)
 
 Nisqually Ingraham::getBackplane() const
 {
-    Nisqually backplane{};
+    Nisqually backplane(inventory);
 
     backplane.probe();
 
