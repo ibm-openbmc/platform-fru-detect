@@ -6,6 +6,8 @@
 
 #include <phosphor-logging/lg2.hpp>
 
+#include <array>
+
 class Inventory;
 class Williwakas;
 
@@ -29,6 +31,7 @@ class NVMeDrive
     std::string getInventoryPath() const;
     const Williwakas& getBackplane() const;
     int getIndex() const;
+    std::array<uint8_t, 2> getSerial() const;
 
   private:
     /* FRU Information Device, NVMe Storage Device (non-Carrier) */

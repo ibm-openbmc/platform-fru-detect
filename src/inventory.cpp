@@ -2,7 +2,6 @@
 #include "inventory.hpp"
 
 #include "devices/nvme.hpp"
-#include "platforms/rainier.hpp" /* TODO: get rid of this */
 #include "sysfs/i2c.hpp"
 
 #include <sdbusplus/message.hpp>
@@ -71,6 +70,8 @@ void Inventory::decorateWithVINI(const NVMeDrive& drive)
         dbus.new_method_call(INVENTORY_BUS_NAME, INVENTORY_MANAGER_OBJECT,
                              INVENTORY_MANAGER_IFACE, "Notify");
 
+    auto sn = drive.getSerial();
+
     std::map<sdbusplus::message::object_path, ObjectType> inventoryUpdate = {
         {
             drive.getInventoryPath(),
@@ -80,13 +81,7 @@ void Inventory::decorateWithVINI(const NVMeDrive& drive)
                     {
                         {"RT", std::vector<uint8_t>({'V', 'I', 'N', 'I'})},
                         {"CC", std::vector<uint8_t>({'N', 'V', 'M', 'e'})},
-                        {
-                            "SN",
-                            std::vector<uint8_t>(
-                                {static_cast<uint8_t>(
-                                     drive.getBackplane().getIndex()),
-                                 static_cast<uint8_t>(drive.getIndex())}),
-                        },
+                        {"SN", std::vector<uint8_t>(sn.begin(), sn.end())},
                     },
                 },
             },

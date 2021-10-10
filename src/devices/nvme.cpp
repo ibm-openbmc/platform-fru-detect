@@ -44,3 +44,9 @@ int NVMeDrive::getIndex() const
 {
     return index;
 }
+
+std::array<uint8_t, 2> NVMeDrive::getSerial() const
+{
+    return std::array<uint8_t, 2>({static_cast<uint8_t>(backplane.getIndex()),
+                                   static_cast<uint8_t>(index)});
+}
