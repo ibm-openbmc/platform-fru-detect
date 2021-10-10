@@ -28,7 +28,7 @@ int main(void)
          Platform::getModel());
 
     Inventory inventory;
-    Ingraham ingraham;
+    Ingraham ingraham(inventory);
     Nisqually systemBackplane = ingraham.getBackplane();
     for (auto& driveBackplane : systemBackplane.getDriveBackplanes())
     {

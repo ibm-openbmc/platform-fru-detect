@@ -1,6 +1,7 @@
 /* SPDX-License-Identifier: Apache-2.0 */
 #pragma once
 
+#include "dbus/inventory.hpp"
 #include "sysfs/i2c.hpp"
 
 #include <gpiod.hpp>
@@ -109,7 +110,7 @@ class Ingraham
   public:
     static SysfsI2CBus getPCIeSlotI2CBus(int slot);
 
-    Ingraham() = default;
+    Ingraham(Inventory& inventory);
     ~Ingraham() = default;
 
     Nisqually getBackplane() const;
@@ -136,6 +137,8 @@ class Ingraham
         "/sys/bus/i2c/devices/i2c-14",
         "/sys/bus/i2c/devices/i2c-15",
     };
+
+    Inventory& inventory;
 };
 
 class Rainier

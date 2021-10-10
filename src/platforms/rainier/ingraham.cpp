@@ -7,6 +7,9 @@
 
 namespace fs = std::filesystem;
 
+Ingraham::Ingraham(Inventory& inventory) : inventory(inventory)
+{}
+
 SysfsI2CBus Ingraham::getPCIeSlotI2CBus(int slot)
 {
     return SysfsI2CBus(fs::path(Ingraham::pcie_slot_bus_map.at(slot)));
