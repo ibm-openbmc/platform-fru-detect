@@ -29,11 +29,21 @@ static constexpr auto INVENTORY_MANAGER_OBJECT =
 
 static constexpr auto INVENTORY_IPZVPD_VINI_IFACE = "com.ibm.ipzvpd.VINI";
 
-// dict[path,dict[string,dict[string,variant[boolean,size,int64,string,array[byte]]]]]
-using PropertyType =
-    std::variant<bool, size_t, int64_t, std::string, std::vector<uint8_t>>;
-using InterfaceType = std::map<std::string, PropertyType>;
-using ObjectType = std::map<std::string, InterfaceType>;
+using namespace inventory;
+
+void Inventory::updateObject(const std::string& path, const ObjectType& updates)
+{
+    auto call =
+        dbus.new_method_call(INVENTORY_BUS_NAME, INVENTORY_MANAGER_OBJECT,
+                             INVENTORY_MANAGER_IFACE, "Notify");
+
+    std::map<sdbusplus::message::object_path, ObjectType> inventoryUpdate = {
+        {path, updates},
+    };
+
+    call.append(inventoryUpdate);
+    dbus.call(call);
+}
 
 void Inventory::decorateWithI2CDevice(const NVMeDrive& drive)
 {
