@@ -4,6 +4,7 @@
 #include "platforms/rainier.hpp"
 
 #include <phosphor-logging/lg2.hpp>
+#include <sdbusplus/bus.hpp>
 
 #include <array>
 #include <chrono>
@@ -26,7 +27,8 @@ int main(void)
     info("Detecting FRUs for '{PLATFORM_MODEL}'", "PLATFORM_MODEL",
          Platform::getModel());
 
-    Inventory inventory;
+    sdbusplus::bus::bus dbus = sdbusplus::bus::new_default();
+    Inventory inventory(dbus);
     Ingraham ingraham(inventory);
     ingraham.plug();
 
