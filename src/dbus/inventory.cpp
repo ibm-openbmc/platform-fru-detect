@@ -1,6 +1,9 @@
 /* SPDX-License-Identifier: Apache-2.0 */
 #include "dbus/inventory.hpp"
 
+#include "devices/nvme.hpp"
+#include "sysfs/i2c.hpp"
+
 #include <sdbusplus/message.hpp>
 
 // https://dbus.freedesktop.org/doc/dbus-specification.html#standard-interfaces-properties

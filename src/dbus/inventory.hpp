@@ -1,9 +1,9 @@
 /* SPDX-License-Identifier: Apache-2.0 */
 #pragma once
 
-#include "devices/nvme.hpp"
-
 #include <sdbusplus/bus.hpp>
+
+class NVMeDrive;
 
 class Inventory
 {
