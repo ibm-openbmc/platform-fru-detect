@@ -77,7 +77,7 @@ class Nisqually
 class Williwakas
 {
   public:
-    Williwakas(Nisqually backplane, Flett flett);
+    Williwakas(Inventory& inventory, Nisqually backplane, Flett flett);
     ~Williwakas() = default;
 
     const Flett& getFlett() const;
@@ -98,6 +98,7 @@ class Williwakas
         8, 9, 10, 11, 12, 13, 14, 15,
     };
 
+    Inventory& inventory;
     Nisqually nisqually;
     Flett flett;
     gpiod::chip chip;

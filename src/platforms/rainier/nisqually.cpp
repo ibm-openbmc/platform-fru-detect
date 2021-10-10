@@ -105,7 +105,7 @@ std::vector<Williwakas> Nisqually::getDriveBackplanes() const
 
         try
         {
-            Williwakas williwakas(*this, flett);
+            Williwakas williwakas(inventory, *this, flett);
             dbps.push_back(williwakas);
             debug("Initialised Williwakas {WILLIWAKAS_ID}", "WILLIWAKAS_ID",
                   index);
