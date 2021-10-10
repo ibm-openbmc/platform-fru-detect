@@ -1,11 +1,13 @@
 /* SPDX-License-Identifier: Apache-2.0 */
 #pragma once
 
-#include "platforms/rainier.hpp"
 #include "sysfs/eeprom.hpp"
 #include "sysfs/i2c.hpp"
 
 #include <phosphor-logging/lg2.hpp>
+
+class Inventory;
+class Williwakas;
 
 class NVMeDrive
 {
@@ -14,7 +16,7 @@ class NVMeDrive
         inventory(drive.inventory), backplane(drive.backplane),
         index(drive.index)
     {}
-    NVMeDrive(Inventory& inventory, Williwakas backplane, int index) :
+    NVMeDrive(Inventory& inventory, const Williwakas& backplane, int index) :
         inventory(inventory), backplane(backplane), index(index)
     {}
 
@@ -33,6 +35,6 @@ class NVMeDrive
     static constexpr int eepromAddress = 0x53;
 
     Inventory& inventory;
-    Williwakas backplane;
+    const Williwakas& backplane;
     int index;
 };

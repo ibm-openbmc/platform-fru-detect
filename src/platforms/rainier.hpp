@@ -28,7 +28,7 @@ class Flett
 
     SysfsI2CBus getDriveBus(int index) const;
     bool isDriveEEPROMPresent(int index) const;
-    NVMeDrive getDrive(Williwakas backplane, int index) const;
+    NVMeDrive getDrive(const Williwakas& backplane, int index) const;
 
     int probe();
 

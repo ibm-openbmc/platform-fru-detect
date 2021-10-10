@@ -2,6 +2,7 @@
 #include "inventory.hpp"
 
 #include "devices/nvme.hpp"
+#include "platforms/rainier.hpp" /* TODO: get rid of this */
 #include "sysfs/i2c.hpp"
 
 #include <sdbusplus/message.hpp>

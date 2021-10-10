@@ -2,6 +2,8 @@
 
 #include "devices/nvme.hpp"
 
+#include "platforms/rainier.hpp" /* TODO: Get rid of this */
+
 bool NVMeDrive::isPresent(SysfsI2CBus bus)
 {
     return bus.isDevicePresent(NVMeDrive::eepromAddress);
