@@ -1,4 +1,6 @@
 /* SPDX-License-Identifier: Apache-2.0 */
+#include "devices/nvme.hpp"
+#include "inventory.hpp"
 #include "platforms/rainier.hpp"
 #include "sysfs/gpio.hpp"
 #include "sysfs/i2c.hpp"
@@ -78,9 +80,32 @@ void Nisqually::probe()
                                                 Nisqually::slotMuxAddress);
 }
 
-std::vector<Williwakas> Nisqually::getDriveBackplanes() const
+void Nisqually::plug()
 {
-    std::vector<Williwakas> dbps{};
+    detectDriveBackplanes(driveBackplanes);
+    for (auto& driveBackplane : driveBackplanes)
+    {
+        for (auto& drive : driveBackplane.getDrives())
+        {
+            int rc;
+
+            if ((rc = drive.probe()))
+            {
+                error("Failed to probe drive: {ERROR_CODE}\n", "ERROR_CODE",
+                      rc);
+                continue;
+            }
+
+            inventory.markPresent(drive);
+            inventory.decorateWithI2CDevice(drive);
+            inventory.decorateWithVINI(drive);
+        }
+    }
+}
+
+void Nisqually::detectDriveBackplanes(std::vector<Williwakas>& driveBackplanes)
+{
+    assert(driveBackplanes.empty() && "Already detected drive backplanes");
 
     debug("Matching expander cards to drive backplanes");
 
@@ -106,7 +131,7 @@ std::vector<Williwakas> Nisqually::getDriveBackplanes() const
         try
         {
             Williwakas williwakas(inventory, *this, flett);
-            dbps.push_back(williwakas);
+            driveBackplanes.push_back(williwakas);
             debug("Initialised Williwakas {WILLIWAKAS_ID}", "WILLIWAKAS_ID",
                   index);
         }
@@ -123,9 +148,7 @@ std::vector<Williwakas> Nisqually::getDriveBackplanes() const
     }
 
     debug("Found {WILLIWAKAS_COUNT} Williwakas drive backplanes",
-          "WILLIWAKAS_COUNT", dbps.size());
-
-    return dbps;
+          "WILLIWAKAS_COUNT", driveBackplanes.size());
 }
 
 std::string Nisqually::getInventoryPath() const

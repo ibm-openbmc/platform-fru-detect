@@ -40,7 +40,7 @@ class Flett
 
 class Williwakas;
 
-class Nisqually
+class Nisqually : public Device
 {
   public:
     static int getFlettIndex(int slot);
@@ -50,9 +50,10 @@ class Nisqually
     ~Nisqually() = default;
 
     void probe();
-
-    std::vector<Williwakas> getDriveBackplanes() const;
     std::string getInventoryPath() const;
+
+    /* Device */
+    virtual void plug() override;
 
   private:
     static constexpr int slotMuxAddress = 0x70;
@@ -73,13 +74,16 @@ class Nisqually
     bool isWilliwakasPresent(int index) const;
 
     std::vector<Flett> getExpanderCards() const;
+    void detectDriveBackplanes(std::vector<Williwakas>& driveBackplanes);
+
     Inventory& inventory;
+    std::vector<Williwakas> driveBackplanes;
 };
 
 class Williwakas
 {
   public:
-    Williwakas(Inventory& inventory, Nisqually backplane, Flett flett);
+    Williwakas(Inventory& inventory, Nisqually& backplane, Flett flett);
     ~Williwakas() = default;
 
     const Flett& getFlett() const;
@@ -101,7 +105,7 @@ class Williwakas
     };
 
     Inventory& inventory;
-    Nisqually nisqually;
+    Nisqually& nisqually;
     Flett flett;
     gpiod::chip chip;
     gpiod::line_bulk lines;
@@ -143,9 +147,8 @@ class Ingraham : public Device
         "/sys/bus/i2c/devices/i2c-15",
     };
 
-    Nisqually getBackplane() const;
-
     Inventory& inventory;
+    Nisqually nisqually;
 };
 
 class Rainier

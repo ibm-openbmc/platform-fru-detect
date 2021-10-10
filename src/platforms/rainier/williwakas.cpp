@@ -17,8 +17,10 @@ const Flett& Williwakas::getFlett() const
     return flett;
 }
 
-Williwakas::Williwakas(Inventory& inventory, Nisqually nisqually, Flett flett) :
-    inventory(inventory), nisqually(nisqually), flett(flett)
+Williwakas::Williwakas(Inventory& inventory, Nisqually& nisqually,
+                       Flett flett) :
+    inventory(inventory),
+    nisqually(nisqually), flett(flett)
 {
     SysfsI2CBus bus(Williwakas::drive_backplane_bus.at(getIndex()));
 
@@ -45,7 +47,6 @@ Williwakas::Williwakas(Inventory& inventory, Nisqually nisqually, Flett flett) :
     }
     catch (const SysfsI2CDeviceDriverBindException& ex)
     {
-        nisqually.~Nisqually();
         flett.~Flett();
         throw ex;
     }
