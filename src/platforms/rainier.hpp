@@ -1,7 +1,7 @@
 /* SPDX-License-Identifier: Apache-2.0 */
 #pragma once
 
-#include "inventory.hpp"
+#include "platform.hpp"
 #include "sysfs/i2c.hpp"
 
 #include <gpiod.hpp>
@@ -13,6 +13,7 @@
 #include <string>
 #include <vector>
 
+class Inventory;
 class NVMeDrive;
 class Williwakas;
 
@@ -108,7 +109,7 @@ class Williwakas
     bool isDrivePresent(int index);
 };
 
-class Ingraham
+class Ingraham : public Device
 {
   public:
     static SysfsI2CBus getPCIeSlotI2CBus(int slot);
@@ -116,7 +117,8 @@ class Ingraham
     Ingraham(Inventory& inventory);
     ~Ingraham() = default;
 
-    Nisqually getBackplane() const;
+    /* Device */
+    virtual void plug() override;
 
   private:
     static constexpr std::array<const char*, 4> pcie_slot_busses = {
@@ -140,6 +142,8 @@ class Ingraham
         "/sys/bus/i2c/devices/i2c-14",
         "/sys/bus/i2c/devices/i2c-15",
     };
+
+    Nisqually getBackplane() const;
 
     Inventory& inventory;
 };

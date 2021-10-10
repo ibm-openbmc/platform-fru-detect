@@ -1,5 +1,4 @@
 /* SPDX-License-Identifier: Apache-2.0 */
-#include "devices/nvme.hpp"
 #include "inventory.hpp"
 #include "platform.hpp"
 #include "platforms/rainier.hpp"
@@ -29,25 +28,7 @@ int main(void)
 
     Inventory inventory;
     Ingraham ingraham(inventory);
-    Nisqually systemBackplane = ingraham.getBackplane();
-    for (auto& driveBackplane : systemBackplane.getDriveBackplanes())
-    {
-        for (auto& drive : driveBackplane.getDrives())
-        {
-            int rc;
-
-            if ((rc = drive.probe()))
-            {
-                error("Failed to probe drive: {ERROR_CODE}\n", "ERROR_CODE",
-                      rc);
-                continue;
-            }
-
-            inventory.markPresent(drive);
-            inventory.decorateWithI2CDevice(drive);
-            inventory.decorateWithVINI(drive);
-        }
-    }
+    ingraham.plug();
 
     return 0;
 }
