@@ -35,16 +35,6 @@ std::string NVMeDrive::getInventoryPath() const
     return backplane.getInventoryPath() + "/" + "nvme" + std::to_string(index);
 }
 
-const Williwakas& NVMeDrive::getBackplane() const
-{
-    return backplane;
-}
-
-int NVMeDrive::getIndex() const
-{
-    return index;
-}
-
 std::array<uint8_t, 2> NVMeDrive::getSerial() const
 {
     return std::array<uint8_t, 2>({static_cast<uint8_t>(backplane.getIndex()),

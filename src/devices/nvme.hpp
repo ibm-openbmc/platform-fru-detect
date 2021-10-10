@@ -29,8 +29,6 @@ class NVMeDrive
     int probe();
 
     std::string getInventoryPath() const;
-    const Williwakas& getBackplane() const;
-    int getIndex() const;
     std::array<uint8_t, 2> getSerial() const;
 
   private:
