@@ -1,7 +1,7 @@
 /* SPDX-License-Identifier: Apache-2.0 */
 #pragma once
 
-#include "dbus/inventory.hpp"
+#include "inventory.hpp"
 #include "sysfs/i2c.hpp"
 
 #include <gpiod.hpp>

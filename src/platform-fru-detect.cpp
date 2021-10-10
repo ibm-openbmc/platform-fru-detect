@@ -1,6 +1,6 @@
 /* SPDX-License-Identifier: Apache-2.0 */
-#include "dbus/inventory.hpp"
 #include "devices/nvme.hpp"
+#include "inventory.hpp"
 #include "platform.hpp"
 #include "platforms/rainier.hpp"
 

@@ -1,5 +1,5 @@
 /* SPDX-License-Identifier: Apache-2.0 */
-#include "dbus/inventory.hpp"
+#include "inventory.hpp"
 
 #include "devices/nvme.hpp"
 #include "sysfs/i2c.hpp"
