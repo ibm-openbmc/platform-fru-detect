@@ -1,8 +1,18 @@
 /* SPDX-License-Identifier: Apache-2.0 */
 #pragma once
 
-#include <stdexcept>
 #include <string>
+
+class Inventory;
+
+class FRU
+{
+  public:
+    FRU() = default;
+    virtual ~FRU() = default;
+
+    virtual void addToInventory([[maybe_unused]] Inventory& inventory) = 0;
+};
 
 class Device
 {
