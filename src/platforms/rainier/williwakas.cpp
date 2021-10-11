@@ -1,5 +1,6 @@
 /* SPDX-License-Identifier: Apache-2.0 */
 #include "devices/nvme.hpp"
+#include "inventory.hpp"
 #include "platforms/rainier.hpp"
 #include "sysfs/gpio.hpp"
 
@@ -11,57 +12,76 @@
 
 PHOSPHOR_LOG2_USING;
 
-static constexpr const char* name = "foo";
+/* WilliwakasNVMeDrive */
 
-const Flett& Williwakas::getFlett() const
+WilliwakasNVMeDrive::WilliwakasNVMeDrive(Inventory& inventory,
+                                         const Williwakas& williwakas,
+                                         int index) :
+    NVMeDrive(inventory, index),
+    williwakas(williwakas)
+{}
+
+std::string WilliwakasNVMeDrive::getInventoryPath() const
 {
-    return flett;
+    return williwakas.getInventoryPath() + "/" + "nvme" + std::to_string(index);
 }
 
-Williwakas::Williwakas(Inventory& inventory, Nisqually& nisqually,
-                       Flett flett) :
-    inventory(inventory),
-    nisqually(nisqually), flett(flett)
+void WilliwakasNVMeDrive::addToInventory(Inventory& inventory)
 {
-    SysfsI2CBus bus(Williwakas::drive_backplane_bus.at(getIndex()));
+    std::string path = getInventoryPath();
 
-    try
-    {
-        SysfsI2CDevice dev =
-            bus.probeDevice("pca9552", Williwakas::drivePresenceDeviceAddress);
+    markPresent(path, inventory);
+}
 
-        std::string chipName = SysfsGPIOChip(dev).getName().string();
+void WilliwakasNVMeDrive::markPresent(const std::string& path,
+                                      Inventory& inventory) const
+{
+    inventory.markPresent(path);
+}
 
-        gpiod::chip chip(chipName, gpiod::chip::OPEN_BY_NAME);
+/* Williwakas */
 
-        std::vector<unsigned int> offsets(
-            Williwakas::drive_presence_map.begin(),
-            Williwakas::drive_presence_map.end());
+static constexpr const char* name = "foo";
 
-        lines = chip.get_lines(offsets);
+std::string Williwakas::getInventoryPathFor(const Nisqually& nisqually,
+                                            int index)
+{
+    return nisqually.getInventoryPath() + "/" + "disk_backplane" +
+           std::to_string(index);
+}
 
-        lines.request(
-            {name, gpiod::line::DIRECTION_INPUT, gpiod::line::ACTIVE_LOW});
+Williwakas::Williwakas(Inventory& inventory, Nisqually& nisqually, int index) :
+    inventory(inventory), nisqually(nisqually), index(index)
+{
+    SysfsI2CBus bus(Williwakas::drive_backplane_bus.at(index));
 
-        debug("Constructed drive backplane for index {WILLIWAKAS_ID}",
-              "WILLIWAKAS_ID", getIndex());
-    }
-    catch (const SysfsI2CDeviceDriverBindException& ex)
-    {
-        flett.~Flett();
-        throw ex;
-    }
+    SysfsI2CDevice dev =
+        bus.probeDevice("pca9552", Williwakas::drivePresenceDeviceAddress);
+
+    std::string chipName = SysfsGPIOChip(dev).getName().string();
+
+    gpiod::chip chip(chipName, gpiod::chip::OPEN_BY_NAME);
+
+    std::vector<unsigned int> offsets(Williwakas::drive_presence_map.begin(),
+                                      Williwakas::drive_presence_map.end());
+
+    lines = chip.get_lines(offsets);
+
+    lines.request(
+        {name, gpiod::line::DIRECTION_INPUT, gpiod::line::ACTIVE_LOW});
+
+    debug("Constructed drive backplane for index {WILLIWAKAS_ID}",
+          "WILLIWAKAS_ID", index);
 }
 
 std::string Williwakas::getInventoryPath() const
 {
-    return nisqually.getInventoryPath() + "/" + "disk_backplane" +
-           std::to_string(flett.getIndex());
+    return getInventoryPathFor(nisqually, index);
 }
 
-int Williwakas::getIndex() const
+void Williwakas::addToInventory([[maybe_unused]] Inventory& inventory)
 {
-    return flett.getIndex();
+    std::logic_error("Unimplemented");
 }
 
 void Williwakas::plug()
@@ -69,45 +89,32 @@ void Williwakas::plug()
     detectDrives(drives);
     for (auto& drive : drives)
     {
-        int rc;
-
-        if ((rc = drive.probe()))
-        {
-            error("Failed to probe drive: {ERROR_CODE}\n", "ERROR_CODE", rc);
-            continue;
-        }
-
         drive.addToInventory(inventory);
     }
 }
 
-bool Williwakas::isDrivePresent(int index)
-{
-    return lines.get(drive_presence_map[index]).get_value();
-}
-
-void Williwakas::detectDrives(std::vector<NVMeDrive>& drives)
+void Williwakas::detectDrives(std::vector<WilliwakasNVMeDrive>& drives)
 {
     assert(drives.empty() && "Already detected drives");
 
     std::vector<int> presence = lines.get_values();
 
-    for (size_t index = 0; index < presence.size(); index++)
+    for (size_t id = 0; id < presence.size(); id++)
     {
         /* FIXME: work around libgpiod bug */
         if (presence.at(index))
         {
             info("Found drive {NVME_ID} on backplane {WILLIWAKAS_ID}",
-                 "NVME_ID", index, "WILLIWAKAS_ID", getIndex());
-            drives.emplace_back(flett.getDrive(*this, index));
+                 "NVME_ID", id, "WILLIWAKAS_ID", index);
+            drives.emplace_back(WilliwakasNVMeDrive(inventory, *this, id));
         }
         else
         {
             debug("Drive {NVME_ID} not present on backplane {WILLIWAKAS_ID}",
-                  "NVME_ID", index, "WILLIWAKAS_ID", getIndex());
+                  "NVME_ID", id, "WILLIWAKAS_ID", index);
         }
     }
 
     debug("Found {NVME_COUNT} drives for backplane {WILLIWAKAS_ID}",
-          "NVME_COUNT", drives.size(), "WILLIWAKAS_ID", getIndex());
+          "NVME_COUNT", drives.size(), "WILLIWAKAS_ID", index);
 }

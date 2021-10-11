@@ -10,6 +10,7 @@
 
 #include <cassert>
 #include <filesystem>
+#include <stdexcept>
 #include <string>
 
 PHOSPHOR_LOG2_USING;
@@ -82,6 +83,12 @@ void Nisqually::probe()
 
 void Nisqually::plug()
 {
+    detectExpanderCards(ioExpanders);
+    for (auto& ioExpander : ioExpanders)
+    {
+        ioExpander.plug();
+    }
+
     detectDriveBackplanes(driveBackplanes);
     for (auto& driveBackplane : driveBackplanes)
     {
@@ -91,19 +98,12 @@ void Nisqually::plug()
 
 void Nisqually::detectDriveBackplanes(std::vector<Williwakas>& driveBackplanes)
 {
+    static constexpr std::array<int, 3> backplane_indexes = {0, 1, 2};
+
     assert(driveBackplanes.empty() && "Already detected drive backplanes");
 
-    debug("Matching expander cards to drive backplanes");
-
-    std::vector<Flett> expanders = getExpanderCards();
-
-    debug("Have {FLETT_COUNT} Flett IO expanders", "FLETT_COUNT",
-          expanders.size());
-
-    for (auto& flett : expanders)
+    for (auto& index : backplane_indexes)
     {
-        int index = flett.getIndex();
-
         debug("Testing for Williwakas presence at index {WILLIWAKAS_ID}",
               "WILLIWAKAS_ID", index);
 
@@ -116,7 +116,7 @@ void Nisqually::detectDriveBackplanes(std::vector<Williwakas>& driveBackplanes)
 
         try
         {
-            Williwakas williwakas(inventory, *this, flett);
+            Williwakas williwakas(inventory, *this, index);
             driveBackplanes.push_back(williwakas);
             debug("Initialised Williwakas {WILLIWAKAS_ID}", "WILLIWAKAS_ID",
                   index);
@@ -140,6 +140,11 @@ void Nisqually::detectDriveBackplanes(std::vector<Williwakas>& driveBackplanes)
 std::string Nisqually::getInventoryPath() const
 {
     return "/system/chassis/motherboard";
+}
+
+void Nisqually::addToInventory([[maybe_unused]] Inventory& inventory)
+{
+    std::logic_error("Unimplemented");
 }
 
 /*
@@ -244,11 +249,11 @@ bool Nisqually::isWilliwakasPresent(int index) const
     return present;
 }
 
-std::vector<Flett> Nisqually::getExpanderCards() const
+void Nisqually::detectExpanderCards(std::vector<Flett>& expanders)
 {
     static constexpr std::array<int, 3> expander_indexes = {0, 1, 2};
 
-    std::vector<Flett> expanders{};
+    assert(expanders.empty() && "Already detected Flett IO expanders");
 
     debug("Locating expander cards");
 
@@ -264,7 +269,7 @@ std::vector<Flett> Nisqually::getExpanderCards() const
 
         try
         {
-            Flett flett(inventory, slot);
+            Flett flett(inventory, *this, slot);
             flett.probe();
             expanders.push_back(flett);
             debug("Initialised Flett {FLETT_ID} in slot {PCIE_SLOT}",
@@ -284,6 +289,4 @@ std::vector<Flett> Nisqually::getExpanderCards() const
 
     debug("Found {FLETT_COUNT} Flett IO expander cards", "FLETT_COUNT",
           expanders.size());
-
-    return expanders;
 }

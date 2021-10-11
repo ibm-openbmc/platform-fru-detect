@@ -1,8 +1,7 @@
 subdir('sysfs')
 subdir('platforms')
-subdir('devices')
 
-fru_deps = [ sysfs_dep, platforms_dep, devices_dep ]
+fru_deps = [ sysfs_dep, platforms_dep ]
 sdbusplus_dep = dependency('sdbusplus', fallback: [ 'sdbusplus', 'sdbusplus_dep' ])
 phosphor_logging_dep = dependency('phosphor-logging',
 				  fallback: [ 'phosphor-logging', 'phosphor_logging_dep' ])

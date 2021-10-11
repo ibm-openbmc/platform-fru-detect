@@ -14,33 +14,62 @@
 #include <string>
 #include <vector>
 
+class Flett;
 class Inventory;
+class Nisqually;
 class Williwakas;
 
-class Flett
+class FlettNVMeDrive : public NVMeDrive
 {
   public:
-    Flett(Inventory& inventory, int index);
-    ~Flett() = default;
+    static bool isPresent(SysfsI2CBus bus);
 
-    int getSlot() const;
-    int getIndex() const;
-
-    SysfsI2CBus getDriveBus(int index) const;
-    bool isDriveEEPROMPresent(int index) const;
-    NVMeDrive getDrive(const Williwakas& backplane, int index) const;
+    FlettNVMeDrive(Inventory& inventory, const Nisqually& nisqually,
+                   const Flett& flett, int index);
+    ~FlettNVMeDrive() = default;
 
     int probe();
 
+    /* FRU */
+    virtual std::string getInventoryPath() const override;
+    virtual void addToInventory(Inventory& inventory) override;
+
   private:
-    Inventory& inventory;
-    int slot;
-    int expander;
+    std::filesystem::path getEEPROMDevicePath() const;
+    SysfsI2CDevice getEEPROMDevice() const;
+    std::array<uint8_t, 2> getSerial() const;
+
+    void decorateWithI2CDevice(const std::string& path,
+                               Inventory& inventory) const;
+    void decorateWithVINI(const std::string& path, Inventory& inventory) const;
+
+    const Nisqually& nisqually;
+    const Flett& flett;
 };
 
-class Williwakas;
+class Flett : public Device
+{
+  public:
+    Flett(Inventory& inventory, const Nisqually& nisqually, int slot);
+    ~Flett() = default;
 
-class Nisqually : public Device
+    int getIndex() const;
+    int probe();
+    SysfsI2CBus getDriveBus(int index) const;
+
+    /* Device */
+    virtual void plug() override;
+
+  private:
+    void detectDrives(std::vector<FlettNVMeDrive>& drives);
+
+    Inventory& inventory;
+    const Nisqually& nisqually;
+    int slot;
+    std::vector<FlettNVMeDrive> drives;
+};
+
+class Nisqually : public Device, FRU
 {
   public:
     static int getFlettIndex(int slot);
@@ -50,10 +79,13 @@ class Nisqually : public Device
     ~Nisqually() = default;
 
     void probe();
-    std::string getInventoryPath() const;
 
     /* Device */
     virtual void plug() override;
+
+    /* FRU */
+    virtual std::string getInventoryPath() const override;
+    virtual void addToInventory(Inventory& inventory) override;
 
   private:
     static constexpr int slotMuxAddress = 0x70;
@@ -73,25 +105,46 @@ class Nisqually : public Device
 
     bool isWilliwakasPresent(int index) const;
 
-    std::vector<Flett> getExpanderCards() const;
+    void detectExpanderCards(std::vector<Flett>& expanders);
     void detectDriveBackplanes(std::vector<Williwakas>& driveBackplanes);
 
     Inventory& inventory;
     std::vector<Williwakas> driveBackplanes;
+    std::vector<Flett> ioExpanders;
 };
 
-class Williwakas : public Device
+class WilliwakasNVMeDrive : public NVMeDrive
 {
   public:
-    Williwakas(Inventory& inventory, Nisqually& backplane, Flett flett);
-    ~Williwakas() = default;
+    WilliwakasNVMeDrive(Inventory& inventory, const Williwakas& backplane,
+                        int index);
+    ~WilliwakasNVMeDrive() = default;
 
-    const Flett& getFlett() const;
-    std::string getInventoryPath() const;
-    int getIndex() const;
+    /* FRU */
+    virtual std::string getInventoryPath() const override;
+    virtual void addToInventory(Inventory& inventory) override;
+
+  private:
+    void markPresent(const std::string& path, Inventory& inventory) const;
+
+    const Williwakas& williwakas;
+};
+
+class Williwakas : public Device, FRU
+{
+  public:
+    static std::string getInventoryPathFor(const Nisqually& nisqually,
+                                           int index);
+
+    Williwakas(Inventory& inventory, Nisqually& backplane, int index);
+    ~Williwakas() = default;
 
     /* Device */
     virtual void plug() override;
+
+    /* FRU */
+    virtual std::string getInventoryPath() const override;
+    virtual void addToInventory(Inventory& inventory) override;
 
   private:
     static constexpr int drivePresenceDeviceAddress = 0x60;
@@ -108,13 +161,13 @@ class Williwakas : public Device
 
     Inventory& inventory;
     Nisqually& nisqually;
-    Flett flett;
-    std::vector<NVMeDrive> drives;
+    int index;
+    std::vector<WilliwakasNVMeDrive> drives;
     gpiod::chip chip;
     gpiod::line_bulk lines;
 
     bool isDrivePresent(int index);
-    void detectDrives(std::vector<NVMeDrive>& drives);
+    void detectDrives(std::vector<WilliwakasNVMeDrive>& drives);
 };
 
 class Ingraham : public Device

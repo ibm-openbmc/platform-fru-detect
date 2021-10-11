@@ -11,6 +11,7 @@ class FRU
     FRU() = default;
     virtual ~FRU() = default;
 
+    virtual std::string getInventoryPath() const = 0;
     virtual void addToInventory([[maybe_unused]] Inventory& inventory) = 0;
 };
 
