@@ -85,21 +85,7 @@ void Nisqually::plug()
     detectDriveBackplanes(driveBackplanes);
     for (auto& driveBackplane : driveBackplanes)
     {
-        for (auto& drive : driveBackplane.getDrives())
-        {
-            int rc;
-
-            if ((rc = drive.probe()))
-            {
-                error("Failed to probe drive: {ERROR_CODE}\n", "ERROR_CODE",
-                      rc);
-                continue;
-            }
-
-            inventory.markPresent(drive);
-            inventory.decorateWithI2CDevice(drive);
-            inventory.decorateWithVINI(drive);
-        }
+        driveBackplane.plug();
     }
 }
 

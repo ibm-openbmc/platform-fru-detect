@@ -1,11 +1,13 @@
 /* SPDX-License-Identifier: Apache-2.0 */
 #include "devices/nvme.hpp"
+#include "inventory.hpp"
 #include "platforms/rainier.hpp"
 #include "sysfs/gpio.hpp"
 
 #include <gpiod.hpp>
 #include <phosphor-logging/lg2.hpp>
 
+#include <cassert>
 #include <iostream>
 
 PHOSPHOR_LOG2_USING;
@@ -52,14 +54,44 @@ Williwakas::Williwakas(Inventory& inventory, Nisqually& nisqually,
     }
 }
 
+std::string Williwakas::getInventoryPath() const
+{
+    return nisqually.getInventoryPath() + "/" + "disk_backplane" +
+           std::to_string(flett.getIndex());
+}
+
+int Williwakas::getIndex() const
+{
+    return flett.getIndex();
+}
+
+void Williwakas::plug()
+{
+    detectDrives(drives);
+    for (auto& drive : drives)
+    {
+        int rc;
+
+        if ((rc = drive.probe()))
+        {
+            error("Failed to probe drive: {ERROR_CODE}\n", "ERROR_CODE", rc);
+            continue;
+        }
+
+        inventory.markPresent(drive);
+        inventory.decorateWithI2CDevice(drive);
+        inventory.decorateWithVINI(drive);
+    }
+}
+
 bool Williwakas::isDrivePresent(int index)
 {
     return lines.get(drive_presence_map[index]).get_value();
 }
 
-std::vector<NVMeDrive> Williwakas::getDrives(void) const
+void Williwakas::detectDrives(std::vector<NVMeDrive>& drives)
 {
-    std::vector<NVMeDrive> drives{};
+    assert(drives.empty() && "Already detected drives");
 
     std::vector<int> presence = lines.get_values();
 
@@ -81,17 +113,4 @@ std::vector<NVMeDrive> Williwakas::getDrives(void) const
 
     debug("Found {NVME_COUNT} drives for backplane {WILLIWAKAS_ID}",
           "NVME_COUNT", drives.size(), "WILLIWAKAS_ID", getIndex());
-
-    return drives;
-}
-
-std::string Williwakas::getInventoryPath() const
-{
-    return nisqually.getInventoryPath() + "/" + "disk_backplane" +
-           std::to_string(flett.getIndex());
-}
-
-int Williwakas::getIndex() const
-{
-    return flett.getIndex();
 }

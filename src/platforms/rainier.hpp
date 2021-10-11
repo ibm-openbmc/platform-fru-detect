@@ -1,6 +1,7 @@
 /* SPDX-License-Identifier: Apache-2.0 */
 #pragma once
 
+#include "devices/nvme.hpp"
 #include "platform.hpp"
 #include "sysfs/i2c.hpp"
 
@@ -14,7 +15,6 @@
 #include <vector>
 
 class Inventory;
-class NVMeDrive;
 class Williwakas;
 
 class Flett
@@ -80,16 +80,18 @@ class Nisqually : public Device
     std::vector<Williwakas> driveBackplanes;
 };
 
-class Williwakas
+class Williwakas : public Device
 {
   public:
     Williwakas(Inventory& inventory, Nisqually& backplane, Flett flett);
     ~Williwakas() = default;
 
     const Flett& getFlett() const;
-    std::vector<NVMeDrive> getDrives() const;
     std::string getInventoryPath() const;
     int getIndex() const;
+
+    /* Device */
+    virtual void plug() override;
 
   private:
     static constexpr int drivePresenceDeviceAddress = 0x60;
@@ -107,10 +109,12 @@ class Williwakas
     Inventory& inventory;
     Nisqually& nisqually;
     Flett flett;
+    std::vector<NVMeDrive> drives;
     gpiod::chip chip;
     gpiod::line_bulk lines;
 
     bool isDrivePresent(int index);
+    void detectDrives(std::vector<NVMeDrive>& drives);
 };
 
 class Ingraham : public Device
