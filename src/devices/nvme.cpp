@@ -44,7 +44,54 @@ std::array<uint8_t, 2> NVMeDrive::getSerial() const
 
 void NVMeDrive::addToInventory(Inventory& inventory)
 {
-    inventory.markPresent(*this);
-    inventory.decorateWithI2CDevice(*this);
-    inventory.decorateWithVINI(*this);
+    std::string path = getInventoryPath();
+
+    markPresent(path, inventory);
+    decorateWithI2CDevice(path, inventory);
+    decorateWithVINI(path, inventory);
+}
+
+void NVMeDrive::decorateWithI2CDevice(const std::string& path,
+                                      Inventory& inventory) const
+{
+    SysfsI2CDevice eepromDevice = getEEPROMDevice();
+
+    size_t bus = static_cast<size_t>(eepromDevice.getBus().getAddress());
+    size_t address = static_cast<size_t>(eepromDevice.getAddress());
+
+    inventory::ObjectType updates = {
+        {
+            inventory::INVENTORY_DECORATOR_I2CDEVICE_IFACE,
+            {
+                {"Bus", bus},
+                {"Address", address},
+            },
+        },
+    };
+
+    inventory.updateObject(path, updates);
+}
+
+void NVMeDrive::decorateWithVINI(const std::string& path,
+                                 Inventory& inventory) const
+{
+    auto sn = getSerial();
+
+    inventory::ObjectType updates = {
+        {
+            inventory::INVENTORY_IPZVPD_VINI_IFACE,
+            {
+                {"RT", std::vector<uint8_t>({'V', 'I', 'N', 'I'})},
+                {"CC", std::vector<uint8_t>({'N', 'V', 'M', 'e'})},
+                {"SN", std::vector<uint8_t>(sn.begin(), sn.end())},
+            },
+        },
+    };
+
+    inventory.updateObject(path, updates);
+}
+
+void NVMeDrive::markPresent(const std::string& path, Inventory& inventory) const
+{
+    inventory.markPresent(path);
 }
