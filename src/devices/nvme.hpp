@@ -1,6 +1,7 @@
 /* SPDX-License-Identifier: Apache-2.0 */
 #pragma once
 
+#include "platform.hpp"
 #include "sysfs/eeprom.hpp"
 #include "sysfs/i2c.hpp"
 
@@ -11,7 +12,7 @@
 class Inventory;
 class Williwakas;
 
-class NVMeDrive
+class NVMeDrive : public FRU
 {
   public:
     static bool isPresent(SysfsI2CBus bus);
@@ -30,6 +31,8 @@ class NVMeDrive
     SysfsI2CDevice getEEPROMDevice() const;
     std::string getInventoryPath() const;
     std::array<uint8_t, 2> getSerial() const;
+
+    virtual void addToInventory(Inventory& inventory) override;
 
   private:
     /* FRU Information Device, NVMe Storage Device (non-Carrier) */

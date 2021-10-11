@@ -2,6 +2,7 @@
 
 #include "devices/nvme.hpp"
 
+#include "inventory.hpp"
 #include "platforms/rainier.hpp" /* TODO: Get rid of this */
 
 bool NVMeDrive::isPresent(SysfsI2CBus bus)
@@ -39,4 +40,11 @@ std::array<uint8_t, 2> NVMeDrive::getSerial() const
 {
     return std::array<uint8_t, 2>({static_cast<uint8_t>(backplane.getIndex()),
                                    static_cast<uint8_t>(index)});
+}
+
+void NVMeDrive::addToInventory(Inventory& inventory)
+{
+    inventory.markPresent(*this);
+    inventory.decorateWithI2CDevice(*this);
+    inventory.decorateWithVINI(*this);
 }

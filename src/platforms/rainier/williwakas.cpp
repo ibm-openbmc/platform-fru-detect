@@ -1,6 +1,5 @@
 /* SPDX-License-Identifier: Apache-2.0 */
 #include "devices/nvme.hpp"
-#include "inventory.hpp"
 #include "platforms/rainier.hpp"
 #include "sysfs/gpio.hpp"
 
@@ -78,9 +77,7 @@ void Williwakas::plug()
             continue;
         }
 
-        inventory.markPresent(drive);
-        inventory.decorateWithI2CDevice(drive);
-        inventory.decorateWithVINI(drive);
+        drive.addToInventory(inventory);
     }
 }
 
