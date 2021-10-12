@@ -15,14 +15,14 @@ PHOSPHOR_LOG2_USING;
 
 /* FlettNVMeDrive */
 
-FlettNVMeDrive::FlettNVMeDrive(Inventory& inventory, const Nisqually& nisqually,
-                               const Flett& flett, int index) :
+FlettNVMeDrive::FlettNVMeDrive(Inventory& inventory, const Nisqually* nisqually,
+                               const Flett* flett, int index) :
     NVMeDrive(inventory, index),
     nisqually(nisqually), flett(flett)
 {
     try
     {
-        SysfsI2CBus bus = flett.getDriveBus(index);
+        SysfsI2CBus bus = flett->getDriveBus(index);
         SysfsI2CDevice eeprom =
             bus.probeDevice("24c02", NVMeDrive::eepromAddress);
         lg2::info("EEPROM device exists at '{EEPROM_PATH}'", "EEPROM_PATH",
@@ -39,7 +39,7 @@ void FlettNVMeDrive::plug()
 {
     /* TODO: Probe NVMe MI endpoints on I2C? */
     debug("Drive {NVME_ID} plugged on Flett {FLETT_ID}", "NVME_ID", index,
-          "FLETT_ID", flett.getIndex());
+          "FLETT_ID", flett->getIndex());
     addToInventory(inventory);
 }
 
@@ -50,13 +50,13 @@ void FlettNVMeDrive::unplug(int mode)
         removeFromInventory(inventory);
     }
     debug("Drive {NVME_ID} unplugged on Williwakas {WILLIWAKAS_ID}", "NVME_ID",
-          index, "WILLIWAKAS_ID", flett.getIndex());
+          index, "WILLIWAKAS_ID", flett->getIndex());
 }
 
 std::string FlettNVMeDrive::getInventoryPath() const
 {
     std::string williwakasPath =
-        Williwakas::getInventoryPathFor(nisqually, flett.getIndex());
+        Williwakas::getInventoryPathFor(nisqually, flett->getIndex());
 
     return williwakasPath + "/" + "nvme" + std::to_string(index);
 }
@@ -73,7 +73,7 @@ void FlettNVMeDrive::removeFromInventory([[maybe_unused]] Inventory& inventory)
 {
     debug(
         "I'm not sure how to remove drive {NVME_ID} on Flett {FLETT_ID} from the inventory!",
-        "NVME_ID", index, "FLETT_ID", flett.getIndex());
+        "NVME_ID", index, "FLETT_ID", flett->getIndex());
 }
 
 bool FlettNVMeDrive::isPresent(SysfsI2CBus bus)
@@ -83,7 +83,7 @@ bool FlettNVMeDrive::isPresent(SysfsI2CBus bus)
 
 std::filesystem::path FlettNVMeDrive::getEEPROMDevicePath() const
 {
-    return flett.getDriveBus(index).getDevicePath(NVMeDrive::eepromAddress);
+    return flett->getDriveBus(index).getDevicePath(NVMeDrive::eepromAddress);
 }
 
 SysfsI2CDevice FlettNVMeDrive::getEEPROMDevice() const
@@ -94,7 +94,7 @@ SysfsI2CDevice FlettNVMeDrive::getEEPROMDevice() const
 std::array<uint8_t, 2> FlettNVMeDrive::getSerial() const
 {
     return std::array<uint8_t, 2>(
-        {static_cast<uint8_t>(flett.getIndex()), static_cast<uint8_t>(index)});
+        {static_cast<uint8_t>(flett->getIndex()), static_cast<uint8_t>(index)});
 }
 
 void FlettNVMeDrive::decorateWithI2CDevice(const std::string& path,
@@ -160,8 +160,18 @@ static const std::map<int, int> flett_slot_eeprom_map = {
     {11, 0x51},
 };
 
-Flett::Flett(Inventory& inventory, const Nisqually& nisqually, int slot) :
-    inventory(inventory), nisqually(nisqually), slot(slot)
+Flett::Flett(Inventory& inventory, const Nisqually* nisqually, int slot) :
+    inventory(inventory), nisqually(nisqually), slot(slot),
+    driveConnectors{{
+        Connector<FlettNVMeDrive>(inventory, this->nisqually, this, 0),
+        Connector<FlettNVMeDrive>(inventory, this->nisqually, this, 1),
+        Connector<FlettNVMeDrive>(inventory, this->nisqually, this, 2),
+        Connector<FlettNVMeDrive>(inventory, this->nisqually, this, 3),
+        Connector<FlettNVMeDrive>(inventory, this->nisqually, this, 4),
+        Connector<FlettNVMeDrive>(inventory, this->nisqually, this, 5),
+        Connector<FlettNVMeDrive>(inventory, this->nisqually, this, 6),
+        Connector<FlettNVMeDrive>(inventory, this->nisqually, this, 7),
+    }}
 {
     SysfsI2CBus bus = Nisqually::getFlettSlotI2CBus(slot);
 
@@ -188,26 +198,29 @@ SysfsI2CBus Flett::getDriveBus(int index) const
 
 void Flett::plug()
 {
-    detectDrives(drives);
+    detectDrives();
 }
 
 void Flett::unplug(int mode)
 {
-    for (auto& drive : drives)
+    for (auto& connector : driveConnectors)
     {
-        drive.unplug(mode);
+        if (connector.isPopulated())
+        {
+            connector.getDevice().unplug(mode);
+            connector.depopulate();
+        }
     }
 }
 
-void Flett::detectDrives(std::vector<FlettNVMeDrive>& drives)
+void Flett::detectDrives()
 {
-    for (int i = 0; i < 8; i++)
+    for (std::size_t i = 0; i < driveConnectors.size(); i++)
     {
         try
         {
-            FlettNVMeDrive drive(inventory, nisqually, *this, i);
-            drives.push_back(drive);
-            drives.back().plug();
+            driveConnectors[i].populate();
+            driveConnectors[i].getDevice().plug();
             info("Detected drive at index {NVME_ID} on Flett {FLETT_ID}",
                  "NVME_ID", i, "FLETT_ID", getIndex());
         }

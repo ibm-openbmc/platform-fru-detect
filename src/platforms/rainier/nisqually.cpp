@@ -38,6 +38,13 @@ static const std::map<int, int> flett_index_map = {
     {11, 2},
 };
 
+static const std::map<int, int> flett_connector_slot_map = {
+    {0, 8},
+    {1, 9},
+    {2, 10},
+    {3, 11},
+};
+
 int Nisqually::getFlettIndex(int slot)
 {
     return flett_index_map.at(slot);
@@ -57,18 +64,29 @@ SysfsI2CBus Nisqually::getFlettSlotI2CBus(int slot)
 }
 
 Nisqually::Nisqually(Inventory& inventory) :
-    flett_presence(SysfsGPIOChip(std::filesystem::path(
-                                     Nisqually::flett_presence_device_path))
-                       .getName()
-                       .string(),
-                   gpiod::chip::OPEN_BY_NAME),
-    williwakas_presence(
+    inventory(inventory),
+    flettPresenceChip(SysfsGPIOChip(std::filesystem::path(
+                                        Nisqually::flett_presence_device_path))
+                          .getName()
+                          .string(),
+                      gpiod::chip::OPEN_BY_NAME),
+    flettConnectors{{
+        Connector<Flett>(this->inventory, this, 8),
+        Connector<Flett>(this->inventory, this, 9),
+        Connector<Flett>(this->inventory, this, 10),
+        Connector<Flett>(this->inventory, this, 11),
+    }},
+    williwakasPresenceChip(
         SysfsGPIOChip(
             std::filesystem::path(Nisqually::williwakas_presence_device_path))
             .getName()
             .string(),
         gpiod::chip::OPEN_BY_NAME),
-    inventory(inventory)
+    williwakasConnectors{{
+        Connector<Williwakas>(this->inventory, this, 0),
+        Connector<Williwakas>(this->inventory, this, 1),
+        Connector<Williwakas>(this->inventory, this, 2),
+    }}
 {
     /* Slot 9 is on the same mux as slot 8 */
     Ingraham::getPCIeSlotI2CBus(8).probeDevice("pca9546",
@@ -80,39 +98,51 @@ Nisqually::Nisqually(Inventory& inventory) :
 
 void Nisqually::plug()
 {
-    detectExpanderCards(ioExpanders);
-    for (auto& ioExpander : ioExpanders)
+    detectFlettCards();
+    for (auto& connector : flettConnectors)
     {
-        ioExpander.plug();
+        if (connector.isPopulated())
+        {
+            connector.getDevice().plug();
+        }
     }
 
-    detectDriveBackplanes(driveBackplanes);
-    for (auto& driveBackplane : driveBackplanes)
+    detectWilliwakasCards();
+    for (auto& connector : williwakasConnectors)
     {
-        driveBackplane.plug();
+        if (connector.isPopulated())
+        {
+            connector.getDevice().plug();
+        }
     }
 }
 
 void Nisqually::unplug(int mode)
 {
-    for (auto& driveBackplane : driveBackplanes)
+    for (auto& connector : williwakasConnectors)
     {
-        driveBackplane.unplug(mode);
+        if (connector.isPopulated())
+        {
+            connector.getDevice().unplug(mode);
+            connector.depopulate();
+        }
     }
 
-    for (auto& ioExpander : ioExpanders)
+    for (auto& connector : flettConnectors)
     {
-        ioExpander.unplug(mode);
+        if (connector.isPopulated())
+        {
+            connector.getDevice().unplug(mode);
+            connector.depopulate();
+        }
     }
 }
 
-void Nisqually::detectDriveBackplanes(std::vector<Williwakas>& driveBackplanes)
+void Nisqually::detectWilliwakasCards(void)
 {
-    static constexpr std::array<int, 3> backplane_indexes = {0, 1, 2};
+    debug("Locating Williwakas cards");
 
-    assert(driveBackplanes.empty() && "Already detected drive backplanes");
-
-    for (auto& index : backplane_indexes)
+    for (std::size_t index = 0; index < williwakasConnectors.size(); index++)
     {
         debug("Testing for Williwakas presence at index {WILLIWAKAS_ID}",
               "WILLIWAKAS_ID", index);
@@ -126,8 +156,7 @@ void Nisqually::detectDriveBackplanes(std::vector<Williwakas>& driveBackplanes)
 
         try
         {
-            Williwakas williwakas(inventory, *this, index);
-            driveBackplanes.push_back(williwakas);
+            williwakasConnectors[index].populate();
             debug("Initialised Williwakas {WILLIWAKAS_ID}", "WILLIWAKAS_ID",
                   index);
         }
@@ -142,9 +171,6 @@ void Nisqually::detectDriveBackplanes(std::vector<Williwakas>& driveBackplanes)
             continue;
         }
     }
-
-    debug("Found {WILLIWAKAS_COUNT} Williwakas drive backplanes",
-          "WILLIWAKAS_COUNT", driveBackplanes.size());
 }
 
 std::string Nisqually::getInventoryPath() const
@@ -178,7 +204,7 @@ bool Nisqually::isFlettPresentAt(int slot) const
     debug("Testing for Flett presence via index {FLETT_PRESENCE_INDEX}",
           "FLETT_PRESENCE_INDEX", flett_presence_index);
 
-    gpiod::line line = flett_presence.get_line(flett_presence_index);
+    gpiod::line line = flettPresenceChip.get_line(flett_presence_index);
     line.request(
         {app_name, gpiod::line::DIRECTION_INPUT, gpiod::line::ACTIVE_LOW});
 
@@ -192,39 +218,6 @@ bool Nisqually::isFlettPresentAt(int slot) const
     line.release();
 
     return present;
-}
-
-int Nisqually::getFlettSlot(int index) const
-{
-    debug("Inspecting whether Flett {FLETT_ID} is present", "FLETT_ID", index);
-    if (index == 0)
-    {
-        debug("Probing PCIe slot 8 presence");
-        if (Nisqually::isFlettPresentAt(8))
-        {
-            return 8;
-        }
-
-        debug("Probing PCIe slot 10 presence");
-        if (Nisqually::isFlettPresentAt(10))
-        {
-            return 10;
-        }
-
-        return -1;
-    }
-    else if (index == 1)
-    {
-        debug("Probing PCIe slot 9 presence");
-        return Nisqually::isFlettPresentAt(9) ? 9 : -1;
-    }
-    else if (index == 2)
-    {
-        debug("Probing PCIe slot 11 presence");
-        return Nisqually::isFlettPresentAt(11) ? 11 : -1;
-    }
-
-    return -1;
 }
 
 bool Nisqually::isFlettSlot(int slot) const
@@ -249,7 +242,8 @@ bool Nisqually::isWilliwakasPresent(int index) const
         "Testing for Williwakas presence via index {WILLIWAKAS_PRESENCE_INDEX}",
         "WILLIWAKAS_PRESENCE_INDEX", williwakas_presence_index);
 
-    gpiod::line line = williwakas_presence.get_line(williwakas_presence_index);
+    gpiod::line line =
+        williwakasPresenceChip.get_line(williwakas_presence_index);
 
     line.request(
         {app_name, gpiod::line::DIRECTION_INPUT, gpiod::line::ACTIVE_LOW});
@@ -264,43 +258,34 @@ bool Nisqually::isWilliwakasPresent(int index) const
     return present;
 }
 
-void Nisqually::detectExpanderCards(std::vector<Flett>& expanders)
+void Nisqually::detectFlettCards()
 {
-    static constexpr std::array<int, 3> expander_indexes = {0, 1, 2};
+    debug("Locating Flett cards");
 
-    assert(expanders.empty() && "Already detected Flett IO expanders");
-
-    debug("Locating expander cards");
-
-    for (auto& index : expander_indexes)
+    /* FIXME: do something more ergonomic */
+    for (auto& [connector, slot] : flett_connector_slot_map)
     {
-        int slot = getFlettSlot(index);
-
-        if (!isFlettSlot(slot))
+        if (!isFlettPresentAt(slot))
         {
-            debug("No Flett for index {FLETT_ID}", "FLETT_ID", index);
+            debug("No Flett in slot {PCIE_SLOT}", "PCIE_SLOT", slot);
             continue;
         }
 
         try
         {
-            Flett flett(inventory, *this, slot);
-            expanders.push_back(flett);
+            flettConnectors[connector].populate();
             debug("Initialised Flett {FLETT_ID} in slot {PCIE_SLOT}",
-                  "FLETT_ID", index, "PCIE_SLOT", slot);
+                  "FLETT_ID", getFlettIndex(slot), "PCIE_SLOT", slot);
         }
         catch (const SysfsI2CDeviceDriverBindException& ex)
         {
-            std::string what(ex.what());
-            error(
-                "Required drivers failed to bind for devices on Flett {FLETT_ID}: {EXCEPTION_DESCRIPTION}",
-                "FLETT_ID", index, "EXCEPTION_DESCRIPTION", what);
-            warning("Skipping FRU detection on Flett {FLETT_ID}", "FLETT_ID",
-                    index);
+            debug(
+                "Required drivers failed to bind for devices on Flett {FLETT_ID} in slot {PCIE_SLOT}: {EXCEPTION}",
+                "FLETT_ID", getFlettIndex(slot), "PCIE_SLOT", slot, "EXCEPTION",
+                ex);
+            warning("Failed to detect Flett in slot {PCIE_SLOT}", "PCIE_SLOT",
+                    slot);
             continue;
         }
     }
-
-    debug("Found {FLETT_COUNT} Flett IO expander cards", "FLETT_COUNT",
-          expanders.size());
 }

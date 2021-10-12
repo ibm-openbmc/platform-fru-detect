@@ -16,7 +16,7 @@ PHOSPHOR_LOG2_USING;
 /* WilliwakasNVMeDrive */
 
 WilliwakasNVMeDrive::WilliwakasNVMeDrive(Inventory& inventory,
-                                         const Williwakas& williwakas,
+                                         const Williwakas* williwakas,
                                          int index) :
     NVMeDrive(inventory, index),
     williwakas(williwakas)
@@ -25,7 +25,7 @@ WilliwakasNVMeDrive::WilliwakasNVMeDrive(Inventory& inventory,
 void WilliwakasNVMeDrive::plug()
 {
     debug("Drive {NVME_ID} plugged on Williwakas {WILLIWAKAS_ID}", "NVME_ID",
-          index, "WILLIWAKAS_ID", williwakas.getIndex());
+          index, "WILLIWAKAS_ID", williwakas->getIndex());
     addToInventory(inventory);
 }
 
@@ -36,12 +36,13 @@ void WilliwakasNVMeDrive::unplug(int mode)
         removeFromInventory(inventory);
     }
     debug("Drive {NVME_ID} unplugged on Williwakas {WILLIWAKAS_ID}", "NVME_ID",
-          index, "WILLIWAKAS_ID", williwakas.getIndex());
+          index, "WILLIWAKAS_ID", williwakas->getIndex());
 }
 
 std::string WilliwakasNVMeDrive::getInventoryPath() const
 {
-    return williwakas.getInventoryPath() + "/" + "nvme" + std::to_string(index);
+    return williwakas->getInventoryPath() + "/" + "nvme" +
+           std::to_string(index);
 }
 
 void WilliwakasNVMeDrive::addToInventory(Inventory& inventory)
@@ -68,15 +69,27 @@ void WilliwakasNVMeDrive::markPresent(const std::string& path,
 
 static constexpr const char* name = "foo";
 
-std::string Williwakas::getInventoryPathFor(const Nisqually& nisqually,
+std::string Williwakas::getInventoryPathFor(const Nisqually* nisqually,
                                             int index)
 {
-    return nisqually.getInventoryPath() + "/" + "disk_backplane" +
+    return nisqually->getInventoryPath() + "/" + "disk_backplane" +
            std::to_string(index);
 }
 
-Williwakas::Williwakas(Inventory& inventory, Nisqually& nisqually, int index) :
-    inventory(inventory), nisqually(nisqually), index(index)
+Williwakas::Williwakas(Inventory& inventory, const Nisqually* nisqually,
+                       int index) :
+    inventory(inventory),
+    nisqually(nisqually),
+    index(index), driveConnectors{{
+                      Connector<WilliwakasNVMeDrive>(inventory, this, 0),
+                      Connector<WilliwakasNVMeDrive>(inventory, this, 1),
+                      Connector<WilliwakasNVMeDrive>(inventory, this, 2),
+                      Connector<WilliwakasNVMeDrive>(inventory, this, 3),
+                      Connector<WilliwakasNVMeDrive>(inventory, this, 4),
+                      Connector<WilliwakasNVMeDrive>(inventory, this, 5),
+                      Connector<WilliwakasNVMeDrive>(inventory, this, 6),
+                      Connector<WilliwakasNVMeDrive>(inventory, this, 7),
+                  }}
 {
     SysfsI2CBus bus(Williwakas::drive_backplane_bus.at(index));
 
@@ -121,40 +134,42 @@ void Williwakas::removeFromInventory([[maybe_unused]] Inventory& inventory)
 
 void Williwakas::plug()
 {
-    detectDrives(drives);
+    detectDrives();
 }
 
 void Williwakas::unplug(int mode)
 {
-    for (auto& drive : drives)
+    for (auto& connector : driveConnectors)
     {
-        drive.unplug(mode);
+        if (connector.isPopulated())
+        {
+            connector.getDevice().unplug(mode);
+            connector.depopulate();
+        }
     }
 }
 
-void Williwakas::detectDrives(std::vector<WilliwakasNVMeDrive>& drives)
+void Williwakas::detectDrives()
 {
-    assert(drives.empty() && "Already detected drives");
+    debug("Locating NVMe drives from drive backplane {WILLIWAKAS_ID}",
+          "WILLIWAKAS_ID", index);
 
     std::vector<int> presence = lines.get_values();
 
-    for (size_t id = 0; id < presence.size(); id++)
+    for (std::size_t i = 0; i < presence.size(); i++)
     {
         /* FIXME: work around libgpiod bug */
         if (presence.at(index))
         {
+            driveConnectors[i].populate();
+            driveConnectors[i].getDevice().plug();
             info("Found drive {NVME_ID} on backplane {WILLIWAKAS_ID}",
-                 "NVME_ID", id, "WILLIWAKAS_ID", index);
-            drives.emplace_back(WilliwakasNVMeDrive(inventory, *this, id));
-            drives.back().plug();
+                 "NVME_ID", i, "WILLIWAKAS_ID", index);
         }
         else
         {
             debug("Drive {NVME_ID} not present on backplane {WILLIWAKAS_ID}",
-                  "NVME_ID", id, "WILLIWAKAS_ID", index);
+                  "NVME_ID", i, "WILLIWAKAS_ID", index);
         }
     }
-
-    debug("Found {NVME_COUNT} drives for backplane {WILLIWAKAS_ID}",
-          "NVME_COUNT", drives.size(), "WILLIWAKAS_ID", index);
 }
