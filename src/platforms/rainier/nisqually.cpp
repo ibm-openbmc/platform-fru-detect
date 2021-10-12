@@ -69,9 +69,6 @@ Nisqually::Nisqually(Inventory& inventory) :
             .string(),
         gpiod::chip::OPEN_BY_NAME),
     inventory(inventory)
-{}
-
-void Nisqually::probe()
 {
     /* Slot 9 is on the same mux as slot 8 */
     Ingraham::getPCIeSlotI2CBus(8).probeDevice("pca9546",
@@ -270,7 +267,6 @@ void Nisqually::detectExpanderCards(std::vector<Flett>& expanders)
         try
         {
             Flett flett(inventory, *this, slot);
-            flett.probe();
             expanders.push_back(flett);
             debug("Initialised Flett {FLETT_ID} in slot {PCIE_SLOT}",
                   "FLETT_ID", index, "PCIE_SLOT", slot);

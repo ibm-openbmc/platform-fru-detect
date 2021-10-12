@@ -28,8 +28,6 @@ class FlettNVMeDrive : public NVMeDrive
                    const Flett& flett, int index);
     ~FlettNVMeDrive() = default;
 
-    int probe();
-
     /* FRU */
     virtual std::string getInventoryPath() const override;
     virtual void addToInventory(Inventory& inventory) override;
@@ -54,7 +52,6 @@ class Flett : public Device
     ~Flett() = default;
 
     int getIndex() const;
-    int probe();
     SysfsI2CBus getDriveBus(int index) const;
 
     /* Device */
@@ -77,8 +74,6 @@ class Nisqually : public Device, FRU
 
     Nisqually(Inventory& inventory);
     ~Nisqually() = default;
-
-    void probe();
 
     /* Device */
     virtual void plug() override;

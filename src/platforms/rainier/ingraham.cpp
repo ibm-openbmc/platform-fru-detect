@@ -8,9 +8,7 @@ namespace fs = std::filesystem;
 
 Ingraham::Ingraham(Inventory& inventory) :
     inventory(inventory), nisqually(inventory)
-{
-    nisqually.probe();
-}
+{}
 
 SysfsI2CBus Ingraham::getPCIeSlotI2CBus(int slot)
 {

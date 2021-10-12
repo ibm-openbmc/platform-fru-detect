@@ -19,7 +19,21 @@ FlettNVMeDrive::FlettNVMeDrive(Inventory& inventory, const Nisqually& nisqually,
                                const Flett& flett, int index) :
     NVMeDrive(inventory, index),
     nisqually(nisqually), flett(flett)
-{}
+{
+    try
+    {
+        SysfsI2CBus bus = flett.getDriveBus(index);
+        SysfsI2CDevice eeprom =
+            bus.probeDevice("24c02", NVMeDrive::eepromAddress);
+        lg2::info("EEPROM device exists at '{EEPROM_PATH}'", "EEPROM_PATH",
+                  eeprom.getPath().string());
+    }
+    catch (const SysfsI2CDeviceDriverBindException& ex)
+    {
+        NVMeDrive::~NVMeDrive();
+        throw ex;
+    }
+}
 
 std::string FlettNVMeDrive::getInventoryPath() const
 {
@@ -50,16 +64,6 @@ std::filesystem::path FlettNVMeDrive::getEEPROMDevicePath() const
 SysfsI2CDevice FlettNVMeDrive::getEEPROMDevice() const
 {
     return SysfsI2CDevice(getEEPROMDevicePath());
-}
-
-int FlettNVMeDrive::probe()
-{
-    SysfsI2CBus bus = flett.getDriveBus(index);
-    SysfsI2CDevice eeprom = bus.probeDevice("24c02", NVMeDrive::eepromAddress);
-    lg2::info("EEPROM device exists at '{EEPROM_PATH}'", "EEPROM_PATH",
-              eeprom.getPath().string());
-
-    return 0;
 }
 
 std::array<uint8_t, 2> FlettNVMeDrive::getSerial() const
@@ -134,16 +138,6 @@ static const std::map<int, int> flett_slot_eeprom_map = {
 Flett::Flett(Inventory& inventory, const Nisqually& nisqually, int slot) :
     inventory(inventory), nisqually(nisqually), slot(slot)
 {
-    debug("Instantiated Flett in slot {PCIE_SLOT}", "PCIE_SLOT", slot);
-}
-
-int Flett::getIndex() const
-{
-    return Nisqually::getFlettIndex(slot);
-}
-
-int Flett::probe()
-{
     SysfsI2CBus bus = Nisqually::getFlettSlotI2CBus(slot);
 
 #if 0 /* FIXME: Well, fix qemu */
@@ -151,7 +145,12 @@ int Flett::probe()
 #endif
     bus.probeDevice("pca9548", flett_slot_mux_map.at(slot));
 
-    return 0;
+    debug("Instantiated Flett in slot {PCIE_SLOT}", "PCIE_SLOT", slot);
+}
+
+int Flett::getIndex() const
+{
+    return Nisqually::getFlettIndex(slot);
 }
 
 SysfsI2CBus Flett::getDriveBus(int index) const
@@ -178,7 +177,6 @@ void Flett::detectDrives(std::vector<FlettNVMeDrive>& drives)
         try
         {
             FlettNVMeDrive drive(inventory, nisqually, *this, i);
-            drive.probe();
             drives.push_back(drive);
             info("Detected drive at index {NVME_ID} on Flett {FLETT_ID}",
                  "NVME_ID", i, "FLETT_ID", getIndex());
