@@ -1,10 +1,49 @@
 /* SPDX-License-Identifier: Apache-2.0 */
 #pragma once
 
+#include <functional>
+#include <optional>
 #include <stdexcept>
 #include <string>
 
 class Inventory;
+
+template <class T>
+class Connector
+{
+  public:
+    template <typename... Args>
+    Connector(Args&&... args) :
+        device(), ctor([this, args...]() mutable {
+            device.emplace(std::forward<Args>(args)...);
+        })
+    {}
+    ~Connector() = default;
+
+    void populate()
+    {
+        ctor();
+    }
+
+    void depopulate()
+    {
+        device.reset();
+    }
+
+    bool isPopulated()
+    {
+        return device.has_value();
+    }
+
+    T& getDevice()
+    {
+        return device.value();
+    }
+
+  private:
+    std::optional<T> device;
+    std::function<void(void)> ctor;
+};
 
 class FRU
 {
