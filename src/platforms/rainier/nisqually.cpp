@@ -97,7 +97,7 @@ std::vector<Williwakas> Nisqually::getDriveBackplanes() const
 
         if (!isWilliwakasPresent(index))
         {
-            info("Williwakas {WILLWAKAS_ID} is not present", "WILLIWAKAS_ID",
+            info("Williwakas {WILLIWAKAS_ID} is not present", "WILLIWAKAS_ID",
                  index);
             continue;
         }
