@@ -124,6 +124,14 @@ void Williwakas::plug()
     detectDrives(drives);
 }
 
+void Williwakas::unplug(int mode)
+{
+    for (auto& drive : drives)
+    {
+        drive.unplug(mode);
+    }
+}
+
 void Williwakas::detectDrives(std::vector<WilliwakasNVMeDrive>& drives)
 {
     assert(drives.empty() && "Already detected drives");

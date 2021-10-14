@@ -191,6 +191,14 @@ void Flett::plug()
     detectDrives(drives);
 }
 
+void Flett::unplug(int mode)
+{
+    for (auto& drive : drives)
+    {
+        drive.unplug(mode);
+    }
+}
+
 void Flett::detectDrives(std::vector<FlettNVMeDrive>& drives)
 {
     for (int i = 0; i < 8; i++)

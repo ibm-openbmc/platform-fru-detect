@@ -61,6 +61,7 @@ class Flett : public Device
 
     /* Device */
     virtual void plug() override;
+    virtual void unplug(int mode = UNPLUG_REMOVES_INVENTORY) override;
 
   private:
     void detectDrives(std::vector<FlettNVMeDrive>& drives);
@@ -149,6 +150,7 @@ class Williwakas : public Device, FRU
 
     /* Device */
     virtual void plug() override;
+    virtual void unplug(int mode = UNPLUG_REMOVES_INVENTORY) override;
 
     /* FRU */
     virtual std::string getInventoryPath() const override;
