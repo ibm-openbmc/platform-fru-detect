@@ -33,7 +33,7 @@ static const std::map<int, int> flett_slot_eeprom_map = {
     {11, 0x51},
 };
 
-Flett::Flett(int slot) : slot(slot)
+Flett::Flett(Inventory& inventory, int slot) : inventory(inventory), slot(slot)
 {
     debug("Instantiated Flett in slot {PCIE_SLOT}", "PCIE_SLOT", slot);
 }

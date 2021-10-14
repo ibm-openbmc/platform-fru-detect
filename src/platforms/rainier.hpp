@@ -19,7 +19,7 @@ class Williwakas;
 class Flett
 {
   public:
-    Flett(int index);
+    Flett(Inventory& inventory, int index);
     ~Flett() = default;
 
     int getSlot() const;
@@ -32,6 +32,7 @@ class Flett
     int probe();
 
   private:
+    Inventory& inventory;
     int slot;
     int expander;
 };

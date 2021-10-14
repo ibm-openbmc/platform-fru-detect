@@ -255,7 +255,7 @@ std::vector<Flett> Nisqually::getExpanderCards() const
 
         try
         {
-            Flett flett(slot);
+            Flett flett(inventory, slot);
             flett.probe();
             expanders.push_back(flett);
             debug("Initialised Flett {FLETT_ID} in slot {PCIE_SLOT}",
