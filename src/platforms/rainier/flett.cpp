@@ -75,5 +75,5 @@ bool Flett::isDriveEEPROMPresent(int index) const
 
 NVMeDrive Flett::getDrive(Williwakas backplane, int index) const
 {
-    return NVMeDrive(backplane, index);
+    return NVMeDrive(inventory, backplane, index);
 }
