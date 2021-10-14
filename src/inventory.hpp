@@ -44,6 +44,7 @@ class Inventory
     void updateObject(const std::string& path,
                       const inventory::ObjectType& updates);
     void markPresent(const std::string& path);
+    void markAbsent(const std::string& path);
 
   private:
     sdbusplus::bus::bus& dbus;

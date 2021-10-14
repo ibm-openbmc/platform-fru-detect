@@ -42,3 +42,14 @@ void Inventory::markPresent(const std::string& path)
     call.append(INVENTORY_ITEM_IFACE, "Present", std::variant<bool>(true));
     dbus.call(call);
 }
+
+void Inventory::markAbsent(const std::string& path)
+{
+    std::string absolute = std::string("/xyz/openbmc_project/inventory") + path;
+
+    auto call = dbus.new_method_call(INVENTORY_BUS_NAME, absolute.c_str(),
+                                     DBUS_PROPERTY_IFACE, "Set");
+
+    call.append(INVENTORY_ITEM_IFACE, "Present", std::variant<bool>(false));
+    dbus.call(call);
+}
