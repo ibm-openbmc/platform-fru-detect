@@ -31,6 +31,8 @@ int main(void)
     Inventory inventory(dbus);
     Ingraham ingraham(inventory);
     ingraham.plug();
+    /* Clean up the application state but leave the inventory in-tact. */
+    ingraham.unplug(ingraham.UNPLUG_RETAINS_INVENTORY);
 
     return 0;
 }
