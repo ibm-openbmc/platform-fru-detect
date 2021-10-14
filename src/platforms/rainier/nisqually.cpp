@@ -93,6 +93,19 @@ void Nisqually::plug()
     }
 }
 
+void Nisqually::unplug(int mode)
+{
+    for (auto& driveBackplane : driveBackplanes)
+    {
+        driveBackplane.unplug(mode);
+    }
+
+    for (auto& ioExpander : ioExpanders)
+    {
+        ioExpander.unplug(mode);
+    }
+}
+
 void Nisqually::detectDriveBackplanes(std::vector<Williwakas>& driveBackplanes)
 {
     static constexpr std::array<int, 3> backplane_indexes = {0, 1, 2};
