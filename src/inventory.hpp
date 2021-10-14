@@ -37,14 +37,27 @@ static constexpr auto INVENTORY_IPZVPD_VINI_IFACE = "com.ibm.ipzvpd.VINI";
 class Inventory
 {
   public:
-    Inventory(sdbusplus::bus::bus& dbus) : dbus(dbus)
-    {}
-    ~Inventory() = default;
+    Inventory() = default;
+    virtual ~Inventory() = default;
 
-    void updateObject(const std::string& path,
-                      const inventory::ObjectType& updates);
-    void markPresent(const std::string& path);
-    void markAbsent(const std::string& path);
+    virtual void updateObject(const std::string& path,
+                              const inventory::ObjectType& updates) = 0;
+    virtual void markPresent(const std::string& path) = 0;
+    virtual void markAbsent(const std::string& path) = 0;
+};
+
+class InventoryManager : public Inventory
+{
+  public:
+    InventoryManager(sdbusplus::bus::bus& dbus) : dbus(dbus)
+    {}
+    ~InventoryManager() = default;
+
+    /* Inventory */
+    virtual void updateObject(const std::string& path,
+                              const inventory::ObjectType& updates) override;
+    virtual void markPresent(const std::string& path) override;
+    virtual void markAbsent(const std::string& path) override;
 
   private:
     sdbusplus::bus::bus& dbus;

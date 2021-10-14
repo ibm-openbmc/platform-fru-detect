@@ -65,8 +65,8 @@ class FRU
     virtual ~FRU() = default;
 
     virtual std::string getInventoryPath() const = 0;
-    virtual void addToInventory([[maybe_unused]] Inventory& inventory) = 0;
-    virtual void removeFromInventory(Inventory& inventory) = 0;
+    virtual void addToInventory(Inventory* inventory) = 0;
+    virtual void removeFromInventory(Inventory* inventory) = 0;
 };
 
 class Device

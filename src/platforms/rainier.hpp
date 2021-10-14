@@ -25,7 +25,7 @@ class FlettNVMeDrive : public NVMeDrive
   public:
     static bool isPresent(SysfsI2CBus bus);
 
-    explicit FlettNVMeDrive(Inventory& inventory, const Nisqually* nisqually,
+    explicit FlettNVMeDrive(Inventory* inventory, const Nisqually* nisqually,
                             const Flett* flett, int index);
     FlettNVMeDrive(const FlettNVMeDrive& other) = delete;
     FlettNVMeDrive(const FlettNVMeDrive&& other) = delete;
@@ -41,8 +41,8 @@ class FlettNVMeDrive : public NVMeDrive
 
     /* FRU */
     virtual std::string getInventoryPath() const override;
-    virtual void addToInventory(Inventory& inventory) override;
-    virtual void removeFromInventory(Inventory& inventory) override;
+    virtual void addToInventory(Inventory* inventory) override;
+    virtual void removeFromInventory(Inventory* inventory) override;
 
   private:
     std::filesystem::path getEEPROMDevicePath() const;
@@ -50,8 +50,8 @@ class FlettNVMeDrive : public NVMeDrive
     std::array<uint8_t, 2> getSerial() const;
 
     void decorateWithI2CDevice(const std::string& path,
-                               Inventory& inventory) const;
-    void decorateWithVINI(const std::string& path, Inventory& inventory) const;
+                               Inventory* inventory) const;
+    void decorateWithVINI(const std::string& path, Inventory* inventory) const;
 
     const Nisqually* nisqually;
     const Flett* flett;
@@ -60,7 +60,7 @@ class FlettNVMeDrive : public NVMeDrive
 class Flett : public Device
 {
   public:
-    explicit Flett(Inventory& inventory, const Nisqually* nisqually, int slot);
+    explicit Flett(Inventory* inventory, const Nisqually* nisqually, int slot);
     Flett(const Flett& other) = delete;
     Flett(const Flett&& other) = delete;
     ~Flett() = default;
@@ -79,7 +79,7 @@ class Flett : public Device
   private:
     void detectDrives(Notifier& notifier);
 
-    Inventory& inventory;
+    Inventory* inventory;
     const Nisqually* nisqually;
     int slot;
     std::array<Connector<FlettNVMeDrive>, 8> driveConnectors;
@@ -88,7 +88,7 @@ class Flett : public Device
 class WilliwakasNVMeDrive : public NVMeDrive
 {
   public:
-    explicit WilliwakasNVMeDrive(Inventory& inventory,
+    explicit WilliwakasNVMeDrive(Inventory* inventory,
                                  const Williwakas* backplane, int index);
     WilliwakasNVMeDrive(const WilliwakasNVMeDrive& other) = delete;
     WilliwakasNVMeDrive(const WilliwakasNVMeDrive&& other) = delete;
@@ -104,8 +104,8 @@ class WilliwakasNVMeDrive : public NVMeDrive
 
     /* FRU */
     virtual std::string getInventoryPath() const override;
-    virtual void addToInventory(Inventory& inventory) override;
-    virtual void removeFromInventory(Inventory& inventory) override;
+    virtual void addToInventory(Inventory* inventory) override;
+    virtual void removeFromInventory(Inventory* inventory) override;
 
   private:
     const Williwakas* williwakas;
@@ -117,7 +117,7 @@ class Williwakas : public Device, FRU
     static std::string getInventoryPathFor(const Nisqually* nisqually,
                                            int index);
 
-    explicit Williwakas(Inventory& inventory, const Nisqually* backplane,
+    explicit Williwakas(Inventory* inventory, const Nisqually* backplane,
                         int index);
     Williwakas(const Williwakas& other) = delete;
     Williwakas(const Williwakas&& other) = delete;
@@ -135,8 +135,8 @@ class Williwakas : public Device, FRU
 
     /* FRU */
     virtual std::string getInventoryPath() const override;
-    virtual void addToInventory(Inventory& inventory) override;
-    virtual void removeFromInventory(Inventory& inventory) override;
+    virtual void addToInventory(Inventory* inventory) override;
+    virtual void removeFromInventory(Inventory* inventory) override;
 
   private:
     static constexpr int drivePresenceDeviceAddress = 0x60;
@@ -151,7 +151,7 @@ class Williwakas : public Device, FRU
         8, 9, 10, 11, 12, 13, 14, 15,
     };
 
-    Inventory& inventory;
+    Inventory* inventory;
     const Nisqually* nisqually;
     int index;
     gpiod::chip chip;
@@ -170,7 +170,7 @@ class Nisqually : public Device, FRU
     static int getFlettIndex(int slot);
     static SysfsI2CBus getFlettSlotI2CBus(int slot);
 
-    explicit Nisqually(Inventory& inventory);
+    explicit Nisqually(Inventory* inventory);
     Nisqually(const Nisqually& other) = delete;
     Nisqually(const Nisqually&& other) = delete;
     ~Nisqually() = default;
@@ -185,8 +185,8 @@ class Nisqually : public Device, FRU
 
     /* FRU */
     virtual std::string getInventoryPath() const override;
-    virtual void addToInventory(Inventory& inventory) override;
-    virtual void removeFromInventory(Inventory& inventory) override;
+    virtual void addToInventory(Inventory* inventory) override;
+    virtual void removeFromInventory(Inventory* inventory) override;
 
   private:
     static constexpr int slotMuxAddress = 0x70;
@@ -204,7 +204,7 @@ class Nisqually : public Device, FRU
     bool isWilliwakasPresent(int index);
     void detectWilliwakasCards();
 
-    Inventory& inventory;
+    Inventory* inventory;
 
     gpiod::chip flettPresenceChip;
     std::array<Connector<Flett>, 4> flettConnectors;
@@ -221,7 +221,7 @@ class Ingraham : public Device
   public:
     static SysfsI2CBus getPCIeSlotI2CBus(int slot);
 
-    explicit Ingraham(Inventory& inventory);
+    explicit Ingraham(Inventory* inventory);
     Ingraham(const Ingraham& other) = delete;
     Ingraham(const Ingraham&& other) = delete;
     ~Ingraham() = default;
@@ -257,7 +257,7 @@ class Ingraham : public Device
         "/sys/bus/i2c/devices/i2c-15",
     };
 
-    Inventory& inventory;
+    Inventory* inventory;
     Nisqually nisqually;
 };
 

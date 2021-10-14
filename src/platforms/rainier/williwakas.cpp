@@ -15,7 +15,7 @@ PHOSPHOR_LOG2_USING;
 
 /* WilliwakasNVMeDrive */
 
-WilliwakasNVMeDrive::WilliwakasNVMeDrive(Inventory& inventory,
+WilliwakasNVMeDrive::WilliwakasNVMeDrive(Inventory* inventory,
                                          const Williwakas* williwakas,
                                          int index) :
     NVMeDrive(inventory, index),
@@ -46,18 +46,18 @@ std::string WilliwakasNVMeDrive::getInventoryPath() const
            std::to_string(index);
 }
 
-void WilliwakasNVMeDrive::addToInventory(Inventory& inventory)
+void WilliwakasNVMeDrive::addToInventory(Inventory* inventory)
 {
     std::string path = getInventoryPath();
 
-    inventory.markPresent(path);
+    inventory->markPresent(path);
 }
 
-void WilliwakasNVMeDrive::removeFromInventory(Inventory& inventory)
+void WilliwakasNVMeDrive::removeFromInventory(Inventory* inventory)
 {
     std::string path = getInventoryPath();
 
-    inventory.markAbsent(path);
+    inventory->markAbsent(path);
 }
 
 /* Williwakas */
@@ -71,7 +71,7 @@ std::string Williwakas::getInventoryPathFor(const Nisqually* nisqually,
            std::to_string(index);
 }
 
-Williwakas::Williwakas(Inventory& inventory, const Nisqually* nisqually,
+Williwakas::Williwakas(Inventory* inventory, const Nisqually* nisqually,
                        int index) :
     inventory(inventory),
     nisqually(nisqually),
@@ -117,12 +117,12 @@ std::string Williwakas::getInventoryPath() const
     return getInventoryPathFor(nisqually, index);
 }
 
-void Williwakas::addToInventory([[maybe_unused]] Inventory& inventory)
+void Williwakas::addToInventory([[maybe_unused]] Inventory* inventory)
 {
     std::logic_error("Unimplemented");
 }
 
-void Williwakas::removeFromInventory([[maybe_unused]] Inventory& inventory)
+void Williwakas::removeFromInventory([[maybe_unused]] Inventory* inventory)
 {
     std::logic_error("Unimplemented");
 }

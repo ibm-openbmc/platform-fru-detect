@@ -6,7 +6,7 @@
 
 namespace fs = std::filesystem;
 
-Ingraham::Ingraham(Inventory& inventory) :
+Ingraham::Ingraham(Inventory* inventory) :
     inventory(inventory), nisqually(inventory)
 {}
 

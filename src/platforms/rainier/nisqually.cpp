@@ -64,7 +64,7 @@ SysfsI2CBus Nisqually::getFlettSlotI2CBus(int slot)
     return SysfsI2CBus(mux, channel);
 }
 
-Nisqually::Nisqually(Inventory& inventory) :
+Nisqually::Nisqually(Inventory* inventory) :
     inventory(inventory),
     flettPresenceChip(SysfsGPIOChip(std::filesystem::path(
                                         Nisqually::flett_presence_device_path))
@@ -196,12 +196,12 @@ std::string Nisqually::getInventoryPath() const
     return "/system/chassis/motherboard";
 }
 
-void Nisqually::addToInventory([[maybe_unused]] Inventory& inventory)
+void Nisqually::addToInventory([[maybe_unused]] Inventory* inventory)
 {
     std::logic_error("Unimplemented");
 }
 
-void Nisqually::removeFromInventory([[maybe_unused]] Inventory& inventory)
+void Nisqually::removeFromInventory([[maybe_unused]] Inventory* inventory)
 {
     std::logic_error("Unimplemented");
 }

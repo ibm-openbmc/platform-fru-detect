@@ -28,8 +28,8 @@ int main(void)
          Platform::getModel());
 
     sdbusplus::bus::bus dbus = sdbusplus::bus::new_default();
-    Inventory inventory(dbus);
-    Ingraham ingraham(inventory);
+    InventoryManager inventory(dbus);
+    Ingraham ingraham(&inventory);
     Notifier notifier;
     ingraham.plug(notifier);
     notifier.run();

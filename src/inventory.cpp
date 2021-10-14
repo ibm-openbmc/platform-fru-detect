@@ -18,7 +18,8 @@ static constexpr auto DBUS_PROPERTY_IFACE = "org.freedesktop.DBus.Properties";
 
 using namespace inventory;
 
-void Inventory::updateObject(const std::string& path, const ObjectType& updates)
+void InventoryManager::updateObject(const std::string& path,
+                                    const ObjectType& updates)
 {
     auto call =
         dbus.new_method_call(INVENTORY_BUS_NAME, INVENTORY_MANAGER_OBJECT,
@@ -32,7 +33,7 @@ void Inventory::updateObject(const std::string& path, const ObjectType& updates)
     dbus.call(call);
 }
 
-void Inventory::markPresent(const std::string& path)
+void InventoryManager::markPresent(const std::string& path)
 {
     std::string absolute = std::string("/xyz/openbmc_project/inventory") + path;
 
@@ -43,7 +44,7 @@ void Inventory::markPresent(const std::string& path)
     dbus.call(call);
 }
 
-void Inventory::markAbsent(const std::string& path)
+void InventoryManager::markAbsent(const std::string& path)
 {
     std::string absolute = std::string("/xyz/openbmc_project/inventory") + path;
 

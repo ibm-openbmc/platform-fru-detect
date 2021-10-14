@@ -15,7 +15,7 @@ PHOSPHOR_LOG2_USING;
 
 /* FlettNVMeDrive */
 
-FlettNVMeDrive::FlettNVMeDrive(Inventory& inventory, const Nisqually* nisqually,
+FlettNVMeDrive::FlettNVMeDrive(Inventory* inventory, const Nisqually* nisqually,
                                const Flett* flett, int index) :
     NVMeDrive(inventory, index),
     nisqually(nisqually), flett(flett)
@@ -62,7 +62,7 @@ std::string FlettNVMeDrive::getInventoryPath() const
     return williwakasPath + "/" + "nvme" + std::to_string(index);
 }
 
-void FlettNVMeDrive::addToInventory(Inventory& inventory)
+void FlettNVMeDrive::addToInventory(Inventory* inventory)
 {
     std::string path = getInventoryPath();
 
@@ -70,7 +70,7 @@ void FlettNVMeDrive::addToInventory(Inventory& inventory)
     decorateWithVINI(path, inventory);
 }
 
-void FlettNVMeDrive::removeFromInventory([[maybe_unused]] Inventory& inventory)
+void FlettNVMeDrive::removeFromInventory([[maybe_unused]] Inventory* inventory)
 {
     debug(
         "I'm not sure how to remove drive {NVME_ID} on Flett {FLETT_ID} from the inventory!",
@@ -99,7 +99,7 @@ std::array<uint8_t, 2> FlettNVMeDrive::getSerial() const
 }
 
 void FlettNVMeDrive::decorateWithI2CDevice(const std::string& path,
-                                           Inventory& inventory) const
+                                           Inventory* inventory) const
 {
     SysfsI2CDevice eepromDevice = getEEPROMDevice();
 
@@ -116,11 +116,11 @@ void FlettNVMeDrive::decorateWithI2CDevice(const std::string& path,
         },
     };
 
-    inventory.updateObject(path, updates);
+    inventory->updateObject(path, updates);
 }
 
 void FlettNVMeDrive::decorateWithVINI(const std::string& path,
-                                      Inventory& inventory) const
+                                      Inventory* inventory) const
 {
     auto sn = getSerial();
 
@@ -135,7 +135,7 @@ void FlettNVMeDrive::decorateWithVINI(const std::string& path,
         },
     };
 
-    inventory.updateObject(path, updates);
+    inventory->updateObject(path, updates);
 }
 
 /* Flett */
@@ -161,7 +161,7 @@ static const std::map<int, int> flett_slot_eeprom_map = {
     {11, 0x51},
 };
 
-Flett::Flett(Inventory& inventory, const Nisqually* nisqually, int slot) :
+Flett::Flett(Inventory* inventory, const Nisqually* nisqually, int slot) :
     inventory(inventory), nisqually(nisqually), slot(slot),
     driveConnectors{{
         Connector<FlettNVMeDrive>(inventory, this->nisqually, this, 0),

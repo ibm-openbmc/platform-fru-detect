@@ -13,7 +13,7 @@ class Inventory;
 class NVMeDrive : public Device, FRU
 {
   public:
-    NVMeDrive(Inventory& inventory, int index) :
+    NVMeDrive(Inventory* inventory, int index) :
         inventory(inventory), index(index)
     {}
     virtual ~NVMeDrive() = default;
@@ -24,7 +24,7 @@ class NVMeDrive : public Device, FRU
         throw std::logic_error("Not implemented");
     }
 
-    virtual void addToInventory([[maybe_unused]] Inventory& inventory) override
+    virtual void addToInventory([[maybe_unused]] Inventory* inventory) override
     {
         throw std::logic_error("Not implemented");
     }
@@ -33,6 +33,6 @@ class NVMeDrive : public Device, FRU
     /* FRU Information Device, NVMe Storage Device (non-Carrier) */
     static constexpr int eepromAddress = 0x53;
 
-    Inventory& inventory;
+    Inventory* inventory;
     int index;
 };
