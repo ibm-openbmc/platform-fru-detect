@@ -134,6 +134,8 @@ class Williwakas : public Device, FRU
     Williwakas(Inventory& inventory, Nisqually& backplane, int index);
     ~Williwakas() = default;
 
+    int getIndex() const;
+
     /* Device */
     virtual void plug() override;
 

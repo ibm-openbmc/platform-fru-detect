@@ -74,6 +74,11 @@ Williwakas::Williwakas(Inventory& inventory, Nisqually& nisqually, int index) :
           "WILLIWAKAS_ID", index);
 }
 
+int Williwakas::getIndex() const
+{
+    return index;
+}
+
 std::string Williwakas::getInventoryPath() const
 {
     return getInventoryPathFor(nisqually, index);
