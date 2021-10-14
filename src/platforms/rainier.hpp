@@ -2,6 +2,7 @@
 #pragma once
 
 #include "devices/nvme.hpp"
+#include "notify.hpp"
 #include "platform.hpp"
 #include "sysfs/i2c.hpp"
 
@@ -34,8 +35,9 @@ class FlettNVMeDrive : public NVMeDrive
     FlettNVMeDrive& operator=(const FlettNVMeDrive&& other) = delete;
 
     /* Device */
-    virtual void plug() override;
-    virtual void unplug(int mode = UNPLUG_REMOVES_INVENTORY) override;
+    virtual void plug(Notifier& notifier) override;
+    virtual void unplug(Notifier& notifier,
+                        int mode = UNPLUG_REMOVES_INVENTORY) override;
 
     /* FRU */
     virtual std::string getInventoryPath() const override;
@@ -70,11 +72,12 @@ class Flett : public Device
     SysfsI2CBus getDriveBus(int index) const;
 
     /* Device */
-    virtual void plug() override;
-    virtual void unplug(int mode = UNPLUG_REMOVES_INVENTORY) override;
+    virtual void plug(Notifier& notifier) override;
+    virtual void unplug(Notifier& notifier,
+                        int mode = Device::UNPLUG_REMOVES_INVENTORY) override;
 
   private:
-    void detectDrives();
+    void detectDrives(Notifier& notifier);
 
     Inventory& inventory;
     const Nisqually* nisqually;
@@ -95,8 +98,9 @@ class WilliwakasNVMeDrive : public NVMeDrive
     WilliwakasNVMeDrive& operator=(const WilliwakasNVMeDrive&& other) = delete;
 
     /* Device */
-    virtual void plug() override;
-    virtual void unplug(int mode = UNPLUG_REMOVES_INVENTORY) override;
+    virtual void plug(Notifier& notifier) override;
+    virtual void unplug(Notifier& notifier,
+                        int mode = UNPLUG_REMOVES_INVENTORY) override;
 
     /* FRU */
     virtual std::string getInventoryPath() const override;
@@ -127,8 +131,9 @@ class Williwakas : public Device, FRU
     int getIndex() const;
 
     /* Device */
-    virtual void plug() override;
-    virtual void unplug(int mode = UNPLUG_REMOVES_INVENTORY) override;
+    virtual void plug(Notifier& notifier) override;
+    virtual void unplug(Notifier& notifier,
+                        int mode = Device::UNPLUG_REMOVES_INVENTORY) override;
 
     /* FRU */
     virtual std::string getInventoryPath() const override;
@@ -154,9 +159,11 @@ class Williwakas : public Device, FRU
     gpiod::chip chip;
     gpiod::line_bulk lines;
     std::array<Connector<WilliwakasNVMeDrive>, 8> driveConnectors;
+    std::array<PolledGPIODevicePresence<WilliwakasNVMeDrive>, 8>
+        presenceAdaptors;
 
     bool isDrivePresent(int index);
-    void detectDrives();
+    void detectDrives(Notifier& notifier);
 };
 
 class Nisqually : public Device, FRU
@@ -174,8 +181,9 @@ class Nisqually : public Device, FRU
     Nisqually& operator=(const Nisqually&& other) = delete;
 
     /* Device */
-    virtual void plug() override;
-    virtual void unplug(int mode = UNPLUG_REMOVES_INVENTORY) override;
+    virtual void plug(Notifier& notifier) override;
+    virtual void unplug(Notifier& notifier,
+                        int mode = Device::UNPLUG_REMOVES_INVENTORY) override;
 
     /* FRU */
     virtual std::string getInventoryPath() const override;
@@ -192,12 +200,10 @@ class Nisqually : public Device, FRU
         "/sys/bus/i2c/devices/0-0020";
     static constexpr std::array<int, 3> williwakas_presence_map = {7, 6, 5};
 
-    bool isFlettPresentAt(int slot) const;
-    bool isFlettSlot(int slot) const;
-
-    bool isWilliwakasPresent(int index) const;
-
+    bool isFlettPresentAt(int slot);
     void detectFlettCards();
+
+    bool isWilliwakasPresent(int index);
     void detectWilliwakasCards();
 
     Inventory& inventory;
@@ -207,6 +213,9 @@ class Nisqually : public Device, FRU
 
     gpiod::chip williwakasPresenceChip;
     std::array<Connector<Williwakas>, 3> williwakasConnectors;
+
+    gpiod::line_bulk flettPresenceLines;
+    gpiod::line_bulk williwakasPresenceLines;
 };
 
 class Ingraham : public Device
@@ -223,8 +232,9 @@ class Ingraham : public Device
     Ingraham& operator=(const Ingraham&& other) = delete;
 
     /* Device */
-    virtual void plug() override;
-    virtual void unplug(int mode = UNPLUG_REMOVES_INVENTORY) override;
+    virtual void plug(Notifier& notifier) override;
+    virtual void unplug(Notifier& notifier,
+                        int mode = Device::UNPLUG_REMOVES_INVENTORY) override;
 
   private:
     static constexpr std::array<const char*, 4> pcie_slot_busses = {

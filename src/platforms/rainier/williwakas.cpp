@@ -22,14 +22,15 @@ WilliwakasNVMeDrive::WilliwakasNVMeDrive(Inventory& inventory,
     williwakas(williwakas)
 {}
 
-void WilliwakasNVMeDrive::plug()
+void WilliwakasNVMeDrive::plug([[maybe_unused]] Notifier& notifier)
 {
     debug("Drive {NVME_ID} plugged on Williwakas {WILLIWAKAS_ID}", "NVME_ID",
           index, "WILLIWAKAS_ID", williwakas->getIndex());
     addToInventory(inventory);
 }
 
-void WilliwakasNVMeDrive::unplug(int mode)
+void WilliwakasNVMeDrive::unplug([[maybe_unused]] Notifier& notifier,
+                                 [[maybe_unused]] int mode)
 {
     if (mode == UNPLUG_REMOVES_INVENTORY)
     {
@@ -132,24 +133,37 @@ void Williwakas::removeFromInventory([[maybe_unused]] Inventory& inventory)
     std::logic_error("Unimplemented");
 }
 
-void Williwakas::plug()
+void Williwakas::plug(Notifier& notifier)
 {
-    detectDrives();
+    for (std::size_t i = 0; i < driveConnectors.size(); i++)
+    {
+        gpiod::line& line = lines.get(i);
+        presenceAdaptors[i] = PolledGPIODevicePresence<WilliwakasNVMeDrive>(
+            &line, &driveConnectors.at(i));
+        notifier.add(&presenceAdaptors.at(i));
+    }
+
+    detectDrives(notifier);
 }
 
-void Williwakas::unplug(int mode)
+void Williwakas::unplug(Notifier& notifier, int mode)
 {
+    for (auto& presenceAdaptor : presenceAdaptors)
+    {
+        notifier.remove(&presenceAdaptor);
+    }
+
     for (auto& connector : driveConnectors)
     {
         if (connector.isPopulated())
         {
-            connector.getDevice().unplug(mode);
+            connector.getDevice().unplug(notifier, mode);
             connector.depopulate();
         }
     }
 }
 
-void Williwakas::detectDrives()
+void Williwakas::detectDrives(Notifier& notifier)
 {
     debug("Locating NVMe drives from drive backplane {WILLIWAKAS_ID}",
           "WILLIWAKAS_ID", index);
@@ -162,7 +176,7 @@ void Williwakas::detectDrives()
         if (presence.at(index))
         {
             driveConnectors[i].populate();
-            driveConnectors[i].getDevice().plug();
+            driveConnectors[i].getDevice().plug(notifier);
             info("Found drive {NVME_ID} on backplane {WILLIWAKAS_ID}",
                  "NVME_ID", i, "WILLIWAKAS_ID", index);
         }

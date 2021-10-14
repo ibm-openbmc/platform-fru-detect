@@ -30,9 +30,11 @@ int main(void)
     sdbusplus::bus::bus dbus = sdbusplus::bus::new_default();
     Inventory inventory(dbus);
     Ingraham ingraham(inventory);
-    ingraham.plug();
+    Notifier notifier;
+    ingraham.plug(notifier);
+    notifier.run();
     /* Clean up the application state but leave the inventory in-tact. */
-    ingraham.unplug(ingraham.UNPLUG_RETAINS_INVENTORY);
+    ingraham.unplug(notifier, ingraham.UNPLUG_RETAINS_INVENTORY);
 
     return 0;
 }

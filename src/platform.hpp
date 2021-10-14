@@ -80,8 +80,9 @@ class Device
 
     virtual ~Device() = default;
 
-    virtual void plug() = 0;
-    virtual void unplug(int mode = UNPLUG_REMOVES_INVENTORY) = 0;
+    virtual void plug(Notifier& notifier) = 0;
+    virtual void unplug(Notifier& notifier,
+                        int mode = UNPLUG_REMOVES_INVENTORY) = 0;
 };
 
 template <typename T>

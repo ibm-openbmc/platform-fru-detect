@@ -35,7 +35,7 @@ FlettNVMeDrive::FlettNVMeDrive(Inventory& inventory, const Nisqually* nisqually,
     }
 }
 
-void FlettNVMeDrive::plug()
+void FlettNVMeDrive::plug([[maybe_unused]] Notifier& notifier)
 {
     /* TODO: Probe NVMe MI endpoints on I2C? */
     debug("Drive {NVME_ID} plugged on Flett {FLETT_ID}", "NVME_ID", index,
@@ -43,7 +43,8 @@ void FlettNVMeDrive::plug()
     addToInventory(inventory);
 }
 
-void FlettNVMeDrive::unplug(int mode)
+void FlettNVMeDrive::unplug([[maybe_unused]] Notifier& notifier,
+                            [[maybe_unused]] int mode)
 {
     if (mode == UNPLUG_REMOVES_INVENTORY)
     {
@@ -196,31 +197,31 @@ SysfsI2CBus Flett::getDriveBus(int index) const
     return SysfsI2CBus(flettMux, index);
 }
 
-void Flett::plug()
+void Flett::plug(Notifier& notifier)
 {
-    detectDrives();
+    detectDrives(notifier);
 }
 
-void Flett::unplug(int mode)
+void Flett::unplug(Notifier& notifier, int mode)
 {
     for (auto& connector : driveConnectors)
     {
         if (connector.isPopulated())
         {
-            connector.getDevice().unplug(mode);
+            connector.getDevice().unplug(notifier, mode);
             connector.depopulate();
         }
     }
 }
 
-void Flett::detectDrives()
+void Flett::detectDrives(Notifier& notifier)
 {
     for (std::size_t i = 0; i < driveConnectors.size(); i++)
     {
         try
         {
             driveConnectors[i].populate();
-            driveConnectors[i].getDevice().plug();
+            driveConnectors[i].getDevice().plug(notifier);
             info("Detected drive at index {NVME_ID} on Flett {FLETT_ID}",
                  "NVME_ID", i, "FLETT_ID", getIndex());
         }

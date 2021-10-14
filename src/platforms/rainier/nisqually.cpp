@@ -10,6 +10,7 @@
 
 #include <cassert>
 #include <filesystem>
+#include <ranges>
 #include <stdexcept>
 #include <string>
 
@@ -94,16 +95,33 @@ Nisqually::Nisqually(Inventory& inventory) :
     /* Slot 11 is on the same mux as slot 10 */
     Ingraham::getPCIeSlotI2CBus(10).probeDevice("pca9546",
                                                 Nisqually::slotMuxAddress);
+
+    /* TODO: Need a PolledGPIODevicePresence! */
+
+    /* FIXME: Consolidate this with the presence map, but it's the identity map
+     */
+    std::vector<unsigned int> flettPresentOffsets({8, 9, 10, 11});
+    flettPresenceLines = flettPresenceChip.get_lines(flettPresentOffsets);
+    flettPresenceLines.request({app_name, gpiod::line_request::DIRECTION_INPUT,
+                                gpiod::line_request::FLAG_ACTIVE_LOW});
+
+    std::vector<unsigned int> williwakasPresenceOffsets(
+        williwakas_presence_map.begin(), williwakas_presence_map.end());
+    williwakasPresenceLines =
+        williwakasPresenceChip.get_lines(williwakasPresenceOffsets);
+    williwakasPresenceLines.request({app_name,
+                                     gpiod::line_request::DIRECTION_INPUT,
+                                     gpiod::line_request::FLAG_ACTIVE_LOW});
 }
 
-void Nisqually::plug()
+void Nisqually::plug(Notifier& notifier)
 {
     detectFlettCards();
     for (auto& connector : flettConnectors)
     {
         if (connector.isPopulated())
         {
-            connector.getDevice().plug();
+            connector.getDevice().plug(notifier);
         }
     }
 
@@ -112,18 +130,18 @@ void Nisqually::plug()
     {
         if (connector.isPopulated())
         {
-            connector.getDevice().plug();
+            connector.getDevice().plug(notifier);
         }
     }
 }
 
-void Nisqually::unplug(int mode)
+void Nisqually::unplug(Notifier& notifier, int mode)
 {
     for (auto& connector : williwakasConnectors)
     {
         if (connector.isPopulated())
         {
-            connector.getDevice().unplug(mode);
+            connector.getDevice().unplug(notifier, mode);
             connector.depopulate();
         }
     }
@@ -132,7 +150,7 @@ void Nisqually::unplug(int mode)
     {
         if (connector.isPopulated())
         {
-            connector.getDevice().unplug(mode);
+            connector.getDevice().unplug(notifier, mode);
             connector.depopulate();
         }
     }
@@ -194,66 +212,23 @@ void Nisqually::removeFromInventory([[maybe_unused]] Inventory& inventory)
  * will be no associated Williwakas card and as such there will be no drives
  * detected.
  */
-bool Nisqually::isFlettPresentAt(int slot) const
+bool Nisqually::isFlettPresentAt(int slot)
 {
-    debug("Looking up Flett presence GPIO index for slot {PCIE_SLOT}",
-          "PCIE_SLOT", slot);
+    bool present = flettPresenceLines.get(slot - 8).get_value();
 
-    int flett_presence_index = flett_slot_presence_map.at(slot);
-
-    debug("Testing for Flett presence via index {FLETT_PRESENCE_INDEX}",
-          "FLETT_PRESENCE_INDEX", flett_presence_index);
-
-    gpiod::line line = flettPresenceChip.get_line(flett_presence_index);
-    line.request(
-        {app_name, gpiod::line::DIRECTION_INPUT, gpiod::line::ACTIVE_LOW});
-
-    bool present = line.get_value();
-
-    debug(
-        "Flett presence at index {FLETT_PRESENCE_INDEX} for slot {PCIE_SLOT}: {FLETT_PRESENT}",
-        "FLETT_PRESENCE_INDEX", flett_presence_index, "PCIE_SLOT", slot,
-        "FLETT_PRESENT", present);
-
-    line.release();
+    debug("Flett {FLETT_ID} presence for slot {PCIE_SLOT}: {FLETT_PRESENT}",
+          "FLETT_ID", getFlettIndex(slot), "PCIE_SLOT", slot, "FLETT_PRESENT",
+          present);
 
     return present;
 }
 
-bool Nisqually::isFlettSlot(int slot) const
+bool Nisqually::isWilliwakasPresent(int index)
 {
-    bool contains = flett_index_map.contains(slot);
-
-    debug("Is {PCIE_SLOT} a Flett slot? {IS_FLETT_PCIE_SLOT}", "PCIE_SLOT",
-          slot, "IS_FLETT_PCIE_SLOT", contains);
-
-    return contains;
-}
-
-bool Nisqually::isWilliwakasPresent(int index) const
-{
-    debug(
-        "Looking up Williwakas presence GPIO index for backplane {WILLIWAKAS_ID}",
-        "WILLIWAKAS_ID", index);
-
-    int williwakas_presence_index = williwakas_presence_map.at(index);
-
-    debug(
-        "Testing for Williwakas presence via index {WILLIWAKAS_PRESENCE_INDEX}",
-        "WILLIWAKAS_PRESENCE_INDEX", williwakas_presence_index);
-
-    gpiod::line line =
-        williwakasPresenceChip.get_line(williwakas_presence_index);
-
-    line.request(
-        {app_name, gpiod::line::DIRECTION_INPUT, gpiod::line::ACTIVE_LOW});
-
-    bool present = line.get_value();
+    bool present = williwakasPresenceLines.get(index).get_value();
 
     debug("Williwakas presence at index {WILLIWAKAS_ID}: {WILLIWAKAS_PRESENT}",
           "WILLIWAKAS_ID", index, "WILLIWAKAS_PRESENT", present);
-
-    line.release();
 
     return present;
 }

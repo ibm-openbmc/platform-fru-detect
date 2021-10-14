@@ -15,12 +15,12 @@ SysfsI2CBus Ingraham::getPCIeSlotI2CBus(int slot)
     return SysfsI2CBus(fs::path(Ingraham::pcie_slot_bus_map.at(slot)));
 }
 
-void Ingraham::plug()
+void Ingraham::plug(Notifier& notifier)
 {
-    nisqually.plug();
+    nisqually.plug(notifier);
 }
 
-void Ingraham::unplug(int mode)
+void Ingraham::unplug(Notifier& notifier, int mode)
 {
-    nisqually.unplug(mode);
+    nisqually.unplug(notifier, mode);
 }

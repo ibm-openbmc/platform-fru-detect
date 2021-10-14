@@ -5,7 +5,6 @@ After=xyz.openbmc_project.Inventory.Manager.service
 
 [Service]
 Type=simple
-RemainAfterExit=true
 ExecStart=/usr/bin/platform-fru-detect
 
 [Install]
