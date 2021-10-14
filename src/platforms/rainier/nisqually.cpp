@@ -144,6 +144,11 @@ void Nisqually::addToInventory([[maybe_unused]] Inventory& inventory)
     std::logic_error("Unimplemented");
 }
 
+void Nisqually::removeFromInventory([[maybe_unused]] Inventory& inventory)
+{
+    std::logic_error("Unimplemented");
+}
+
 /*
  * Note that Bear River and Bear Lake cards also assert the presence GPIO.
  * However, if they are present in slots that can also house Flett cards there

@@ -59,6 +59,13 @@ void FlettNVMeDrive::addToInventory(Inventory& inventory)
     decorateWithVINI(path, inventory);
 }
 
+void FlettNVMeDrive::removeFromInventory([[maybe_unused]] Inventory& inventory)
+{
+    debug(
+        "I'm not sure how to remove drive {NVME_ID} on Flett {FLETT_ID} from the inventory!",
+        "NVME_ID", index, "FLETT_ID", flett.getIndex());
+}
+
 bool FlettNVMeDrive::isPresent(SysfsI2CBus bus)
 {
     return bus.isDevicePresent(NVMeDrive::eepromAddress);

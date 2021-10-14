@@ -34,6 +34,7 @@ class FlettNVMeDrive : public NVMeDrive
     /* FRU */
     virtual std::string getInventoryPath() const override;
     virtual void addToInventory(Inventory& inventory) override;
+    virtual void removeFromInventory(Inventory& inventory) override;
 
   private:
     std::filesystem::path getEEPROMDevicePath() const;
@@ -84,6 +85,7 @@ class Nisqually : public Device, FRU
     /* FRU */
     virtual std::string getInventoryPath() const override;
     virtual void addToInventory(Inventory& inventory) override;
+    virtual void removeFromInventory(Inventory& inventory) override;
 
   private:
     static constexpr int slotMuxAddress = 0x70;
@@ -124,6 +126,7 @@ class WilliwakasNVMeDrive : public NVMeDrive
     /* FRU */
     virtual std::string getInventoryPath() const override;
     virtual void addToInventory(Inventory& inventory) override;
+    virtual void removeFromInventory(Inventory& inventory) override;
 
   private:
     void markPresent(const std::string& path, Inventory& inventory) const;
@@ -148,6 +151,7 @@ class Williwakas : public Device, FRU
     /* FRU */
     virtual std::string getInventoryPath() const override;
     virtual void addToInventory(Inventory& inventory) override;
+    virtual void removeFromInventory(Inventory& inventory) override;
 
   private:
     static constexpr int drivePresenceDeviceAddress = 0x60;

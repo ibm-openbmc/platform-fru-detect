@@ -9,6 +9,7 @@
 
 #include <cassert>
 #include <iostream>
+#include <stdexcept>
 
 PHOSPHOR_LOG2_USING;
 
@@ -38,6 +39,13 @@ void WilliwakasNVMeDrive::addToInventory(Inventory& inventory)
     std::string path = getInventoryPath();
 
     markPresent(path, inventory);
+}
+
+void WilliwakasNVMeDrive::removeFromInventory(Inventory& inventory)
+{
+    std::string path = getInventoryPath();
+
+    inventory.markAbsent(path);
 }
 
 void WilliwakasNVMeDrive::markPresent(const std::string& path,
@@ -92,6 +100,11 @@ std::string Williwakas::getInventoryPath() const
 }
 
 void Williwakas::addToInventory([[maybe_unused]] Inventory& inventory)
+{
+    std::logic_error("Unimplemented");
+}
+
+void Williwakas::removeFromInventory([[maybe_unused]] Inventory& inventory)
 {
     std::logic_error("Unimplemented");
 }
