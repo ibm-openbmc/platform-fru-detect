@@ -108,8 +108,6 @@ class WilliwakasNVMeDrive : public NVMeDrive
     virtual void removeFromInventory(Inventory& inventory) override;
 
   private:
-    void markPresent(const std::string& path, Inventory& inventory) const;
-
     const Williwakas* williwakas;
 };
 

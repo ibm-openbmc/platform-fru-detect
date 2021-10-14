@@ -50,7 +50,7 @@ void WilliwakasNVMeDrive::addToInventory(Inventory& inventory)
 {
     std::string path = getInventoryPath();
 
-    markPresent(path, inventory);
+    inventory.markPresent(path);
 }
 
 void WilliwakasNVMeDrive::removeFromInventory(Inventory& inventory)
@@ -58,12 +58,6 @@ void WilliwakasNVMeDrive::removeFromInventory(Inventory& inventory)
     std::string path = getInventoryPath();
 
     inventory.markAbsent(path);
-}
-
-void WilliwakasNVMeDrive::markPresent(const std::string& path,
-                                      Inventory& inventory) const
-{
-    inventory.markPresent(path);
 }
 
 /* Williwakas */
