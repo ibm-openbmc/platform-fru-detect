@@ -192,6 +192,7 @@ class Ingraham : public Device
 
     /* Device */
     virtual void plug() override;
+    virtual void unplug(int mode = UNPLUG_REMOVES_INVENTORY) override;
 
   private:
     static constexpr std::array<const char*, 4> pcie_slot_busses = {

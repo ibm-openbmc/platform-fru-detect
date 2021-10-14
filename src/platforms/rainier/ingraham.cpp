@@ -19,3 +19,8 @@ void Ingraham::plug()
 {
     nisqually.plug();
 }
+
+void Ingraham::unplug(int mode)
+{
+    nisqually.unplug(mode);
+}
