@@ -23,9 +23,9 @@ WilliwakasNVMeDrive::WilliwakasNVMeDrive(Inventory& inventory,
 
 void WilliwakasNVMeDrive::plug()
 {
-    /* Nothing we can really do here other than log the event */
     debug("Drive {NVME_ID} plugged on Williwakas {WILLIWAKAS_ID}", "NVME_ID",
           index, "WILLIWAKAS_ID", williwakas.getIndex());
+    addToInventory(inventory);
 }
 
 std::string WilliwakasNVMeDrive::getInventoryPath() const
@@ -99,10 +99,6 @@ void Williwakas::addToInventory([[maybe_unused]] Inventory& inventory)
 void Williwakas::plug()
 {
     detectDrives(drives);
-    for (auto& drive : drives)
-    {
-        drive.addToInventory(inventory);
-    }
 }
 
 void Williwakas::detectDrives(std::vector<WilliwakasNVMeDrive>& drives)
@@ -119,6 +115,7 @@ void Williwakas::detectDrives(std::vector<WilliwakasNVMeDrive>& drives)
             info("Found drive {NVME_ID} on backplane {WILLIWAKAS_ID}",
                  "NVME_ID", id, "WILLIWAKAS_ID", index);
             drives.emplace_back(WilliwakasNVMeDrive(inventory, *this, id));
+            drives.back().plug();
         }
         else
         {

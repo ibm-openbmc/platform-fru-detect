@@ -40,6 +40,7 @@ void FlettNVMeDrive::plug()
     /* TODO: Probe NVMe MI endpoints on I2C? */
     debug("Drive {NVME_ID} plugged on Flett {FLETT_ID}", "NVME_ID", index,
           "FLETT_ID", flett.getIndex());
+    addToInventory(inventory);
 }
 
 std::string FlettNVMeDrive::getInventoryPath() const
@@ -171,10 +172,6 @@ SysfsI2CBus Flett::getDriveBus(int index) const
 void Flett::plug()
 {
     detectDrives(drives);
-    for (auto& drive : drives)
-    {
-        drive.addToInventory(inventory);
-    }
 }
 
 void Flett::detectDrives(std::vector<FlettNVMeDrive>& drives)
@@ -185,6 +182,7 @@ void Flett::detectDrives(std::vector<FlettNVMeDrive>& drives)
         {
             FlettNVMeDrive drive(inventory, nisqually, *this, i);
             drives.push_back(drive);
+            drives.back().plug();
             info("Detected drive at index {NVME_ID} on Flett {FLETT_ID}",
                  "NVME_ID", i, "FLETT_ID", getIndex());
         }
