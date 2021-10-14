@@ -28,6 +28,9 @@ class FlettNVMeDrive : public NVMeDrive
                    const Flett& flett, int index);
     ~FlettNVMeDrive() = default;
 
+    /* Device */
+    virtual void plug() override;
+
     /* FRU */
     virtual std::string getInventoryPath() const override;
     virtual void addToInventory(Inventory& inventory) override;
@@ -114,6 +117,9 @@ class WilliwakasNVMeDrive : public NVMeDrive
     WilliwakasNVMeDrive(Inventory& inventory, const Williwakas& backplane,
                         int index);
     ~WilliwakasNVMeDrive() = default;
+
+    /* Device */
+    virtual void plug() override;
 
     /* FRU */
     virtual std::string getInventoryPath() const override;

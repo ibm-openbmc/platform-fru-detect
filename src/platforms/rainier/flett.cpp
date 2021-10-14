@@ -35,6 +35,13 @@ FlettNVMeDrive::FlettNVMeDrive(Inventory& inventory, const Nisqually& nisqually,
     }
 }
 
+void FlettNVMeDrive::plug()
+{
+    /* TODO: Probe NVMe MI endpoints on I2C? */
+    debug("Drive {NVME_ID} plugged on Flett {FLETT_ID}", "NVME_ID", index,
+          "FLETT_ID", flett.getIndex());
+}
+
 std::string FlettNVMeDrive::getInventoryPath() const
 {
     std::string williwakasPath =

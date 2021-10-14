@@ -10,7 +10,7 @@
 
 class Inventory;
 
-class NVMeDrive : public FRU
+class NVMeDrive : public Device, FRU
 {
   public:
     NVMeDrive(Inventory& inventory, int index) :

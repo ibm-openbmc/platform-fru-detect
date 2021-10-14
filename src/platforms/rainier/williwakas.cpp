@@ -21,6 +21,13 @@ WilliwakasNVMeDrive::WilliwakasNVMeDrive(Inventory& inventory,
     williwakas(williwakas)
 {}
 
+void WilliwakasNVMeDrive::plug()
+{
+    /* Nothing we can really do here other than log the event */
+    debug("Drive {NVME_ID} plugged on Williwakas {WILLIWAKAS_ID}", "NVME_ID",
+          index, "WILLIWAKAS_ID", williwakas.getIndex());
+}
+
 std::string WilliwakasNVMeDrive::getInventoryPath() const
 {
     return williwakas.getInventoryPath() + "/" + "nvme" + std::to_string(index);
