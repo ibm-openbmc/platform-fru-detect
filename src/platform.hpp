@@ -29,13 +29,7 @@ class Device
     virtual ~Device() = default;
 
     virtual void plug() = 0;
-
-    /* Provide an implementation until all subclasses implement it, then switch
-     * to pure virtual */
-    virtual void unplug([[maybe_unused]] int mode = UNPLUG_REMOVES_INVENTORY)
-    {
-        throw std::logic_error("Not implemented");
-    }
+    virtual void unplug(int mode = UNPLUG_REMOVES_INVENTORY) = 0;
 };
 
 class Platform
