@@ -43,6 +43,16 @@ void FlettNVMeDrive::plug()
     addToInventory(inventory);
 }
 
+void FlettNVMeDrive::unplug(int mode)
+{
+    if (mode == UNPLUG_REMOVES_INVENTORY)
+    {
+        removeFromInventory(inventory);
+    }
+    debug("Drive {NVME_ID} unplugged on Williwakas {WILLIWAKAS_ID}", "NVME_ID",
+          index, "WILLIWAKAS_ID", flett.getIndex());
+}
+
 std::string FlettNVMeDrive::getInventoryPath() const
 {
     std::string williwakasPath =

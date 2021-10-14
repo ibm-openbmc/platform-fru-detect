@@ -29,6 +29,16 @@ void WilliwakasNVMeDrive::plug()
     addToInventory(inventory);
 }
 
+void WilliwakasNVMeDrive::unplug(int mode)
+{
+    if (mode == UNPLUG_REMOVES_INVENTORY)
+    {
+        removeFromInventory(inventory);
+    }
+    debug("Drive {NVME_ID} unplugged on Williwakas {WILLIWAKAS_ID}", "NVME_ID",
+          index, "WILLIWAKAS_ID", williwakas.getIndex());
+}
+
 std::string WilliwakasNVMeDrive::getInventoryPath() const
 {
     return williwakas.getInventoryPath() + "/" + "nvme" + std::to_string(index);

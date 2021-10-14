@@ -30,6 +30,7 @@ class FlettNVMeDrive : public NVMeDrive
 
     /* Device */
     virtual void plug() override;
+    virtual void unplug(int mode = UNPLUG_REMOVES_INVENTORY) override;
 
     /* FRU */
     virtual std::string getInventoryPath() const override;
@@ -122,6 +123,7 @@ class WilliwakasNVMeDrive : public NVMeDrive
 
     /* Device */
     virtual void plug() override;
+    virtual void unplug(int mode = UNPLUG_REMOVES_INVENTORY) override;
 
     /* FRU */
     virtual std::string getInventoryPath() const override;
