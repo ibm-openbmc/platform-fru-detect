@@ -29,7 +29,8 @@ int main(void)
 
     sdbusplus::bus::bus dbus = sdbusplus::bus::new_default();
     InventoryManager inventory(dbus);
-    Ingraham ingraham(&inventory);
+    PublishWhenPresentInventoryDecorator decoratedInventory(&inventory);
+    Ingraham ingraham(&decoratedInventory);
     Notifier notifier;
     ingraham.plug(notifier);
     notifier.run();
