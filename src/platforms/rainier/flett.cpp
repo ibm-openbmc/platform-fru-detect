@@ -84,16 +84,6 @@ bool FlettNVMeDrive::isPresent(SysfsI2CBus bus)
     return bus.isDevicePresent(NVMeDrive::eepromAddress);
 }
 
-std::filesystem::path FlettNVMeDrive::getEEPROMDevicePath() const
-{
-    return flett->getDriveBus(index).getDevicePath(NVMeDrive::eepromAddress);
-}
-
-SysfsI2CDevice FlettNVMeDrive::getEEPROMDevice() const
-{
-    return SysfsI2CDevice(getEEPROMDevicePath());
-}
-
 std::array<uint8_t, 2> FlettNVMeDrive::getSerial() const
 {
     return std::array<uint8_t, 2>(
@@ -103,10 +93,8 @@ std::array<uint8_t, 2> FlettNVMeDrive::getSerial() const
 void FlettNVMeDrive::decorateWithI2CDevice(const std::string& path,
                                            Inventory* inventory) const
 {
-    SysfsI2CDevice eepromDevice = getEEPROMDevice();
-
-    size_t bus = static_cast<size_t>(eepromDevice.getBus().getAddress());
-    size_t address = static_cast<size_t>(eepromDevice.getAddress());
+    size_t bus = static_cast<size_t>(flett->getDriveBus(index).getAddress());
+    size_t address = static_cast<size_t>(NVMeDrive::eepromAddress);
 
     inventory::ObjectType updates = {
         {

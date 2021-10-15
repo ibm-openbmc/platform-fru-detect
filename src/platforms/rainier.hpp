@@ -45,8 +45,6 @@ class FlettNVMeDrive : public NVMeDrive
     virtual void removeFromInventory(Inventory* inventory) override;
 
   private:
-    std::filesystem::path getEEPROMDevicePath() const;
-    SysfsI2CDevice getEEPROMDevice() const;
     std::array<uint8_t, 2> getSerial() const;
 
     void decorateWithI2CDevice(const std::string& path,
