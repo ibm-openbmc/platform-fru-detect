@@ -22,6 +22,8 @@ FlettNVMeDrive::FlettNVMeDrive(Inventory* inventory, const Nisqually* nisqually,
     NVMeDrive(inventory, index),
     nisqually(nisqually), flett(flett)
 {
+#if 0 /* FIXME: Add hooks to the inventory to allow us to re-probe when        \
+         present gets set */
     try
     {
         SysfsI2CBus bus = flett->getDriveBus(index);
@@ -35,6 +37,7 @@ FlettNVMeDrive::FlettNVMeDrive(Inventory* inventory, const Nisqually* nisqually,
         NVMeDrive::~NVMeDrive();
         throw ex;
     }
+#endif
 }
 
 void FlettNVMeDrive::plug([[maybe_unused]] Notifier& notifier)
