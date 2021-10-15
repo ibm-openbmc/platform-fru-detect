@@ -98,10 +98,14 @@ Williwakas::Williwakas(Inventory* inventory, const Nisqually* nisqually,
     std::vector<unsigned int> offsets(Williwakas::drive_presence_map.begin(),
                                       Williwakas::drive_presence_map.end());
 
-    lines = chip.get_lines(offsets);
-
-    lines.request(
-        {name, gpiod::line::DIRECTION_INPUT, gpiod::line::ACTIVE_LOW});
+    assert(Williwakas::drive_presence_map.size() == lines.size());
+    for (std::size_t i = 0; i < lines.size(); i++)
+    {
+        auto line = chip.get_line(Williwakas::drive_presence_map[i]);
+        line.request(
+            {name, gpiod::line::DIRECTION_INPUT, gpiod::line::ACTIVE_LOW});
+        lines[i] = line;
+    }
 
     debug("Constructed drive backplane for index {WILLIWAKAS_ID}",
           "WILLIWAKAS_ID", index);
@@ -129,9 +133,10 @@ void Williwakas::removeFromInventory([[maybe_unused]] Inventory* inventory)
 
 void Williwakas::plug(Notifier& notifier)
 {
+    assert(driveConnectors.size() == lines.size());
     for (std::size_t i = 0; i < driveConnectors.size(); i++)
     {
-        gpiod::line& line = lines.get(i);
+        gpiod::line& line = lines[i];
         presenceAdaptors[i] = PolledGPIODevicePresence<WilliwakasNVMeDrive>(
             &line, &driveConnectors.at(i));
         notifier.add(&presenceAdaptors.at(i));
@@ -162,12 +167,11 @@ void Williwakas::detectDrives(Notifier& notifier)
     debug("Locating NVMe drives from drive backplane {WILLIWAKAS_ID}",
           "WILLIWAKAS_ID", index);
 
-    std::vector<int> presence = lines.get_values();
-
-    for (std::size_t i = 0; i < presence.size(); i++)
+    assert(driveConnectors.size() == lines.size());
+    for (std::size_t i = 0; i < driveConnectors.size(); i++)
     {
         /* FIXME: work around libgpiod bug */
-        if (presence.at(index))
+        if (lines[i].get_value())
         {
             driveConnectors[i].populate();
             driveConnectors[i].getDevice().plug(notifier);

@@ -98,20 +98,25 @@ Nisqually::Nisqually(Inventory* inventory) :
 
     /* TODO: Need a PolledGPIODevicePresence! */
 
-    /* FIXME: Consolidate this with the presence map, but it's the identity map
-     */
-    std::vector<unsigned int> flettPresentOffsets({8, 9, 10, 11});
-    flettPresenceLines = flettPresenceChip.get_lines(flettPresentOffsets);
-    flettPresenceLines.request({app_name, gpiod::line_request::DIRECTION_INPUT,
-                                gpiod::line_request::FLAG_ACTIVE_LOW});
+    /* Iterate in terms of Flett slot numbers for mapping to presence lines */
+    for (auto& slot : flett_connector_slot_map | std::views::values)
+    {
+        int offset = flett_slot_presence_map.at(slot);
+        gpiod::line line = flettPresenceChip.get_line(offset);
+        line.request(
+            {app_name, gpiod::line::DIRECTION_INPUT, gpiod::line::ACTIVE_LOW});
+        flettPresenceLines[slot] = line;
+    }
 
-    std::vector<unsigned int> williwakasPresenceOffsets(
-        williwakas_presence_map.begin(), williwakas_presence_map.end());
-    williwakasPresenceLines =
-        williwakasPresenceChip.get_lines(williwakasPresenceOffsets);
-    williwakasPresenceLines.request({app_name,
-                                     gpiod::line_request::DIRECTION_INPUT,
-                                     gpiod::line_request::FLAG_ACTIVE_LOW});
+    for (int i :
+         std::views::iota(0UL, Nisqually::williwakas_presence_map.size()))
+    {
+        int offset = Nisqually::williwakas_presence_map.at(i);
+        gpiod::line line = williwakasPresenceChip.get_line(offset);
+        line.request(
+            {app_name, gpiod::line::DIRECTION_INPUT, gpiod::line::ACTIVE_LOW});
+        williwakasPresenceLines[i] = line;
+    }
 }
 
 void Nisqually::plug(Notifier& notifier)
@@ -214,7 +219,7 @@ void Nisqually::removeFromInventory([[maybe_unused]] Inventory* inventory)
  */
 bool Nisqually::isFlettPresentAt(int slot)
 {
-    bool present = flettPresenceLines.get(slot - 8).get_value();
+    bool present = flettPresenceLines.at(slot).get_value();
 
     debug("Flett {FLETT_ID} presence for slot {PCIE_SLOT}: {FLETT_PRESENT}",
           "FLETT_ID", getFlettIndex(slot), "PCIE_SLOT", slot, "FLETT_PRESENT",
@@ -225,7 +230,7 @@ bool Nisqually::isFlettPresentAt(int slot)
 
 bool Nisqually::isWilliwakasPresent(int index)
 {
-    bool present = williwakasPresenceLines.get(index).get_value();
+    bool present = williwakasPresenceLines.at(index).get_value();
 
     debug("Williwakas presence at index {WILLIWAKAS_ID}: {WILLIWAKAS_PRESENT}",
           "WILLIWAKAS_ID", index, "WILLIWAKAS_PRESENT", present);

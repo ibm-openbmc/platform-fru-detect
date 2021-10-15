@@ -155,7 +155,9 @@ class Williwakas : public Device, FRU
     const Nisqually* nisqually;
     int index;
     gpiod::chip chip;
-    gpiod::line_bulk lines;
+    /* There's a bug in the gpiod::line_bulk iterator that prevents us using it
+     * effectively */
+    std::array<gpiod::line, 8> lines;
     std::array<Connector<WilliwakasNVMeDrive>, 8> driveConnectors;
     std::array<PolledGPIODevicePresence<WilliwakasNVMeDrive>, 8>
         presenceAdaptors;
@@ -212,8 +214,8 @@ class Nisqually : public Device, FRU
     gpiod::chip williwakasPresenceChip;
     std::array<Connector<Williwakas>, 3> williwakasConnectors;
 
-    gpiod::line_bulk flettPresenceLines;
-    gpiod::line_bulk williwakasPresenceLines;
+    std::map<int, gpiod::line> flettPresenceLines;
+    std::array<gpiod::line, 3> williwakasPresenceLines;
 };
 
 class Ingraham : public Device
