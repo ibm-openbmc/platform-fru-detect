@@ -5,6 +5,8 @@
 #include "sysfs/gpio.hpp"
 #include "sysfs/i2c.hpp"
 
+#include <errno.h>
+
 #include <gpiod.hpp>
 #include <phosphor-logging/lg2.hpp>
 
@@ -15,8 +17,6 @@
 #include <string>
 
 PHOSPHOR_LOG2_USING;
-
-static constexpr const char* app_name = "NVMe Drive Management";
 
 static const std::map<int, int> flett_mux_channel_map = {
     {8, 3},
@@ -103,8 +103,8 @@ Nisqually::Nisqually(Inventory* inventory) :
     {
         int offset = flett_slot_presence_map.at(slot);
         gpiod::line line = flettPresenceChip.get_line(offset);
-        line.request(
-            {app_name, gpiod::line::DIRECTION_INPUT, gpiod::line::ACTIVE_LOW});
+        line.request({program_invocation_short_name,
+                      gpiod::line::DIRECTION_INPUT, gpiod::line::ACTIVE_LOW});
         flettPresenceLines[slot] = line;
     }
 
@@ -113,8 +113,8 @@ Nisqually::Nisqually(Inventory* inventory) :
     {
         int offset = Nisqually::williwakas_presence_map.at(i);
         gpiod::line line = williwakasPresenceChip.get_line(offset);
-        line.request(
-            {app_name, gpiod::line::DIRECTION_INPUT, gpiod::line::ACTIVE_LOW});
+        line.request({program_invocation_short_name,
+                      gpiod::line::DIRECTION_INPUT, gpiod::line::ACTIVE_LOW});
         williwakasPresenceLines[i] = line;
     }
 }

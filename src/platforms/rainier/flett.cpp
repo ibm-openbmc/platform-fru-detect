@@ -5,6 +5,8 @@
 #include "sysfs/gpio.hpp"
 #include "sysfs/i2c.hpp"
 
+#include <errno.h>
+
 #include <phosphor-logging/lg2.hpp>
 
 #include <cassert>
@@ -139,8 +141,6 @@ void FlettNVMeDrive::decorateWithVINI(const std::string& path,
 }
 
 /* Flett */
-
-static constexpr const char* name = "foo";
 
 static const std::map<std::string, std::map<int, int>> flett_mux_slot_map = {
     {"i2c-6", {{0x74, 9}, {0x75, 8}}},

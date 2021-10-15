@@ -62,8 +62,6 @@ void WilliwakasNVMeDrive::removeFromInventory(Inventory* inventory)
 
 /* Williwakas */
 
-static constexpr const char* name = "foo";
-
 std::string Williwakas::getInventoryPathFor(const Nisqually* nisqually,
                                             int index)
 {
@@ -102,8 +100,8 @@ Williwakas::Williwakas(Inventory* inventory, const Nisqually* nisqually,
     for (std::size_t i = 0; i < lines.size(); i++)
     {
         auto line = chip.get_line(Williwakas::drive_presence_map[i]);
-        line.request(
-            {name, gpiod::line::DIRECTION_INPUT, gpiod::line::ACTIVE_LOW});
+        line.request({program_invocation_short_name,
+                      gpiod::line::DIRECTION_INPUT, gpiod::line::ACTIVE_LOW});
         lines[i] = line;
     }
 
