@@ -55,7 +55,7 @@ int Flett::probe()
 #if 0 /* FIXME: Well, fix qemu */
     bus.probeDevice("24c02", flett_slot_eeprom_map.at(slot));
 #endif
-    bus.probeDevice("pca9546", flett_slot_mux_map.at(slot));
+    bus.probeDevice("pca9548", flett_slot_mux_map.at(slot));
 
     return 0;
 }
