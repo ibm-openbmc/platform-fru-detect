@@ -205,3 +205,64 @@ TEST(MockInventory, updateAnObjectTwiceSameProperty)
               std::get<bool>(
                   inventory.store[TEST_PATH][TEST_INTERFACE]["FirstProperty"]));
 }
+
+TEST(PublishWhenPresent, notifyInterfacesButNotPresent)
+{
+    MockInventory inventory;
+    PublishWhenPresentInventoryDecorator decorator(&inventory);
+
+    inventory::ObjectType update = {
+        {
+            TEST_INTERFACE,
+            {
+                {"FirstProperty", true},
+            },
+        },
+    };
+
+    decorator.updateObject(TEST_PATH, update);
+
+    EXPECT_TRUE(inventory.store.empty());
+    EXPECT_TRUE(inventory.present.empty());
+}
+
+TEST(PublishWhenPresent, setPresentWithNoInterfaces)
+{
+    MockInventory inventory;
+    PublishWhenPresentInventoryDecorator decorator(&inventory);
+
+    decorator.markPresent(TEST_PATH);
+
+    EXPECT_TRUE(inventory.store.empty());
+    EXPECT_TRUE(inventory.present.empty());
+}
+
+TEST(PublishWhenPresent, notifyInterfacesAndSetPresent)
+{
+    MockInventory inventory;
+    PublishWhenPresentInventoryDecorator decorator(&inventory);
+
+    inventory::ObjectType update = {
+        {
+            TEST_INTERFACE,
+            {
+                {"FirstProperty", true},
+            },
+        },
+    };
+
+    decorator.updateObject(TEST_PATH, update);
+    decorator.markPresent(TEST_PATH);
+
+    EXPECT_FALSE(inventory.store.empty());
+    EXPECT_TRUE(inventory.store.contains(TEST_PATH));
+    EXPECT_TRUE(inventory.store[TEST_PATH].contains(TEST_INTERFACE));
+    EXPECT_TRUE(
+        inventory.store[TEST_PATH][TEST_INTERFACE].contains("FirstProperty"));
+    EXPECT_TRUE(std::get<bool>(
+        inventory.store[TEST_PATH][TEST_INTERFACE]["FirstProperty"]));
+
+    EXPECT_FALSE(inventory.present.empty());
+    EXPECT_TRUE(inventory.present.contains(TEST_PATH));
+    EXPECT_TRUE(inventory.present[TEST_PATH]);
+}

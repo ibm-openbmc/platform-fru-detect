@@ -86,3 +86,47 @@ void inventory::accumulate(std::map<std::string, ObjectType>& store,
         store[path] = updates;
     }
 }
+
+/* PublishWhenPresentInventoryDecorator */
+
+PublishWhenPresentInventoryDecorator::PublishWhenPresentInventoryDecorator(
+    Inventory* inventory) :
+    inventory(inventory)
+{}
+
+void PublishWhenPresentInventoryDecorator::updateObject(
+    const std::string& path, const ObjectType& updates)
+{
+    inventory::accumulate(objectCache, path, updates);
+
+    if (presentCache.contains(path) && presentCache[path])
+    {
+        inventory->updateObject(path, objectCache[path]);
+        inventory->markPresent(path);
+    }
+}
+
+void PublishWhenPresentInventoryDecorator::markPresent(const std::string& path)
+{
+    bool alreadyPresent = presentCache.contains(path) && presentCache[path];
+
+    presentCache.insert_or_assign(path, true);
+
+    if (!alreadyPresent && objectCache.contains(path))
+    {
+        inventory->updateObject(path, objectCache[path]);
+        inventory->markPresent(path);
+    }
+}
+
+void PublishWhenPresentInventoryDecorator::markAbsent(const std::string& path)
+{
+    bool wasPresent = !presentCache.contains(path) || presentCache[path];
+
+    presentCache.insert_or_assign(path, false);
+
+    if (wasPresent)
+    {
+        inventory->markAbsent(path);
+    }
+}

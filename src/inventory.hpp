@@ -65,3 +65,22 @@ class InventoryManager : public Inventory
   private:
     sdbusplus::bus::bus& dbus;
 };
+
+/* Unifies the split we have with WilliwakasNVMeDrive and FlettNVMeDrive */
+class PublishWhenPresentInventoryDecorator : public Inventory
+{
+  public:
+    PublishWhenPresentInventoryDecorator(Inventory* inventory);
+    ~PublishWhenPresentInventoryDecorator() = default;
+
+    /* Inventory */
+    virtual void updateObject(const std::string& path,
+                              const inventory::ObjectType& updates) override;
+    virtual void markPresent(const std::string& path) override;
+    virtual void markAbsent(const std::string& path) override;
+
+  private:
+    Inventory* inventory;
+    std::map<std::string, inventory::ObjectType> objectCache;
+    std::map<std::string, bool> presentCache;
+};
