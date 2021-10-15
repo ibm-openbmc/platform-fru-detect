@@ -54,3 +54,35 @@ void InventoryManager::markAbsent(const std::string& path)
     call.append(INVENTORY_ITEM_IFACE, "Present", std::variant<bool>(false));
     dbus.call(call);
 }
+
+/* inventory::accumulate */
+
+void inventory::accumulate(std::map<std::string, ObjectType>& store,
+                           const std::string& path, const ObjectType& updates)
+{
+    if (store.contains(path))
+    {
+        auto& object = store[path];
+
+        for (const auto& [ikey, ival] : updates)
+        {
+            if (object.contains(ikey))
+            {
+                auto& interface = object[ikey];
+
+                for (const auto& [pkey, pval] : ival)
+                {
+                    interface[pkey] = pval;
+                }
+            }
+            else
+            {
+                object[ikey] = ival;
+            }
+        }
+    }
+    else
+    {
+        store[path] = updates;
+    }
+}

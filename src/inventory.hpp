@@ -32,6 +32,9 @@ static constexpr auto INVENTORY_DECORATOR_I2CDEVICE_IFACE =
     "xyz.openbmc_project.Inventory.Decorator.I2CDevice";
 
 static constexpr auto INVENTORY_IPZVPD_VINI_IFACE = "com.ibm.ipzvpd.VINI";
+
+void accumulate(std::map<std::string, inventory::ObjectType>& store,
+                const std::string& path, const inventory::ObjectType& updates);
 } // namespace inventory
 
 class Inventory
