@@ -201,10 +201,10 @@ class Nisqually : public Device, FRU
     static constexpr std::array<int, 3> williwakas_presence_map = {7, 6, 5};
 
     bool isFlettPresentAt(int slot);
-    void detectFlettCards();
+    void detectFlettCards(Notifier& notifier);
 
     bool isWilliwakasPresent(int index);
-    void detectWilliwakasCards();
+    void detectWilliwakasCards(Notifier& notifier);
 
     Inventory* inventory;
 

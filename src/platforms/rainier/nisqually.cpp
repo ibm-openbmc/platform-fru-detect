@@ -121,23 +121,8 @@ Nisqually::Nisqually(Inventory* inventory) :
 
 void Nisqually::plug(Notifier& notifier)
 {
-    detectFlettCards();
-    for (auto& connector : flettConnectors)
-    {
-        if (connector.isPopulated())
-        {
-            connector.getDevice().plug(notifier);
-        }
-    }
-
-    detectWilliwakasCards();
-    for (auto& connector : williwakasConnectors)
-    {
-        if (connector.isPopulated())
-        {
-            connector.getDevice().plug(notifier);
-        }
-    }
+    detectFlettCards(notifier);
+    detectWilliwakasCards(notifier);
 }
 
 void Nisqually::unplug(Notifier& notifier, int mode)
@@ -161,7 +146,7 @@ void Nisqually::unplug(Notifier& notifier, int mode)
     }
 }
 
-void Nisqually::detectWilliwakasCards(void)
+void Nisqually::detectWilliwakasCards(Notifier& notifier)
 {
     debug("Locating Williwakas cards");
 
@@ -180,6 +165,7 @@ void Nisqually::detectWilliwakasCards(void)
         try
         {
             williwakasConnectors[index].populate();
+            williwakasConnectors[index].getDevice().plug(notifier);
             debug("Initialised Williwakas {WILLIWAKAS_ID}", "WILLIWAKAS_ID",
                   index);
         }
@@ -238,7 +224,7 @@ bool Nisqually::isWilliwakasPresent(int index)
     return present;
 }
 
-void Nisqually::detectFlettCards()
+void Nisqually::detectFlettCards(Notifier& notifier)
 {
     debug("Locating Flett cards");
 
@@ -254,6 +240,7 @@ void Nisqually::detectFlettCards()
         try
         {
             flettConnectors[connector].populate();
+            flettConnectors[connector].getDevice().plug(notifier);
             debug("Initialised Flett {FLETT_ID} in slot {PCIE_SLOT}",
                   "FLETT_ID", getFlettIndex(slot), "PCIE_SLOT", slot);
         }
