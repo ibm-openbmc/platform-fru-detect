@@ -1,69 +1,38 @@
 /* SPDX-License-Identifier: Apache-2.0 */
 #pragma once
 
-#include "platforms/rainier.hpp"
-#include "sysfs/eeprom.hpp"
-#include "sysfs/i2c.hpp"
+#include "platform.hpp"
 
 #include <phosphor-logging/lg2.hpp>
 
-class NVMeDrive
+#include <array>
+#include <stdexcept>
+
+class Inventory;
+
+class NVMeDrive : public Device, FRU
 {
   public:
-    NVMeDrive(const NVMeDrive& drive) :
-        backplane(drive.backplane), index(drive.index)
+    NVMeDrive(Inventory* inventory, int index) :
+        inventory(inventory), index(index)
     {}
-    NVMeDrive(Williwakas backplane, int index) :
-        backplane(backplane), index(index)
-    {}
+    virtual ~NVMeDrive() = default;
 
-    static bool isPresent(SysfsI2CBus bus)
+    /* FRU */
+    virtual std::string getInventoryPath() const override
     {
-        return bus.isDevicePresent(NVMeDrive::eepromAddress);
+        throw std::logic_error("Not implemented");
     }
 
-    std::filesystem::path getEEPROMDevicePath() const
+    virtual void addToInventory([[maybe_unused]] Inventory* inventory) override
     {
-        return backplane.getFlett().getDriveBus(index).getDevicePath(
-            NVMeDrive::eepromAddress);
+        throw std::logic_error("Not implemented");
     }
 
-    SysfsI2CDevice getEEPROMDevice() const
-    {
-        return SysfsI2CDevice(getEEPROMDevicePath());
-    }
-
-    int probe()
-    {
-        SysfsI2CBus bus = backplane.getFlett().getDriveBus(index);
-        SysfsI2CDevice eeprom =
-            bus.probeDevice("24c02", NVMeDrive::eepromAddress);
-        lg2::info("EEPROM device exists at '{EEPROM_PATH}'", "EEPROM_PATH",
-                  eeprom.getPath().string());
-
-        return 0;
-    }
-
-    std::string getInventoryPath() const
-    {
-        return backplane.getInventoryPath() + "/" + "nvme" +
-               std::to_string(index);
-    }
-
-    const Williwakas& getBackplane() const
-    {
-        return backplane;
-    }
-
-    int getIndex() const
-    {
-        return index;
-    }
-
-  private:
+  protected:
     /* FRU Information Device, NVMe Storage Device (non-Carrier) */
     static constexpr int eepromAddress = 0x53;
 
-    Williwakas backplane;
+    Inventory* inventory;
     int index;
 };

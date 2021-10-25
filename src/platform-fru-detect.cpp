@@ -1,10 +1,10 @@
 /* SPDX-License-Identifier: Apache-2.0 */
-#include "dbus/inventory.hpp"
-#include "devices/nvme.hpp"
+#include "inventory.hpp"
 #include "platform.hpp"
 #include "platforms/rainier.hpp"
 
 #include <phosphor-logging/lg2.hpp>
+#include <sdbusplus/bus.hpp>
 
 #include <array>
 #include <chrono>
@@ -27,25 +27,15 @@ int main(void)
     info("Detecting FRUs for '{PLATFORM_MODEL}'", "PLATFORM_MODEL",
          Platform::getModel());
 
-    Inventory inventory{};
-    Ingraham ingraham{};
-    Nisqually systemBackplane = ingraham.getBackplane();
-    for (auto& driveBackplane : systemBackplane.getDriveBackplanes())
-    {
-        for (auto& drive : driveBackplane.getDrives())
-        {
-            int rc;
+    sdbusplus::bus::bus dbus = sdbusplus::bus::new_default();
+    InventoryManager inventory(dbus);
+    PublishWhenPresentInventoryDecorator decoratedInventory(&inventory);
+    Ingraham ingraham(&decoratedInventory);
+    Notifier notifier;
+    ingraham.plug(notifier);
+    notifier.run();
+    /* Clean up the application state but leave the inventory in-tact. */
+    ingraham.unplug(notifier, ingraham.UNPLUG_RETAINS_INVENTORY);
 
-            if ((rc = drive.probe()))
-            {
-                error("Failed to probe drive: {ERROR_CODE}\n", "ERROR_CODE",
-                      rc);
-                continue;
-            }
-
-            inventory.markPresent(drive);
-            inventory.decorateWithI2CDevice(drive);
-            inventory.decorateWithVINI(drive);
-        }
-    }
+    return 0;
 }
