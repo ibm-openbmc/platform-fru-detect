@@ -10,6 +10,7 @@
 #include <cerrno>
 #include <cstring>
 #include <functional>
+#include <map>
 #include <optional>
 #include <stdexcept>
 #include <type_traits>
@@ -201,9 +202,30 @@ class PolledGPIODevicePresence : public NotifySink
     int timerfd;
 };
 
+class Platform;
+
 class PlatformManager
 {
   public:
-    static std::string getPlatformModel();
-    static bool isSupportedPlatform();
+    PlatformManager();
+    ~PlatformManager() = default;
+
+    const std::string& getPlatformModel() noexcept;
+    void enrollPlatform(const std::string& model, Platform* platform);
+    bool isSupportedPlatform() noexcept;
+    void detectPlatformFrus(Inventory*);
+
+  private:
+    std::map<std::string, Platform*> platforms;
+    std::string model;
+};
+
+class Platform
+{
+  public:
+    Platform() = default;
+    virtual ~Platform() = default;
+
+    virtual void enrollWith(PlatformManager& pm) = 0;
+    virtual void detectFrus(Notifier& notifier, Inventory* inventory) = 0;
 };

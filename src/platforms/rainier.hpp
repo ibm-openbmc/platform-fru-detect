@@ -261,8 +261,12 @@ class Ingraham : public Device
     Nisqually nisqually;
 };
 
-class Rainier
+class Rainier : public Platform
 {
   public:
-    static std::set<std::string> getSupportedModels();
+    Rainier() = default;
+    virtual ~Rainier() = default;
+
+    virtual void enrollWith(PlatformManager& pm) override;
+    virtual void detectFrus(Notifier& notifier, Inventory* inventory) override;
 };
