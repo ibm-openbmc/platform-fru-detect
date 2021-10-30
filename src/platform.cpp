@@ -7,14 +7,14 @@
 
 #include <set>
 
-std::string Platform::getModel()
+std::string PlatformManager::getPlatformModel()
 {
     return SysfsDevicetree::getModel();
 }
 
-bool Platform::isSupported()
+bool PlatformManager::isSupportedPlatform()
 {
     std::set<std::string> rainier = Rainier::getSupportedModels();
 
-    return rainier.contains(Platform::getModel());
+    return rainier.contains(PlatformManager::getPlatformModel());
 }

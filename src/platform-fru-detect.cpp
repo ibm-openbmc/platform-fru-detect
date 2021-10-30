@@ -17,15 +17,15 @@ PHOSPHOR_LOG2_USING;
 
 int main(void)
 {
-    if (!Platform::isSupported())
+    if (!PlatformManager::isSupportedPlatform())
     {
         warning("Unsupported platform: '{PLATFORM_MODEL}'", "PLATFORM_MODEL",
-                Platform::getModel());
+                PlatformManager::getPlatformModel());
         return 0;
     }
 
     info("Detecting FRUs for '{PLATFORM_MODEL}'", "PLATFORM_MODEL",
-         Platform::getModel());
+         PlatformManager::getPlatformModel());
 
     sdbusplus::bus::bus dbus = sdbusplus::bus::new_default();
     InventoryManager inventory(dbus);

@@ -201,9 +201,9 @@ class PolledGPIODevicePresence : public NotifySink
     int timerfd;
 };
 
-class Platform
+class PlatformManager
 {
   public:
-    static std::string getModel();
-    static bool isSupported();
+    static std::string getPlatformModel();
+    static bool isSupportedPlatform();
 };
