@@ -189,12 +189,12 @@ std::string Nisqually::getInventoryPath() const
 
 void Nisqually::addToInventory([[maybe_unused]] Inventory* inventory)
 {
-    std::logic_error("Unimplemented");
+    throw std::logic_error("Unimplemented");
 }
 
 void Nisqually::removeFromInventory([[maybe_unused]] Inventory* inventory)
 {
-    std::logic_error("Unimplemented");
+    throw std::logic_error("Unimplemented");
 }
 
 /*

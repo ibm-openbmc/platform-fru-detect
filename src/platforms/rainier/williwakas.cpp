@@ -121,12 +121,12 @@ std::string Williwakas::getInventoryPath() const
 
 void Williwakas::addToInventory([[maybe_unused]] Inventory* inventory)
 {
-    std::logic_error("Unimplemented");
+    throw std::logic_error("Unimplemented");
 }
 
 void Williwakas::removeFromInventory([[maybe_unused]] Inventory* inventory)
 {
-    std::logic_error("Unimplemented");
+    throw std::logic_error("Unimplemented");
 }
 
 void Williwakas::plug(Notifier& notifier)
