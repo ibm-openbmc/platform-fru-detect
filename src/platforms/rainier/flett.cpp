@@ -165,7 +165,7 @@ Flett::Flett(Inventory* inventory, const Nisqually* nisqually, int slot) :
         Connector<FlettNVMeDrive>(inventory, this->nisqually, this, 7),
     }}
 {
-    SysfsI2CBus bus = Nisqually::getFlettSlotI2CBus(slot);
+    SysfsI2CBus bus = nisqually->getFlettSlotI2CBus(slot);
 
 #if 0 /* FIXME: Well, fix qemu */
     bus.probeDevice("24c02", flett_slot_eeprom_map.at(slot));
@@ -182,7 +182,7 @@ int Flett::getIndex() const
 
 SysfsI2CBus Flett::getDriveBus(int index) const
 {
-    SysfsI2CMux flettMux(Nisqually::getFlettSlotI2CBus(slot),
+    SysfsI2CMux flettMux(nisqually->getFlettSlotI2CBus(slot),
                          flett_slot_mux_map.at(slot));
 
     return SysfsI2CBus(flettMux, index);

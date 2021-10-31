@@ -51,7 +51,7 @@ int Nisqually::getFlettIndex(int slot)
     return flett_index_map.at(slot);
 }
 
-SysfsI2CBus Nisqually::getFlettSlotI2CBus(int slot)
+SysfsI2CBus Nisqually::getFlettSlotI2CBus(int slot) const
 {
     SysfsI2CBus rootBus = Ingraham::getPCIeSlotI2CBus(slot);
     SysfsI2CMux mux(rootBus, Nisqually::slotMuxAddress);

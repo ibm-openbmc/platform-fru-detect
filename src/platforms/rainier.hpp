@@ -168,7 +168,6 @@ class Nisqually : public Device, FRU
 {
   public:
     static int getFlettIndex(int slot);
-    static SysfsI2CBus getFlettSlotI2CBus(int slot);
 
     explicit Nisqually(Inventory* inventory);
     Nisqually(const Nisqually& other) = delete;
@@ -177,6 +176,8 @@ class Nisqually : public Device, FRU
 
     Nisqually& operator=(const Nisqually& other) = delete;
     Nisqually& operator=(const Nisqually&& other) = delete;
+
+    SysfsI2CBus getFlettSlotI2CBus(int slot) const;
 
     /* Device */
     virtual void plug(Notifier& notifier) override;
