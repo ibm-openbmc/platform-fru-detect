@@ -293,11 +293,21 @@ class Ingraham : public Device
     Nisqually* nisqually;
 };
 
-class Rainier : public Platform
+class Rainier0z : public Platform
 {
   public:
-    Rainier() = default;
-    virtual ~Rainier() = default;
+    Rainier0z() = default;
+    virtual ~Rainier0z() = default;
+
+    virtual void enrollWith(PlatformManager& pm) override;
+    virtual void detectFrus(Notifier& notifier, Inventory* inventory) override;
+};
+
+class Rainier1z : public Platform
+{
+  public:
+    Rainier1z() = default;
+    virtual ~Rainier1z() = default;
 
     virtual void enrollWith(PlatformManager& pm) override;
     virtual void detectFrus(Notifier& notifier, Inventory* inventory) override;

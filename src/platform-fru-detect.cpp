@@ -18,9 +18,12 @@ PHOSPHOR_LOG2_USING;
 int main(void)
 {
     PlatformManager pm;
-    Rainier rainier;
 
-    rainier.enrollWith(pm);
+    Rainier0z rainier0z;
+    rainier0z.enrollWith(pm);
+
+    Rainier1z rainier1z;
+    rainier1z.enrollWith(pm);
 
     if (!pm.isSupportedPlatform())
     {
