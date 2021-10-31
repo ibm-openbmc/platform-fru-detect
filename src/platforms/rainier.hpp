@@ -221,7 +221,7 @@ class Ingraham : public Device
   public:
     static SysfsI2CBus getPCIeSlotI2CBus(int slot);
 
-    explicit Ingraham(Inventory* inventory);
+    explicit Ingraham(Inventory* inventory, Nisqually* nisqually);
     Ingraham(const Ingraham& other) = delete;
     Ingraham(const Ingraham&& other) = delete;
     ~Ingraham() = default;
@@ -258,7 +258,7 @@ class Ingraham : public Device
     };
 
     Inventory* inventory;
-    Nisqually nisqually;
+    Nisqually* nisqually;
 };
 
 class Rainier : public Platform

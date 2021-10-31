@@ -11,7 +11,8 @@ void Rainier::enrollWith(PlatformManager& pm)
 
 void Rainier::detectFrus(Notifier& notifier, Inventory* inventory)
 {
-    Ingraham ingraham(inventory);
+    Nisqually nisqually(inventory);
+    Ingraham ingraham(inventory, &nisqually);
 
     /* Cold-plug devices */
     ingraham.plug(notifier);
