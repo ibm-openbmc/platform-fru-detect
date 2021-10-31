@@ -96,8 +96,6 @@ Nisqually::Nisqually(Inventory* inventory) :
     Ingraham::getPCIeSlotI2CBus(10).probeDevice("pca9546",
                                                 Nisqually::slotMuxAddress);
 
-    /* TODO: Need a PolledGPIODevicePresence! */
-
     /* Iterate in terms of Flett slot numbers for mapping to presence lines */
     for (auto& slot : flett_connector_slot_map | std::views::values)
     {
