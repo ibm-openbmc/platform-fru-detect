@@ -237,6 +237,16 @@ void Nisqually::detectFlettCards(Notifier& notifier)
     }
 }
 
+/* Nisqually0z */
+
+Nisqually0z::Nisqually0z(Inventory* inventory) : Nisqually(inventory)
+{}
+
+SysfsI2CBus Nisqually0z::getFlettSlotI2CBus(int slot) const
+{
+    return Ingraham::getPCIeSlotI2CBus(slot);
+}
+
 /* Nisqually1z */
 
 Nisqually1z::Nisqually1z(Inventory* inventory) : Nisqually(inventory)

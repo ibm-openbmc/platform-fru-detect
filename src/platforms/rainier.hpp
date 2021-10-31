@@ -215,6 +215,21 @@ class Nisqually : public Device, FRU
     std::array<gpiod::line, 3> williwakasPresenceLines;
 };
 
+class Nisqually0z : public Nisqually
+{
+  public:
+    explicit Nisqually0z(Inventory* inventory);
+    Nisqually0z(const Nisqually0z& other) = delete;
+    Nisqually0z(const Nisqually0z&& other) = delete;
+    ~Nisqually0z() = default;
+
+    Nisqually0z& operator=(const Nisqually0z& other) = delete;
+    Nisqually0z& operator=(const Nisqually0z&& other) = delete;
+
+    /* Nisqually */
+    virtual SysfsI2CBus getFlettSlotI2CBus(int slot) const override;
+};
+
 class Nisqually1z : public Nisqually
 {
   public:
