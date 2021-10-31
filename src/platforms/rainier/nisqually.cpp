@@ -46,22 +46,11 @@ static const std::map<int, int> flett_connector_slot_map = {
     {3, 11},
 };
 
+/* Nisqually */
+
 int Nisqually::getFlettIndex(int slot)
 {
     return flett_index_map.at(slot);
-}
-
-SysfsI2CBus Nisqually::getFlettSlotI2CBus(int slot) const
-{
-    SysfsI2CBus rootBus = Ingraham::getPCIeSlotI2CBus(slot);
-    SysfsI2CMux mux(rootBus, Nisqually::slotMuxAddress);
-
-    debug("Looking up mux channel for Flett in slot {PCIE_SLOT}", "PCIE_SLOT",
-          slot);
-
-    int channel = flett_mux_channel_map.at(slot);
-
-    return SysfsI2CBus(mux, channel);
 }
 
 Nisqually::Nisqually(Inventory* inventory) :
@@ -89,13 +78,6 @@ Nisqually::Nisqually(Inventory* inventory) :
         Connector<Williwakas>(this->inventory, this, 2),
     }}
 {
-    /* Slot 9 is on the same mux as slot 8 */
-    Ingraham::getPCIeSlotI2CBus(8).probeDevice("pca9546",
-                                               Nisqually::slotMuxAddress);
-    /* Slot 11 is on the same mux as slot 10 */
-    Ingraham::getPCIeSlotI2CBus(10).probeDevice("pca9546",
-                                                Nisqually::slotMuxAddress);
-
     /* Iterate in terms of Flett slot numbers for mapping to presence lines */
     for (auto& slot : flett_connector_slot_map | std::views::values)
     {
@@ -253,4 +235,29 @@ void Nisqually::detectFlettCards(Notifier& notifier)
             continue;
         }
     }
+}
+
+/* Nisqually1z */
+
+Nisqually1z::Nisqually1z(Inventory* inventory) : Nisqually(inventory)
+{
+    /* Slot 9 is on the same mux as slot 8 */
+    Ingraham::getPCIeSlotI2CBus(8).probeDevice("pca9546",
+                                               Nisqually1z::slotMuxAddress);
+    /* Slot 11 is on the same mux as slot 10 */
+    Ingraham::getPCIeSlotI2CBus(10).probeDevice("pca9546",
+                                                Nisqually1z::slotMuxAddress);
+}
+
+SysfsI2CBus Nisqually1z::getFlettSlotI2CBus(int slot) const
+{
+    SysfsI2CBus rootBus = Ingraham::getPCIeSlotI2CBus(slot);
+    SysfsI2CMux mux(rootBus, Nisqually1z::slotMuxAddress);
+
+    debug("Looking up mux channel for Flett in slot {PCIE_SLOT}", "PCIE_SLOT",
+          slot);
+
+    int channel = flett_mux_channel_map.at(slot);
+
+    return SysfsI2CBus(mux, channel);
 }

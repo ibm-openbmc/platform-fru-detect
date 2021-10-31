@@ -172,12 +172,12 @@ class Nisqually : public Device, FRU
     explicit Nisqually(Inventory* inventory);
     Nisqually(const Nisqually& other) = delete;
     Nisqually(const Nisqually&& other) = delete;
-    ~Nisqually() = default;
+    virtual ~Nisqually() = default;
 
     Nisqually& operator=(const Nisqually& other) = delete;
     Nisqually& operator=(const Nisqually&& other) = delete;
 
-    SysfsI2CBus getFlettSlotI2CBus(int slot) const;
+    virtual SysfsI2CBus getFlettSlotI2CBus(int slot) const = 0;
 
     /* Device */
     virtual void plug(Notifier& notifier) override;
@@ -190,8 +190,6 @@ class Nisqually : public Device, FRU
     virtual void removeFromInventory(Inventory* inventory) override;
 
   private:
-    static constexpr int slotMuxAddress = 0x70;
-
     static constexpr const char* flett_presence_device_path =
         "/sys/bus/i2c/devices/8-0061";
 
@@ -215,6 +213,24 @@ class Nisqually : public Device, FRU
 
     std::map<int, gpiod::line> flettPresenceLines;
     std::array<gpiod::line, 3> williwakasPresenceLines;
+};
+
+class Nisqually1z : public Nisqually
+{
+  public:
+    explicit Nisqually1z(Inventory* inventory);
+    Nisqually1z(const Nisqually1z& other) = delete;
+    Nisqually1z(const Nisqually1z&& other) = delete;
+    ~Nisqually1z() = default;
+
+    Nisqually1z& operator=(const Nisqually1z& other) = delete;
+    Nisqually1z& operator=(const Nisqually1z&& other) = delete;
+
+    /* Nisqually */
+    virtual SysfsI2CBus getFlettSlotI2CBus(int slot) const override;
+
+  private:
+    static constexpr int slotMuxAddress = 0x70;
 };
 
 class Ingraham : public Device
