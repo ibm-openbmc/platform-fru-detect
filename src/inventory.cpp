@@ -1,8 +1,11 @@
 /* SPDX-License-Identifier: Apache-2.0 */
 #include "inventory.hpp"
 
+#include <phosphor-logging/lg2.hpp>
 #include <sdbusplus/bus.hpp>
 #include <sdbusplus/message.hpp>
+
+PHOSPHOR_LOG2_USING;
 
 static constexpr auto INVENTORY_BUS_NAME =
     "xyz.openbmc_project.Inventory.Manager";
@@ -15,6 +18,9 @@ static constexpr auto INVENTORY_MANAGER_OBJECT =
 
 // https://dbus.freedesktop.org/doc/dbus-specification.html#standard-interfaces-properties
 static constexpr auto DBUS_PROPERTY_IFACE = "org.freedesktop.DBus.Properties";
+
+static constexpr auto INVENTORY_DECORATOR_ASSET_IFACE =
+    "xyz.openbmc_project.Inventory.Decorator.Asset";
 
 using namespace inventory;
 
@@ -53,6 +59,67 @@ void InventoryManager::markAbsent(const std::string& path)
 
     call.append(INVENTORY_ITEM_IFACE, "Present", std::variant<bool>(false));
     dbus.call(call);
+}
+
+bool InventoryManager::isPresent(const std::string& path)
+{
+    std::string absolute = std::string("/xyz/openbmc_project/inventory") + path;
+
+    auto call = dbus.new_method_call(INVENTORY_BUS_NAME, absolute.c_str(),
+                                     DBUS_PROPERTY_IFACE, "Get");
+
+    call.append(INVENTORY_ITEM_IFACE, "Present");
+
+    try
+    {
+        std::variant<bool> present;
+        auto reply = dbus.call(call);
+        reply.read(present);
+
+        return std::get<bool>(present);
+    }
+    catch (const sdbusplus::exception::exception& ex)
+    {
+        /* TODO: Define an exception for inventory operations? */
+        info("Failed to determine device presence at path {INVENTORY_PATH}",
+             "INVENTORY_PATH", absolute);
+        debug(
+            "Inventory lookup for device at path {INVENTORY_PATH} resulted in an exception: {EXCEPTION}",
+            "INVENTORY_PATH", absolute, "EXCEPTION", ex);
+    }
+
+    return false;
+}
+
+bool InventoryManager::isModel(const std::string& path,
+                               const std::string& model)
+{
+    std::string absolute = std::string("/xyz/openbmc_project/inventory") + path;
+
+    auto call = dbus.new_method_call(INVENTORY_BUS_NAME, absolute.c_str(),
+                                     DBUS_PROPERTY_IFACE, "Get");
+
+    call.append(INVENTORY_DECORATOR_ASSET_IFACE, "Model");
+
+    try
+    {
+        std::variant<std::string> found;
+        auto reply = dbus.call(call);
+        reply.read(found);
+
+        return std::get<std::string>(found) == model;
+    }
+    catch (const sdbusplus::exception::exception& ex)
+    {
+        /* TODO: Define an exception for inventory operations? */
+        info("Failed to determine device presence at path {INVENTORY_PATH}",
+             "INVENTORY_PATH", absolute);
+        debug(
+            "Inventory lookup for device at path {INVENTORY_PATH} resulted in an exception: {EXCEPTION}",
+            "INVENTORY_PATH", absolute, "EXCEPTION", ex);
+    }
+
+    return false;
 }
 
 /* inventory::accumulate */
@@ -129,4 +196,15 @@ void PublishWhenPresentInventoryDecorator::markAbsent(const std::string& path)
     {
         inventory->markAbsent(path);
     }
+}
+
+bool PublishWhenPresentInventoryDecorator::isPresent(const std::string& path)
+{
+    return inventory->isPresent(path);
+}
+
+bool PublishWhenPresentInventoryDecorator::isModel(const std::string& path,
+                                                   const std::string& model)
+{
+    return inventory->isModel(path, model);
 }
