@@ -58,6 +58,9 @@ class FlettNVMeDrive : public NVMeDrive
 class Flett : public Device
 {
   public:
+    static std::string getInventoryPathFor(const Nisqually* nisqually,
+                                           int slot);
+
     explicit Flett(Inventory* inventory, const Nisqually* nisqually, int slot);
     Flett(const Flett& other) = delete;
     Flett(const Flett&& other) = delete;
@@ -189,29 +192,26 @@ class Nisqually : public Device, FRU
     virtual void addToInventory(Inventory* inventory) override;
     virtual void removeFromInventory(Inventory* inventory) override;
 
-  private:
-    static constexpr const char* flett_presence_device_path =
-        "/sys/bus/i2c/devices/8-0061";
+  protected:
+    virtual bool isFlettPresentAt(int slot) = 0;
 
+    Inventory* inventory;
+
+  private:
     static constexpr const char* williwakas_presence_device_path =
         "/sys/bus/i2c/devices/0-0020";
     static constexpr std::array<int, 3> williwakas_presence_map = {7, 6, 5};
 
-    bool isFlettPresentAt(int slot);
     void detectFlettCards(Notifier& notifier);
 
     bool isWilliwakasPresent(int index);
     void detectWilliwakasCards(Notifier& notifier);
 
-    Inventory* inventory;
-
-    gpiod::chip flettPresenceChip;
     std::array<Connector<Flett>, 4> flettConnectors;
 
     gpiod::chip williwakasPresenceChip;
     std::array<Connector<Williwakas>, 3> williwakasConnectors;
 
-    std::map<int, gpiod::line> flettPresenceLines;
     std::array<gpiod::line, 3> williwakasPresenceLines;
 };
 
@@ -228,6 +228,10 @@ class Nisqually0z : public Nisqually
 
     /* Nisqually */
     virtual SysfsI2CBus getFlettSlotI2CBus(int slot) const override;
+
+  protected:
+    /* Nisqually */
+    virtual bool isFlettPresentAt(int slot) override;
 };
 
 class Nisqually1z : public Nisqually
@@ -244,8 +248,18 @@ class Nisqually1z : public Nisqually
     /* Nisqually */
     virtual SysfsI2CBus getFlettSlotI2CBus(int slot) const override;
 
+  protected:
+    /* Nisqually */
+    virtual bool isFlettPresentAt(int slot) override;
+
   private:
     static constexpr int slotMuxAddress = 0x70;
+
+    static constexpr const char* flett_presence_device_path =
+        "/sys/bus/i2c/devices/8-0061";
+
+    gpiod::chip flettPresenceChip;
+    std::map<int, gpiod::line> flettPresenceLines;
 };
 
 class Ingraham : public Device

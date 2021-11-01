@@ -152,6 +152,12 @@ static const std::map<int, int> flett_slot_eeprom_map = {
     {11, 0x51},
 };
 
+std::string Flett::getInventoryPathFor(const Nisqually* nisqually, int slot)
+{
+    return nisqually->getInventoryPath() + "/" + "pcieslot" +
+           std::to_string(slot) + "/" + "pcie_card" + std::to_string(slot);
+}
+
 Flett::Flett(Inventory* inventory, const Nisqually* nisqually, int slot) :
     inventory(inventory), nisqually(nisqually), slot(slot),
     driveConnectors{{
