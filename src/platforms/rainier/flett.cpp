@@ -219,8 +219,10 @@ void Flett::detectDrives(Notifier& notifier)
         {
             driveConnectors[i].populate();
             driveConnectors[i].getDevice().plug(notifier);
-            info("Detected drive at index {NVME_ID} on Flett {FLETT_ID}",
-                 "NVME_ID", i, "FLETT_ID", getIndex());
+            info(
+                "Plugged drive at index {NVME_ID} on Flett {FLETT_ID} via bus {NVME_DRIVE_BUS}",
+                "NVME_ID", i, "FLETT_ID", getIndex(), "NVME_DRIVE_BUS",
+                getDriveBus(i).getAddress());
         }
         catch (const SysfsI2CDeviceDriverBindException& ex)
         {
