@@ -76,12 +76,12 @@ class Flett : public Device
                         int mode = Device::UNPLUG_REMOVES_INVENTORY) override;
 
   private:
-    void detectDrives(Notifier& notifier);
-
     Inventory* inventory;
     const Nisqually* nisqually;
     int slot;
     std::array<Connector<FlettNVMeDrive>, 8> driveConnectors;
+    std::array<PolledBasicNVMeDrivePresence<FlettNVMeDrive>, 8>
+        presenceAdaptors;
 };
 
 class WilliwakasNVMeDrive : public NVMeDrive

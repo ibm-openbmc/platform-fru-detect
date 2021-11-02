@@ -22,8 +22,6 @@ FlettNVMeDrive::FlettNVMeDrive(Inventory* inventory, const Nisqually* nisqually,
     BasicNVMeDrive(flett->getDriveBus(index), inventory, index),
     nisqually(nisqually), flett(flett)
 {
-#if 0 /* FIXME: Add hooks to the inventory to allow us to re-probe when        \
-         present gets set */
     try
     {
         SysfsI2CBus bus = flett->getDriveBus(index);
@@ -37,7 +35,6 @@ FlettNVMeDrive::FlettNVMeDrive(Inventory* inventory, const Nisqually* nisqually,
         NVMeDrive::~NVMeDrive();
         throw ex;
     }
-#endif
 }
 
 void FlettNVMeDrive::plug([[maybe_unused]] Notifier& notifier)
@@ -210,38 +207,27 @@ SysfsI2CBus Flett::getDriveBus(int index) const
 
 void Flett::plug(Notifier& notifier)
 {
-    detectDrives(notifier);
+    for (std::size_t i = 0; i < presenceAdaptors.size(); i++)
+    {
+        presenceAdaptors[i] = PolledBasicNVMeDrivePresence<FlettNVMeDrive>(
+            getDriveBus(flett_channel_drive_map.at(i)), &driveConnectors.at(i));
+        notifier.add(&presenceAdaptors.at(i));
+    }
 }
 
 void Flett::unplug(Notifier& notifier, int mode)
 {
+    for (auto& adaptor : presenceAdaptors)
+    {
+        notifier.remove(&adaptor);
+    }
+
     for (auto& connector : driveConnectors)
     {
         if (connector.isPopulated())
         {
             connector.getDevice().unplug(notifier, mode);
             connector.depopulate();
-        }
-    }
-}
-
-void Flett::detectDrives(Notifier& notifier)
-{
-    for (std::size_t i = 0; i < driveConnectors.size(); i++)
-    {
-        try
-        {
-            driveConnectors[i].populate();
-            driveConnectors[i].getDevice().plug(notifier);
-            info(
-                "Plugged drive at index {NVME_ID} on Flett {FLETT_ID} via bus {NVME_DRIVE_BUS}",
-                "NVME_ID", i, "FLETT_ID", getIndex(), "NVME_DRIVE_BUS",
-                getDriveBus(i).getAddress());
-        }
-        catch (const SysfsI2CDeviceDriverBindException& ex)
-        {
-            debug("Failed to probe drive {DRIVE_ID} on Flett {FLETT_ID}",
-                  "DRIVE_ID", i, "FLETT_ID", getIndex());
         }
     }
 }
