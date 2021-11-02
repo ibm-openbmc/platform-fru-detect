@@ -96,17 +96,19 @@ concept DerivesDevice = std::is_base_of<Device, T>::value;
  * to work.
  */
 template <DerivesDevice T>
-class PolledGPIODevicePresence : public NotifySink
+class PolledDevicePresence : public NotifySink
 {
   public:
-    PolledGPIODevicePresence() = default;
-    PolledGPIODevicePresence(gpiod::line* line, Connector<T>* connector) :
-        line(line), connector(connector), timerfd(-1)
+    PolledDevicePresence() = default;
+    PolledDevicePresence(Connector<T>* connector) :
+        connector(connector), timerfd(-1)
     {}
-    ~PolledGPIODevicePresence() = default;
+    virtual ~PolledDevicePresence() = default;
 
-    PolledGPIODevicePresence<T>&
-        operator=(const PolledGPIODevicePresence<T>& other) = default;
+    PolledDevicePresence<T>&
+        operator=(const PolledDevicePresence<T>& other) = default;
+
+    virtual bool poll() = 0;
 
     /* NotifySink */
     virtual void arm() override
@@ -148,33 +150,13 @@ class PolledGPIODevicePresence : public NotifySink
 
     virtual void notify(Notifier& notifier) override
     {
-        uint64_t res;
-        ssize_t rc;
+        drain();
 
-        rc = ::read(timerfd, &res, sizeof(res));
-        if (rc != sizeof(res))
-        {
-            if (rc == -1)
-            {
-                lg2::error(
-                    "Failed to read from timerfd {TIMER_FD}: {ERRNO_DESCRIPTION}",
-                    "TIMER_FD", timerfd, "ERRNO_DESCRIPTION", ::strerror(errno),
-                    "ERRNO", errno);
-                std::system_category().default_error_condition(errno);
-            }
-            else
-            {
-                lg2::warning(
-                    "Short read from timerfd {TIMER_FD}: {READ_LENGTH}",
-                    "TIMER_FD", timerfd, "READ_LENGTH", rc);
-            }
-        }
-
-        if (line->get_value())
+        if (poll())
         {
             if (!connector->isPopulated())
             {
-                lg2::debug("Presence GPIO asserted with unpopulated connector");
+                lg2::debug("Presence asserted with unpopulated connector");
                 connector->populate();
                 connector->getDevice().plug(notifier);
             }
@@ -183,7 +165,7 @@ class PolledGPIODevicePresence : public NotifySink
         {
             if (connector->isPopulated())
             {
-                lg2::debug("Presence GPIO deasserted with populated connector");
+                lg2::debug("Presence deasserted with populated connector");
                 connector->getDevice().unplug(notifier);
                 connector->depopulate();
             }
@@ -197,9 +179,58 @@ class PolledGPIODevicePresence : public NotifySink
     }
 
   private:
-    gpiod::line* line;
+    uint64_t drain()
+    {
+        uint64_t res;
+        ssize_t rc;
+
+        rc = ::read(this->timerfd, &res, sizeof(res));
+        if (rc != sizeof(res))
+        {
+            if (rc == -1)
+            {
+                lg2::error(
+                    "Failed to read from timerfd {TIMER_FD}: {ERRNO_DESCRIPTION}",
+                    "TIMER_FD", this->timerfd, "ERRNO_DESCRIPTION",
+                    ::strerror(errno), "ERRNO", errno);
+                std::system_category().default_error_condition(errno);
+            }
+            else
+            {
+                lg2::warning(
+                    "Short read from timerfd {TIMER_FD}: {READ_LENGTH}",
+                    "TIMER_FD", this->timerfd, "READ_LENGTH", rc);
+            }
+        }
+
+        return res;
+    }
+
     Connector<T>* connector;
     int timerfd;
+};
+
+template <DerivesDevice T>
+class PolledGPIODevicePresence : public PolledDevicePresence<T>
+{
+  public:
+    PolledGPIODevicePresence() = default;
+    PolledGPIODevicePresence(gpiod::line* line, Connector<T>* connector) :
+        PolledDevicePresence<T>(connector), line(line)
+    {}
+    ~PolledGPIODevicePresence() = default;
+
+    PolledGPIODevicePresence<T>&
+        operator=(const PolledGPIODevicePresence<T>& other) = default;
+
+    /* PolledDevicePresence */
+    virtual bool poll() override
+    {
+        return line->get_value();
+    }
+
+  private:
+    gpiod::line* line;
 };
 
 class Platform;
