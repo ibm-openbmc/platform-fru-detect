@@ -1,9 +1,6 @@
 /* SPDX-License-Identifier: Apache-2.0 */
 #include "sysfs/i2c.hpp"
 
-/* TODO: Try to remove this */
-#include "platforms/rainier.hpp"
-
 #include <phosphor-logging/lg2.hpp>
 
 #include <array>
