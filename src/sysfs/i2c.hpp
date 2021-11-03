@@ -39,8 +39,9 @@ class SysfsI2CBus : public SysfsEntry
 
     bool isMuxBus();
     int getMuxChannel();
-    std::string getID();
-    int getAddress();
+    std::string getID() const;
+    int getAddress() const;
+    std::filesystem::path getBusDevice() const;
     std::filesystem::path getDevicePath(int address);
     bool isDevicePresent(int address);
 

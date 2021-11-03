@@ -1,6 +1,8 @@
 /* SPDX-License-Identifier: Apache-2.0 */
 #include "sysfs/i2c.hpp"
 
+#include <limits.h>
+
 #include <phosphor-logging/lg2.hpp>
 
 #include <array>
@@ -37,7 +39,7 @@ bool SysfsI2CBus::isMuxBus()
     return std::filesystem::exists(path / "mux_device");
 }
 
-std::string SysfsI2CBus::getID()
+std::string SysfsI2CBus::getID() const
 {
     std::filesystem::path target;
 
@@ -53,12 +55,25 @@ std::string SysfsI2CBus::getID()
     return target.filename().string();
 }
 
-int SysfsI2CBus::getAddress()
+int SysfsI2CBus::getAddress() const
 {
     std::string name = getID();
     std::string::size_type pos = name.find('-');
 
     return std::stoi(name.substr(pos + 1), nullptr, 10);
+}
+
+std::filesystem::path SysfsI2CBus::getBusDevice() const
+{
+    char devpath[PATH_MAX];
+
+    int rc = snprintf(devpath, PATH_MAX - 1, "/dev/i2c-%d", getAddress());
+    if (rc > PATH_MAX - 1)
+    {
+        throw std::logic_error("Formatting bus device path failed");
+    }
+    devpath[rc] = '\0';
+    return devpath;
 }
 
 std::filesystem::path SysfsI2CBus::getDevicePath(int address)
