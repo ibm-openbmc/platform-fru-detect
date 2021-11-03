@@ -2,11 +2,11 @@
 #pragma once
 
 #include "platform.hpp"
-
-#include <phosphor-logging/lg2.hpp>
+#include "sysfs/i2c.hpp"
 
 #include <array>
 #include <stdexcept>
+#include <vector>
 
 class Inventory;
 
@@ -35,4 +35,24 @@ class NVMeDrive : public Device, FRU
 
     Inventory* inventory;
     int index;
+};
+
+class BasicNVMeDrive : public NVMeDrive
+{
+  public:
+    static bool isBasicEndpointPresent(const SysfsI2CBus& bus);
+
+    BasicNVMeDrive(const SysfsI2CBus& bus, Inventory* inventory, int index);
+    virtual ~BasicNVMeDrive() = default;
+
+  protected:
+    const std::vector<uint8_t>& getManufacturer() const;
+    const std::vector<uint8_t>& getSerial() const;
+
+  private:
+    static constexpr int endpointAddress = 0x6a;
+    static constexpr int vendorMetadataOffset = 0x08;
+
+    std::vector<uint8_t> manufacturer;
+    std::vector<uint8_t> serial;
 };
