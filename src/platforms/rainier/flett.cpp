@@ -19,7 +19,7 @@ PHOSPHOR_LOG2_USING;
 
 FlettNVMeDrive::FlettNVMeDrive(Inventory* inventory, const Nisqually* nisqually,
                                const Flett* flett, int index) :
-    NVMeDrive(inventory, index),
+    BasicNVMeDrive(flett->getDriveBus(index), inventory, index),
     nisqually(nisqually), flett(flett)
 {
 #if 0 /* FIXME: Add hooks to the inventory to allow us to re-probe when        \
@@ -87,12 +87,6 @@ bool FlettNVMeDrive::isPresent(SysfsI2CBus bus)
     return bus.isDevicePresent(NVMeDrive::eepromAddress);
 }
 
-std::array<uint8_t, 2> FlettNVMeDrive::getSerial() const
-{
-    return std::array<uint8_t, 2>(
-        {static_cast<uint8_t>(flett->getIndex()), static_cast<uint8_t>(index)});
-}
-
 void FlettNVMeDrive::decorateWithI2CDevice(const std::string& path,
                                            Inventory* inventory) const
 {
@@ -115,15 +109,13 @@ void FlettNVMeDrive::decorateWithI2CDevice(const std::string& path,
 void FlettNVMeDrive::decorateWithVINI(const std::string& path,
                                       Inventory* inventory) const
 {
-    auto sn = getSerial();
-
     inventory::ObjectType updates = {
         {
             inventory::INVENTORY_IPZVPD_VINI_IFACE,
             {
                 {"RT", std::vector<uint8_t>({'V', 'I', 'N', 'I'})},
                 {"CC", std::vector<uint8_t>({'N', 'V', 'M', 'e'})},
-                {"SN", std::vector<uint8_t>(sn.begin(), sn.end())},
+                {"SN", this->getSerial()},
             },
         },
     };

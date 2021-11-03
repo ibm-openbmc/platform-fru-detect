@@ -20,7 +20,7 @@ class Inventory;
 class Nisqually;
 class Williwakas;
 
-class FlettNVMeDrive : public NVMeDrive
+class FlettNVMeDrive : public BasicNVMeDrive
 {
   public:
     static bool isPresent(SysfsI2CBus bus);
@@ -45,8 +45,6 @@ class FlettNVMeDrive : public NVMeDrive
     virtual void removeFromInventory(Inventory* inventory) override;
 
   private:
-    std::array<uint8_t, 2> getSerial() const;
-
     void decorateWithI2CDevice(const std::string& path,
                                Inventory* inventory) const;
     void decorateWithVINI(const std::string& path, Inventory* inventory) const;
