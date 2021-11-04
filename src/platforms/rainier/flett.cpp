@@ -144,6 +144,20 @@ static const std::map<int, int> flett_slot_eeprom_map = {
     {11, 0x51},
 };
 
+/*
+ * Yes, this mux channel / drive index mapping really is the case.
+ *
+ * See flett2z_2021OCT07.pdf, page 27
+ */
+static const std::map<int, int> flett_channel_drive_map = {
+    {0, 0}, {1, 2}, {2, 1}, {3, 3}, {4, 5}, {5, 6}, {6, 4}, {7, 7},
+};
+
+/* Reverse map of the above */
+static const std::map<int, int> flett_drive_channel_map = {
+    {0, 0}, {1, 2}, {2, 1}, {3, 3}, {4, 6}, {5, 4}, {6, 5}, {7, 7},
+};
+
 std::string Flett::getInventoryPathFor(const Nisqually* nisqually, int slot)
 {
     return nisqually->getInventoryPath() + "/" + "pcieslot" +
@@ -151,17 +165,25 @@ std::string Flett::getInventoryPathFor(const Nisqually* nisqually, int slot)
 }
 
 Flett::Flett(Inventory* inventory, const Nisqually* nisqually, int slot) :
-    inventory(inventory), nisqually(nisqually), slot(slot),
-    driveConnectors{{
-        Connector<FlettNVMeDrive>(inventory, this->nisqually, this, 0),
-        Connector<FlettNVMeDrive>(inventory, this->nisqually, this, 1),
-        Connector<FlettNVMeDrive>(inventory, this->nisqually, this, 2),
-        Connector<FlettNVMeDrive>(inventory, this->nisqually, this, 3),
-        Connector<FlettNVMeDrive>(inventory, this->nisqually, this, 4),
-        Connector<FlettNVMeDrive>(inventory, this->nisqually, this, 5),
-        Connector<FlettNVMeDrive>(inventory, this->nisqually, this, 6),
-        Connector<FlettNVMeDrive>(inventory, this->nisqually, this, 7),
-    }}
+    inventory(inventory), nisqually(nisqually),
+    slot(slot), driveConnectors{{
+                    Connector<FlettNVMeDrive>(inventory, this->nisqually, this,
+                                              flett_channel_drive_map.at(0)),
+                    Connector<FlettNVMeDrive>(inventory, this->nisqually, this,
+                                              flett_channel_drive_map.at(1)),
+                    Connector<FlettNVMeDrive>(inventory, this->nisqually, this,
+                                              flett_channel_drive_map.at(2)),
+                    Connector<FlettNVMeDrive>(inventory, this->nisqually, this,
+                                              flett_channel_drive_map.at(3)),
+                    Connector<FlettNVMeDrive>(inventory, this->nisqually, this,
+                                              flett_channel_drive_map.at(4)),
+                    Connector<FlettNVMeDrive>(inventory, this->nisqually, this,
+                                              flett_channel_drive_map.at(5)),
+                    Connector<FlettNVMeDrive>(inventory, this->nisqually, this,
+                                              flett_channel_drive_map.at(6)),
+                    Connector<FlettNVMeDrive>(inventory, this->nisqually, this,
+                                              flett_channel_drive_map.at(7)),
+                }}
 {
     SysfsI2CBus bus = nisqually->getFlettSlotI2CBus(slot);
 
@@ -183,7 +205,7 @@ SysfsI2CBus Flett::getDriveBus(int index) const
     SysfsI2CMux flettMux(nisqually->getFlettSlotI2CBus(slot),
                          flett_slot_mux_map.at(slot));
 
-    return SysfsI2CBus(flettMux, index);
+    return SysfsI2CBus(flettMux, flett_drive_channel_map.at(index));
 }
 
 void Flett::plug(Notifier& notifier)
