@@ -9,8 +9,6 @@
 class SysfsEntry
 {
   public:
-    SysfsEntry(const SysfsEntry& entry) : path(entry.path)
-    {}
     SysfsEntry(std::filesystem::path path) : path(path)
     {
 

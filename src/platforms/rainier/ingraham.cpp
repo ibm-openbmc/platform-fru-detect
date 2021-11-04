@@ -6,8 +6,8 @@
 
 namespace fs = std::filesystem;
 
-Ingraham::Ingraham(Inventory* inventory) :
-    inventory(inventory), nisqually(inventory)
+Ingraham::Ingraham(Inventory* inventory, Nisqually* nisqually) :
+    inventory(inventory), nisqually(nisqually)
 {}
 
 SysfsI2CBus Ingraham::getPCIeSlotI2CBus(int slot)
@@ -17,10 +17,10 @@ SysfsI2CBus Ingraham::getPCIeSlotI2CBus(int slot)
 
 void Ingraham::plug(Notifier& notifier)
 {
-    nisqually.plug(notifier);
+    nisqually->plug(notifier);
 }
 
 void Ingraham::unplug(Notifier& notifier, int mode)
 {
-    nisqually.unplug(notifier, mode);
+    nisqually->unplug(notifier, mode);
 }

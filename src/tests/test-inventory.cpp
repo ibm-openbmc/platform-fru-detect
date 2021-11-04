@@ -27,6 +27,17 @@ struct MockInventory : public Inventory
         present.insert_or_assign(path, false);
     }
 
+    virtual bool isPresent(const std::string& path) override
+    {
+        return present.at(path);
+    }
+
+    virtual bool isModel([[maybe_unused]] const std::string& path,
+                         [[maybe_unused]] const std::string& model) override
+    {
+        throw std::logic_error("Unimplemented");
+    }
+
     std::map<std::string, inventory::ObjectType> store;
     std::map<std::string, bool> present;
 };

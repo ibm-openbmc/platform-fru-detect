@@ -17,25 +17,29 @@ PHOSPHOR_LOG2_USING;
 
 int main(void)
 {
-    if (!Platform::isSupported())
+    PlatformManager pm;
+
+    Rainier0z rainier0z;
+    rainier0z.enrollWith(pm);
+
+    Rainier1z rainier1z;
+    rainier1z.enrollWith(pm);
+
+    if (!pm.isSupportedPlatform())
     {
         warning("Unsupported platform: '{PLATFORM_MODEL}'", "PLATFORM_MODEL",
-                Platform::getModel());
+                pm.getPlatformModel());
         return 0;
     }
 
     info("Detecting FRUs for '{PLATFORM_MODEL}'", "PLATFORM_MODEL",
-         Platform::getModel());
+         pm.getPlatformModel());
 
     sdbusplus::bus::bus dbus = sdbusplus::bus::new_default();
     InventoryManager inventory(dbus);
     PublishWhenPresentInventoryDecorator decoratedInventory(&inventory);
-    Ingraham ingraham(&decoratedInventory);
-    Notifier notifier;
-    ingraham.plug(notifier);
-    notifier.run();
-    /* Clean up the application state but leave the inventory in-tact. */
-    ingraham.unplug(notifier, ingraham.UNPLUG_RETAINS_INVENTORY);
+
+    pm.detectPlatformFrus(&decoratedInventory);
 
     return 0;
 }

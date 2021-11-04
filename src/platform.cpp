@@ -2,19 +2,30 @@
 
 #include "platform.hpp"
 
-#include "platforms/rainier.hpp"
 #include "sysfs/devicetree.hpp"
 
-#include <set>
+PlatformManager::PlatformManager() : model(SysfsDevicetree::getModel())
+{}
 
-std::string Platform::getModel()
+const std::string& PlatformManager::getPlatformModel() noexcept
 {
-    return SysfsDevicetree::getModel();
+    return model;
 }
 
-bool Platform::isSupported()
+void PlatformManager::enrollPlatform(const std::string& model,
+                                     Platform* platform)
 {
-    std::set<std::string> rainier = Rainier::getSupportedModels();
+    platforms[model] = platform;
+}
 
-    return rainier.contains(Platform::getModel());
+bool PlatformManager::isSupportedPlatform() noexcept
+{
+    return platforms.contains(model);
+}
+
+void PlatformManager::detectPlatformFrus(Inventory* inventory)
+{
+    Notifier notifier;
+
+    platforms[model]->detectFrus(notifier, inventory);
 }

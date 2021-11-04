@@ -19,11 +19,9 @@ PHOSPHOR_LOG2_USING;
 
 FlettNVMeDrive::FlettNVMeDrive(Inventory* inventory, const Nisqually* nisqually,
                                const Flett* flett, int index) :
-    NVMeDrive(inventory, index),
+    BasicNVMeDrive(flett->getDriveBus(index), inventory, index),
     nisqually(nisqually), flett(flett)
 {
-#if 0 /* FIXME: Add hooks to the inventory to allow us to re-probe when        \
-         present gets set */
     try
     {
         SysfsI2CBus bus = flett->getDriveBus(index);
@@ -37,7 +35,6 @@ FlettNVMeDrive::FlettNVMeDrive(Inventory* inventory, const Nisqually* nisqually,
         NVMeDrive::~NVMeDrive();
         throw ex;
     }
-#endif
 }
 
 void FlettNVMeDrive::plug([[maybe_unused]] Notifier& notifier)
@@ -87,12 +84,6 @@ bool FlettNVMeDrive::isPresent(SysfsI2CBus bus)
     return bus.isDevicePresent(NVMeDrive::eepromAddress);
 }
 
-std::array<uint8_t, 2> FlettNVMeDrive::getSerial() const
-{
-    return std::array<uint8_t, 2>(
-        {static_cast<uint8_t>(flett->getIndex()), static_cast<uint8_t>(index)});
-}
-
 void FlettNVMeDrive::decorateWithI2CDevice(const std::string& path,
                                            Inventory* inventory) const
 {
@@ -115,15 +106,13 @@ void FlettNVMeDrive::decorateWithI2CDevice(const std::string& path,
 void FlettNVMeDrive::decorateWithVINI(const std::string& path,
                                       Inventory* inventory) const
 {
-    auto sn = getSerial();
-
     inventory::ObjectType updates = {
         {
             inventory::INVENTORY_IPZVPD_VINI_IFACE,
             {
                 {"RT", std::vector<uint8_t>({'V', 'I', 'N', 'I'})},
                 {"CC", std::vector<uint8_t>({'N', 'V', 'M', 'e'})},
-                {"SN", std::vector<uint8_t>(sn.begin(), sn.end())},
+                {"SN", this->getSerial()},
             },
         },
     };
@@ -152,20 +141,48 @@ static const std::map<int, int> flett_slot_eeprom_map = {
     {11, 0x51},
 };
 
-Flett::Flett(Inventory* inventory, const Nisqually* nisqually, int slot) :
-    inventory(inventory), nisqually(nisqually), slot(slot),
-    driveConnectors{{
-        Connector<FlettNVMeDrive>(inventory, this->nisqually, this, 0),
-        Connector<FlettNVMeDrive>(inventory, this->nisqually, this, 1),
-        Connector<FlettNVMeDrive>(inventory, this->nisqually, this, 2),
-        Connector<FlettNVMeDrive>(inventory, this->nisqually, this, 3),
-        Connector<FlettNVMeDrive>(inventory, this->nisqually, this, 4),
-        Connector<FlettNVMeDrive>(inventory, this->nisqually, this, 5),
-        Connector<FlettNVMeDrive>(inventory, this->nisqually, this, 6),
-        Connector<FlettNVMeDrive>(inventory, this->nisqually, this, 7),
-    }}
+/*
+ * Yes, this mux channel / drive index mapping really is the case.
+ *
+ * See flett2z_2021OCT07.pdf, page 27
+ */
+static const std::map<int, int> flett_channel_drive_map = {
+    {0, 0}, {1, 2}, {2, 1}, {3, 3}, {4, 5}, {5, 6}, {6, 4}, {7, 7},
+};
+
+/* Reverse map of the above */
+static const std::map<int, int> flett_drive_channel_map = {
+    {0, 0}, {1, 2}, {2, 1}, {3, 3}, {4, 6}, {5, 4}, {6, 5}, {7, 7},
+};
+
+std::string Flett::getInventoryPathFor(const Nisqually* nisqually, int slot)
 {
-    SysfsI2CBus bus = Nisqually::getFlettSlotI2CBus(slot);
+    return nisqually->getInventoryPath() + "/" + "pcieslot" +
+           std::to_string(slot) + "/" + "pcie_card" + std::to_string(slot);
+}
+
+Flett::Flett(Inventory* inventory, const Nisqually* nisqually, int slot) :
+    inventory(inventory), nisqually(nisqually),
+    slot(slot), driveConnectors{{
+                    Connector<FlettNVMeDrive>(inventory, this->nisqually, this,
+                                              flett_channel_drive_map.at(0)),
+                    Connector<FlettNVMeDrive>(inventory, this->nisqually, this,
+                                              flett_channel_drive_map.at(1)),
+                    Connector<FlettNVMeDrive>(inventory, this->nisqually, this,
+                                              flett_channel_drive_map.at(2)),
+                    Connector<FlettNVMeDrive>(inventory, this->nisqually, this,
+                                              flett_channel_drive_map.at(3)),
+                    Connector<FlettNVMeDrive>(inventory, this->nisqually, this,
+                                              flett_channel_drive_map.at(4)),
+                    Connector<FlettNVMeDrive>(inventory, this->nisqually, this,
+                                              flett_channel_drive_map.at(5)),
+                    Connector<FlettNVMeDrive>(inventory, this->nisqually, this,
+                                              flett_channel_drive_map.at(6)),
+                    Connector<FlettNVMeDrive>(inventory, this->nisqually, this,
+                                              flett_channel_drive_map.at(7)),
+                }}
+{
+    SysfsI2CBus bus = nisqually->getFlettSlotI2CBus(slot);
 
 #if 0 /* FIXME: Well, fix qemu */
     bus.probeDevice("24c02", flett_slot_eeprom_map.at(slot));
@@ -182,44 +199,35 @@ int Flett::getIndex() const
 
 SysfsI2CBus Flett::getDriveBus(int index) const
 {
-    SysfsI2CMux flettMux(Nisqually::getFlettSlotI2CBus(slot),
+    SysfsI2CMux flettMux(nisqually->getFlettSlotI2CBus(slot),
                          flett_slot_mux_map.at(slot));
 
-    return SysfsI2CBus(flettMux, index);
+    return SysfsI2CBus(flettMux, flett_drive_channel_map.at(index));
 }
 
 void Flett::plug(Notifier& notifier)
 {
-    detectDrives(notifier);
+    for (std::size_t i = 0; i < presenceAdaptors.size(); i++)
+    {
+        presenceAdaptors[i] = PolledBasicNVMeDrivePresence<FlettNVMeDrive>(
+            getDriveBus(flett_channel_drive_map.at(i)), &driveConnectors.at(i));
+        notifier.add(&presenceAdaptors.at(i));
+    }
 }
 
 void Flett::unplug(Notifier& notifier, int mode)
 {
+    for (auto& adaptor : presenceAdaptors)
+    {
+        notifier.remove(&adaptor);
+    }
+
     for (auto& connector : driveConnectors)
     {
         if (connector.isPopulated())
         {
             connector.getDevice().unplug(notifier, mode);
             connector.depopulate();
-        }
-    }
-}
-
-void Flett::detectDrives(Notifier& notifier)
-{
-    for (std::size_t i = 0; i < driveConnectors.size(); i++)
-    {
-        try
-        {
-            driveConnectors[i].populate();
-            driveConnectors[i].getDevice().plug(notifier);
-            info("Detected drive at index {NVME_ID} on Flett {FLETT_ID}",
-                 "NVME_ID", i, "FLETT_ID", getIndex());
-        }
-        catch (const SysfsI2CDeviceDriverBindException& ex)
-        {
-            debug("Failed to probe drive {DRIVE_ID} on Flett {FLETT_ID}",
-                  "DRIVE_ID", i, "FLETT_ID", getIndex());
         }
     }
 }

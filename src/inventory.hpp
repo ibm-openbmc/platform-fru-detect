@@ -47,6 +47,8 @@ class Inventory
                               const inventory::ObjectType& updates) = 0;
     virtual void markPresent(const std::string& path) = 0;
     virtual void markAbsent(const std::string& path) = 0;
+    virtual bool isPresent(const std::string& path) = 0;
+    virtual bool isModel(const std::string& path, const std::string& model) = 0;
 };
 
 class InventoryManager : public Inventory
@@ -61,6 +63,9 @@ class InventoryManager : public Inventory
                               const inventory::ObjectType& updates) override;
     virtual void markPresent(const std::string& path) override;
     virtual void markAbsent(const std::string& path) override;
+    virtual bool isPresent(const std::string& path) override;
+    virtual bool isModel(const std::string& path,
+                         const std::string& model) override;
 
   private:
     sdbusplus::bus::bus& dbus;
@@ -78,6 +83,9 @@ class PublishWhenPresentInventoryDecorator : public Inventory
                               const inventory::ObjectType& updates) override;
     virtual void markPresent(const std::string& path) override;
     virtual void markAbsent(const std::string& path) override;
+    virtual bool isPresent(const std::string& path) override;
+    virtual bool isModel(const std::string& path,
+                         const std::string& model) override;
 
   private:
     Inventory* inventory;

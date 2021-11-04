@@ -33,16 +33,15 @@ class SysfsI2CDeviceDriverBindException : public std::exception
 class SysfsI2CBus : public SysfsEntry
 {
   public:
-    SysfsI2CBus(const SysfsI2CBus& bus) : SysfsEntry(bus)
-    {}
     SysfsI2CBus(std::filesystem::path path) : SysfsEntry(path)
     {}
     SysfsI2CBus(SysfsI2CMux mux, int channel);
 
     bool isMuxBus();
     int getMuxChannel();
-    std::string getID();
-    int getAddress();
+    std::string getID() const;
+    int getAddress() const;
+    std::filesystem::path getBusDevice() const;
     std::filesystem::path getDevicePath(int address);
     bool isDevicePresent(int address);
 
