@@ -174,6 +174,7 @@ class PolledDevicePresence : public NotifySink
     {
         assert(timer > -1 && "Bad state: Timer already disarmed");
         ::close(timerfd);
+        timerfd = -1;
     }
 
   private:
