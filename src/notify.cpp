@@ -104,12 +104,19 @@ void Notifier::add(NotifySink* sink)
 
 void Notifier::remove(NotifySink* sink)
 {
-    int rc = ::epoll_ctl(epollfd, EPOLL_CTL_DEL, sink->getFD(), NULL);
+    int fd = sink->getFD();
+    if (fd == -1)
+    {
+        debug("Skipping disarmed sink");
+        return;
+    }
+
+    int rc = ::epoll_ctl(epollfd, EPOLL_CTL_DEL, fd, NULL);
     if (rc < 0)
     {
         error(
             "epoll delete operation failed on epoll descriptor {EPOLL_FD} for event descriptor {EVENT_FD}: {ERRNO_DESCRIPTION}",
-            "EPOLL_FD", epollfd, "EVENT_FD", sink->getFD(), "ERRNO_DESCRIPTION",
+            "EPOLL_FD", epollfd, "EVENT_FD", fd, "ERRNO_DESCRIPTION",
             ::strerror(errno), "ERRNO", errno);
         throw std::system_category().default_error_condition(errno);
     }
