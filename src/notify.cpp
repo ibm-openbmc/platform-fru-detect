@@ -114,10 +114,10 @@ void Notifier::remove(NotifySink* sink)
         throw std::system_category().default_error_condition(errno);
     }
 
-    sink->disarm();
-
     debug("Removed event descriptor {EVENT_FD} from epoll ({EPOLL_FD})",
           "EVENT_FD", sink->getFD(), "EPOLL_FD", epollfd);
+
+    sink->disarm();
 }
 
 void Notifier::run()
