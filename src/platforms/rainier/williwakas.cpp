@@ -139,8 +139,6 @@ void Williwakas::plug(Notifier& notifier)
             &line, &driveConnectors.at(i));
         notifier.add(&presenceAdaptors.at(i));
     }
-
-    detectDrives(notifier);
 }
 
 void Williwakas::unplug(Notifier& notifier, int mode)
@@ -156,30 +154,6 @@ void Williwakas::unplug(Notifier& notifier, int mode)
         {
             connector.getDevice().unplug(notifier, mode);
             connector.depopulate();
-        }
-    }
-}
-
-void Williwakas::detectDrives(Notifier& notifier)
-{
-    debug("Locating NVMe drives from drive backplane {WILLIWAKAS_ID}",
-          "WILLIWAKAS_ID", index);
-
-    assert(driveConnectors.size() == lines.size());
-    for (std::size_t i = 0; i < driveConnectors.size(); i++)
-    {
-        /* FIXME: work around libgpiod bug */
-        if (lines[i].get_value())
-        {
-            driveConnectors[i].populate();
-            driveConnectors[i].getDevice().plug(notifier);
-            info("Found drive {NVME_ID} on backplane {WILLIWAKAS_ID}",
-                 "NVME_ID", i, "WILLIWAKAS_ID", index);
-        }
-        else
-        {
-            debug("Drive {NVME_ID} not present on backplane {WILLIWAKAS_ID}",
-                  "NVME_ID", i, "WILLIWAKAS_ID", index);
         }
     }
 }
