@@ -2,8 +2,6 @@
 
 #include "notify.hpp"
 
-#include "sysfs/i2c.hpp"
-
 #include <unistd.h>
 
 #include <phosphor-logging/lg2.hpp>
@@ -163,16 +161,7 @@ void Notifier::run()
         }
 
         /* If it's not the exitfd sentinel it's a regular NotifySink */
-        try
-        {
-            sink->notify(*this);
-        }
-        catch (const SysfsI2CDeviceDriverBindException& ex)
-        {
-            error("Failed to bind device from Notifier, disabling: {EXCEPTION}",
-                  "EXCEPTION", ex);
-            remove(sink);
-        }
+        sink->notify(*this);
     }
 
     if (rc < 0)

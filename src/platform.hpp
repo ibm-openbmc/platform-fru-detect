@@ -2,6 +2,7 @@
 #pragma once
 
 #include "notify.hpp"
+#include "sysfs/i2c.hpp"
 
 #include <gpiod.hpp>
 #include <phosphor-logging/lg2.hpp>
@@ -155,8 +156,18 @@ class PolledDevicePresence : public NotifySink
             if (!connector->isPopulated())
             {
                 lg2::debug("Presence asserted with unpopulated connector");
-                connector->populate();
-                connector->getDevice().plug(notifier);
+                try
+                {
+                    connector->populate();
+                    connector->getDevice().plug(notifier);
+                }
+                catch (const SysfsI2CDeviceDriverBindException& ex)
+                {
+                    lg2::error(
+                        "Failed to bind driver for device reporting present, disabling notifier: {EXCEPTION}",
+                        "EXCEPTION", ex);
+                    notifier.remove(this);
+                }
             }
         }
         else
