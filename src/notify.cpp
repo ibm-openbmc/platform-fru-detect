@@ -169,8 +169,9 @@ void Notifier::run()
         }
         catch (const SysfsI2CDeviceDriverBindException& ex)
         {
-            error("Failed to bind device from Notifier: {EXCEPTION}",
+            error("Failed to bind device from Notifier, disabling: {EXCEPTION}",
                   "EXCEPTION", ex);
+            remove(sink);
         }
     }
 
