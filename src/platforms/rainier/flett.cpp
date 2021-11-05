@@ -21,21 +21,7 @@ FlettNVMeDrive::FlettNVMeDrive(Inventory* inventory, const Nisqually* nisqually,
                                const Flett* flett, int index) :
     BasicNVMeDrive(flett->getDriveBus(index), inventory, index),
     nisqually(nisqually), flett(flett)
-{
-    try
-    {
-        SysfsI2CBus bus = flett->getDriveBus(index);
-        SysfsI2CDevice eeprom =
-            bus.probeDevice("24c02", NVMeDrive::eepromAddress);
-        lg2::info("EEPROM device exists at '{EEPROM_PATH}'", "EEPROM_PATH",
-                  eeprom.getPath().string());
-    }
-    catch (const SysfsI2CDeviceDriverBindException& ex)
-    {
-        NVMeDrive::~NVMeDrive();
-        throw ex;
-    }
-}
+{}
 
 void FlettNVMeDrive::plug([[maybe_unused]] Notifier& notifier)
 {
