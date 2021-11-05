@@ -134,9 +134,9 @@ void Williwakas::plug(Notifier& notifier)
     assert(driveConnectors.size() == lines.size());
     for (std::size_t i = 0; i < driveConnectors.size(); i++)
     {
-        gpiod::line& line = lines[i];
-        presenceAdaptors[i] = PolledGPIODevicePresence<WilliwakasNVMeDrive>(
-            &line, &driveConnectors.at(i));
+        gpiod::line* line = &lines[i];
+        presenceAdaptors[i] = PolledDevicePresence<WilliwakasNVMeDrive>(
+            &driveConnectors.at(i), [line]() { return line->get_value(); });
         notifier.add(&presenceAdaptors.at(i));
     }
 }

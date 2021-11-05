@@ -100,15 +100,13 @@ class PolledDevicePresence : public NotifySink
 {
   public:
     PolledDevicePresence() = default;
-    PolledDevicePresence(Connector<T>* connector) :
-        connector(connector), timerfd(-1)
+    PolledDevicePresence(Connector<T>* connector, std::function<bool()> poll) :
+        connector(connector), poll(poll), timerfd(-1)
     {}
     virtual ~PolledDevicePresence() = default;
 
     PolledDevicePresence<T>&
         operator=(const PolledDevicePresence<T>& other) = default;
-
-    virtual bool poll() = 0;
 
     /* NotifySink */
     virtual void arm() override
@@ -207,30 +205,8 @@ class PolledDevicePresence : public NotifySink
     }
 
     Connector<T>* connector;
+    std::function<bool()> poll;
     int timerfd;
-};
-
-template <DerivesDevice T>
-class PolledGPIODevicePresence : public PolledDevicePresence<T>
-{
-  public:
-    PolledGPIODevicePresence() = default;
-    PolledGPIODevicePresence(gpiod::line* line, Connector<T>* connector) :
-        PolledDevicePresence<T>(connector), line(line)
-    {}
-    ~PolledGPIODevicePresence() = default;
-
-    PolledGPIODevicePresence<T>&
-        operator=(const PolledGPIODevicePresence<T>& other) = default;
-
-    /* PolledDevicePresence */
-    virtual bool poll() override
-    {
-        return line->get_value();
-    }
-
-  private:
-    gpiod::line* line;
 };
 
 class Platform;

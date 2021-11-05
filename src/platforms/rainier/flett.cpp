@@ -209,8 +209,10 @@ void Flett::plug(Notifier& notifier)
 {
     for (std::size_t i = 0; i < presenceAdaptors.size(); i++)
     {
-        presenceAdaptors[i] = PolledBasicNVMeDrivePresence<FlettNVMeDrive>(
-            getDriveBus(flett_channel_drive_map.at(i)), &driveConnectors.at(i));
+        SysfsI2CBus bus = getDriveBus(flett_channel_drive_map.at(i));
+        presenceAdaptors[i] = PolledDevicePresence<FlettNVMeDrive>(
+            &driveConnectors.at(i),
+            [bus]() { return BasicNVMeDrive::isBasicEndpointPresent(bus); });
         notifier.add(&presenceAdaptors.at(i));
     }
 }

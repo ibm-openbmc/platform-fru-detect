@@ -56,27 +56,3 @@ class BasicNVMeDrive : public NVMeDrive
     std::vector<uint8_t> manufacturer;
     std::vector<uint8_t> serial;
 };
-
-template <DerivesDevice T>
-class PolledBasicNVMeDrivePresence : public PolledDevicePresence<T>
-{
-  public:
-    PolledBasicNVMeDrivePresence() : bus("/")
-    {}
-    PolledBasicNVMeDrivePresence(SysfsI2CBus bus, Connector<T>* connector) :
-        PolledDevicePresence<T>(connector), bus(bus)
-    {}
-    ~PolledBasicNVMeDrivePresence() = default;
-
-    PolledBasicNVMeDrivePresence<T>&
-        operator=(const PolledBasicNVMeDrivePresence<T>& other) = default;
-
-    /* PolledDevicePresence */
-    virtual bool poll() override
-    {
-        return BasicNVMeDrive::isBasicEndpointPresent(bus);
-    }
-
-  private:
-    SysfsI2CBus bus;
-};
