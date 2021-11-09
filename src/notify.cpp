@@ -2,8 +2,6 @@
 
 #include "notify.hpp"
 
-#include "sysfs/i2c.hpp"
-
 #include <unistd.h>
 
 #include <phosphor-logging/lg2.hpp>
@@ -14,7 +12,9 @@
 
 extern "C"
 {
+#include <signal.h>
 #include <sys/epoll.h>
+#include <sys/signalfd.h>
 };
 
 PHOSPHOR_LOG2_USING;
@@ -26,6 +26,48 @@ Notifier::Notifier()
     {
         error("epoll create operation failed: {ERRNO_DESCRIPTION}",
               "ERRNO_DESCRIPTION", ::strerror(errno), "ERRNO", errno);
+        throw std::system_category().default_error_condition(errno);
+    }
+
+    sigset_t mask;
+    ::sigemptyset(&mask);
+    ::sigaddset(&mask, SIGINT);
+    ::sigaddset(&mask, SIGQUIT);
+    int rc = ::sigprocmask(SIG_BLOCK, &mask, nullptr);
+    if (rc == -1)
+    {
+        error(
+            "Failed to mask exit signals with sigprocmask: {ERRNO_DESCRIPTION}",
+            "ERRNO_DESCRIPTION", ::strerror(errno), "ERRNO", errno);
+        throw std::system_category().default_error_condition(errno);
+    }
+
+    exitfd = signalfd(-1, &mask, 0);
+    if (exitfd == -1)
+    {
+        ::close(epollfd);
+        error("Failed to create signalfd: {ERRNO_DESCRIPTION}",
+              "ERRNO_DESCRIPTION", ::strerror(errno), "ERRNO", errno);
+        throw std::system_category().default_error_condition(errno);
+    }
+
+    /*
+     * CAUTION: We're using nullptr as a sentinel for the signalfd. This saves
+     * the source noise of creating a NotifySink class for it.
+     */
+    struct epoll_event event
+    {
+        EPOLLIN | EPOLLPRI, nullptr
+    };
+    rc = ::epoll_ctl(epollfd, EPOLL_CTL_ADD, exitfd, &event);
+    if (rc == -1)
+    {
+        ::close(exitfd);
+        ::close(epollfd);
+        error(
+            "epoll add operation failed on epoll descriptor {EPOLL_FD} for exitfd descriptor {EXIT_FD}: {ERRNO_DESCRIPTION}",
+            "EPOLL_FD", epollfd, "EXIT_FD", exitfd, "ERRNO_DESCRIPTION",
+            ::strerror(errno), "ERRNO", errno);
         throw std::system_category().default_error_condition(errno);
     }
 }
@@ -60,20 +102,27 @@ void Notifier::add(NotifySink* sink)
 
 void Notifier::remove(NotifySink* sink)
 {
-    int rc = ::epoll_ctl(epollfd, EPOLL_CTL_DEL, sink->getFD(), NULL);
+    int fd = sink->getFD();
+    if (fd == -1)
+    {
+        debug("Skipping disarmed sink");
+        return;
+    }
+
+    int rc = ::epoll_ctl(epollfd, EPOLL_CTL_DEL, fd, NULL);
     if (rc < 0)
     {
         error(
             "epoll delete operation failed on epoll descriptor {EPOLL_FD} for event descriptor {EVENT_FD}: {ERRNO_DESCRIPTION}",
-            "EPOLL_FD", epollfd, "EVENT_FD", sink->getFD(), "ERRNO_DESCRIPTION",
+            "EPOLL_FD", epollfd, "EVENT_FD", fd, "ERRNO_DESCRIPTION",
             ::strerror(errno), "ERRNO", errno);
         throw std::system_category().default_error_condition(errno);
     }
 
-    sink->disarm();
-
     debug("Removed event descriptor {EVENT_FD} from epoll ({EPOLL_FD})",
           "EVENT_FD", sink->getFD(), "EPOLL_FD", epollfd);
+
+    sink->disarm();
 }
 
 void Notifier::run()
@@ -85,15 +134,34 @@ void Notifier::run()
     {
         NotifySink* sink = static_cast<NotifySink*>(event.data.ptr);
 
-        try
+        /* Is it the exitfd sentinel? */
+        if (!sink)
         {
-            sink->notify(*this);
+            struct signalfd_siginfo fdsi;
+            ssize_t ingress;
+            ingress = read(exitfd, &fdsi, sizeof(fdsi));
+            if (ingress != sizeof(fdsi))
+            {
+                error(
+                    "Short read from signalfd, expected {SIGNALFD_SIGINFO_SIZE}, got {READ_SIZE}",
+                    "SIGNALFD_SIGINFO_SIZE", sizeof(fdsi), "READ_SIZE",
+                    ingress);
+                throw std::system_category().default_error_condition(EBADMSG);
+            }
+
+            if (!(fdsi.ssi_signo == SIGINT || fdsi.ssi_signo == SIGQUIT))
+            {
+                error("signalfd provided unexpected signal: {SIGNAL}", "SIGNAL",
+                      fdsi.ssi_signo);
+                throw std::system_category().default_error_condition(ENOTSUP);
+            }
+
+            /* Time to clean up */
+            break;
         }
-        catch (const SysfsI2CDeviceDriverBindException& ex)
-        {
-            error("Failed to bind device from Notifier: {EXCEPTION}",
-                  "EXCEPTION", ex);
-        }
+
+        /* If it's not the exitfd sentinel it's a regular NotifySink */
+        sink->notify(*this);
     }
 
     if (rc < 0)
@@ -103,4 +171,6 @@ void Notifier::run()
             "EPOLL_FD", epollfd, "ERRNO_DESCRIPTION", ::strerror(errno),
             "ERRNO", errno);
     }
+
+    info("Exiting notify event loop");
 }

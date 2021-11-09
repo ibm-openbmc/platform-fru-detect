@@ -80,8 +80,7 @@ class Flett : public Device
     const Nisqually* nisqually;
     int slot;
     std::array<Connector<FlettNVMeDrive>, 8> driveConnectors;
-    std::array<PolledBasicNVMeDrivePresence<FlettNVMeDrive>, 8>
-        presenceAdaptors;
+    std::array<PolledDevicePresence<FlettNVMeDrive>, 8> presenceAdaptors;
 };
 
 class WilliwakasNVMeDrive : public NVMeDrive
@@ -158,8 +157,7 @@ class Williwakas : public Device, FRU
      * effectively */
     std::array<gpiod::line, 8> lines;
     std::array<Connector<WilliwakasNVMeDrive>, 8> driveConnectors;
-    std::array<PolledGPIODevicePresence<WilliwakasNVMeDrive>, 8>
-        presenceAdaptors;
+    std::array<PolledDevicePresence<WilliwakasNVMeDrive>, 8> presenceAdaptors;
 
     bool isDrivePresent(int index);
     void detectDrives(Notifier& notifier);

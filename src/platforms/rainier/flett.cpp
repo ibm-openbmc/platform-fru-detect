@@ -21,21 +21,7 @@ FlettNVMeDrive::FlettNVMeDrive(Inventory* inventory, const Nisqually* nisqually,
                                const Flett* flett, int index) :
     BasicNVMeDrive(flett->getDriveBus(index), inventory, index),
     nisqually(nisqually), flett(flett)
-{
-    try
-    {
-        SysfsI2CBus bus = flett->getDriveBus(index);
-        SysfsI2CDevice eeprom =
-            bus.probeDevice("24c02", NVMeDrive::eepromAddress);
-        lg2::info("EEPROM device exists at '{EEPROM_PATH}'", "EEPROM_PATH",
-                  eeprom.getPath().string());
-    }
-    catch (const SysfsI2CDeviceDriverBindException& ex)
-    {
-        NVMeDrive::~NVMeDrive();
-        throw ex;
-    }
-}
+{}
 
 void FlettNVMeDrive::plug([[maybe_unused]] Notifier& notifier)
 {
@@ -209,8 +195,10 @@ void Flett::plug(Notifier& notifier)
 {
     for (std::size_t i = 0; i < presenceAdaptors.size(); i++)
     {
-        presenceAdaptors[i] = PolledBasicNVMeDrivePresence<FlettNVMeDrive>(
-            getDriveBus(flett_channel_drive_map.at(i)), &driveConnectors.at(i));
+        SysfsI2CBus bus = getDriveBus(flett_channel_drive_map.at(i));
+        presenceAdaptors[i] = PolledDevicePresence<FlettNVMeDrive>(
+            &driveConnectors.at(i),
+            [bus]() { return BasicNVMeDrive::isBasicEndpointPresent(bus); });
         notifier.add(&presenceAdaptors.at(i));
     }
 }

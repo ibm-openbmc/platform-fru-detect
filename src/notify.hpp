@@ -19,6 +19,7 @@ class Notifier
 
   private:
     int epollfd;
+    int exitfd;
 };
 
 class NotifySink

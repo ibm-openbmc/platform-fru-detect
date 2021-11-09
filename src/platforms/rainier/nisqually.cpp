@@ -32,11 +32,17 @@ static const std::map<int, int> flett_slot_presence_map = {
     {11, 11},
 };
 
-static const std::map<int, int> flett_index_map = {
+/* See Rainier_System_Workbook_v1.7.pdf, 4.4.4 NVMe JBOF to Backplane Cabling
+ *
+ * The workbook dictates that only two Williwakas/Flett pairs are present, but
+ * the schematics haven't elided the support for the presence of three pairs. We
+ * follow the schematics as an engineering reference point.
+ */
+static const std::map<int, int> flett_slot_index_map = {
     {8, 0},
-    {9, 1},
+    {9, 2},
     {10, 0},
-    {11, 2},
+    {11, 1},
 };
 
 static const std::map<int, int> flett_connector_slot_map = {
@@ -50,7 +56,7 @@ static const std::map<int, int> flett_connector_slot_map = {
 
 int Nisqually::getFlettIndex(int slot)
 {
-    return flett_index_map.at(slot);
+    return flett_slot_index_map.at(slot);
 }
 
 Nisqually::Nisqually(Inventory* inventory) :
