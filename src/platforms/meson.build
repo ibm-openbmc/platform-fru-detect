@@ -1,3 +1,4 @@
+subdir('everest')
 subdir('rainier')
 
 libgpiodcxx_dep = dependency('libgpiodcxx',
@@ -8,4 +9,4 @@ libgpiodcxx_dep = dependency('libgpiodcxx',
 						'bindings=cxx',
 						'strip=true' ])
 
-platforms_dep = declare_dependency(dependencies: [ rainier_dep, libgpiodcxx_dep ])
+platforms_dep = declare_dependency(dependencies: [ everest_dep, rainier_dep, libgpiodcxx_dep ])

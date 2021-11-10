@@ -4,6 +4,7 @@
 #include "environment.hpp"
 #include "inventory.hpp"
 #include "platform.hpp"
+#include "platforms/everest.hpp"
 #include "platforms/rainier.hpp"
 
 #include <phosphor-logging/lg2.hpp>
@@ -27,6 +28,9 @@ int main(void)
 
     Rainier1z rainier1z;
     rainier1z.enrollWith(pm);
+
+    Everest everest;
+    everest.enrollWith(pm);
 
     if (!pm.isSupportedPlatform())
     {
