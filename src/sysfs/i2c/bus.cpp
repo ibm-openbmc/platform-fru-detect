@@ -131,8 +131,8 @@ void SysfsI2CBus::deleteDevice(int address)
     if (delete_device.bad() || delete_device.fail())
     {
         warning(
-            "Failed to delete device at {I2C_DEVICE_ADDRESS} via '{SYFS_I2C_DELETE_DEVICE_PATH}'",
-            "I2C_DEVICE_ADDRESS", address, "SYSFS_I2C_DELETE_DEVICE_PATH",
+            "Failed to delete device at {I2C_DEVICE_ADDRESS} via '{SYSFS_I2C_DELETE_DEVICE_PATH}'",
+            "I2C_DEVICE_ADDRESS", lg2::hex, address, "SYSFS_I2C_DELETE_DEVICE_PATH",
             path);
         throw -1;
     }
@@ -178,7 +178,7 @@ SysfsI2CDevice SysfsI2CBus::probeDevice(std::string type, int address)
     {
         error("No driver bound for '{SYSFS_I2C_DEVICE_PATH}', removing device",
               "SYSFS_I2C_DEVICE_PATH", device.getPath());
-        deleteDevice(address);
+        releaseDevice(address);
         throw SysfsI2CDeviceDriverBindException(device);
     }
 
