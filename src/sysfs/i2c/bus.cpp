@@ -178,7 +178,7 @@ SysfsI2CDevice SysfsI2CBus::probeDevice(std::string type, int address)
     {
         error("No driver bound for '{SYSFS_I2C_DEVICE_PATH}', removing device",
               "SYSFS_I2C_DEVICE_PATH", device.getPath());
-        deleteDevice(address);
+        releaseDevice(address);
         throw SysfsI2CDeviceDriverBindException(device);
     }
 
