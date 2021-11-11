@@ -17,8 +17,17 @@ inventory_dep = declare_dependency(sources: 'inventory.cpp',
 
 fru_deps = [ sysfs_dep, platforms_dep, inventory_dep, devices_dep ]
 
+platform_fru_detect_sources = [
+    'environment.cpp',
+    'i2c.cpp',
+    'inventory.cpp',
+    'notify.cpp',
+    'platform.cpp',
+    'platform-fru-detect.cpp',
+]
+
 executable('platform-fru-detect',
-	   'platform-fru-detect.cpp', 'platform.cpp', 'inventory.cpp', 'notify.cpp', 'i2c.cpp',
+	   sources: platform_fru_detect_sources,
 	   dependencies: [ fru_deps, phosphor_logging_dep, i2c_dep ],
 	   install: true)
 

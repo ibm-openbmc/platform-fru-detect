@@ -1,4 +1,5 @@
 /* SPDX-License-Identifier: Apache-2.0 */
+#include "environment.hpp"
 #include "inventory.hpp"
 #include "platform.hpp"
 #include "platforms/rainier.hpp"
@@ -35,11 +36,19 @@ int main(void)
     info("Detecting FRUs for '{PLATFORM_MODEL}'", "PLATFORM_MODEL",
          pm.getPlatformModel());
 
+    EnvironmentManager em;
+
+    HardwareExecutionEnvironment hardware;
+    em.enrollEnvironment(&hardware);
+
+    SimicsExecutionEnvironment simics;
+    em.enrollEnvironment(&simics);
+
     sdbusplus::bus::bus dbus = sdbusplus::bus::new_default();
     InventoryManager inventory(dbus);
     PublishWhenPresentInventoryDecorator decoratedInventory(&inventory);
 
-    pm.detectPlatformFrus(&decoratedInventory);
+    em.run(pm, &decoratedInventory);
 
     return 0;
 }
