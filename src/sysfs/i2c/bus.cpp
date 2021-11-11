@@ -132,7 +132,7 @@ void SysfsI2CBus::deleteDevice(int address)
     {
         warning(
             "Failed to delete device at {I2C_DEVICE_ADDRESS} via '{SYSFS_I2C_DELETE_DEVICE_PATH}'",
-            "I2C_DEVICE_ADDRESS", address, "SYSFS_I2C_DELETE_DEVICE_PATH",
+            "I2C_DEVICE_ADDRESS", lg2::hex, address, "SYSFS_I2C_DELETE_DEVICE_PATH",
             path);
         throw -1;
     }
