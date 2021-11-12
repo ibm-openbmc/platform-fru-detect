@@ -2,11 +2,14 @@
 
 #include "environment.hpp"
 
+#include <sys/mman.h>
+#include <unistd.h>
+
 #include <phosphor-logging/lg2.hpp>
 
-#include <mntent.h>
-#include <stdio.h>
-#include <string.h>
+#include <cerrno>
+#include <cstdint>
+#include <cstring>
 
 PHOSPHOR_LOG2_USING;
 
@@ -26,37 +29,62 @@ void EnvironmentManager::run(PlatformManager& pm, Inventory* inventory)
     }
 }
 
+#define reg(r) "r" #r
+
+#if defined(__arm__)
+#define trigger(r, p)                                                          \
+    asm volatile("mov " reg(r) ", %0;"                                         \
+                               "orr " reg(r) ", " reg(r) ", " reg(r)           \
+                 :                                                             \
+                 : "r"(p)                                                      \
+                 : "memory")
+#else
+#define trigger(r, p)                                                          \
+    (void)r;                                                                   \
+    (void)p;
+#endif
+
+#define MAGIC_MMAP_FLAGS                                                       \
+    (MAP_PRIVATE | MAP_ANONYMOUS | MAP_LOCKED | MAP_POPULATE)
+
+static const uint64_t magic = 0xd09f7d8134f13f46ull;
+static const struct
+{
+    uint64_t magic;
+    uint16_t pages;
+    uint16_t checksum;
+    uint32_t data;
+} header = {
+    magic,
+    0,
+    0x8d2b,
+    0,
+};
+
 bool SimicsExecutionEnvironment::isSimicsExecutionEnvironment()
 {
-    /*
-     * Test whether we're running under simics by establishing whether we have a simicsfs fuse
-     * filesystem mounted
-     */
-
-    static const char* mountinfo_path = "/proc/mounts";
-    FILE* mntinfo = ::setmntent(mountinfo_path, "r");
-    if (!mntinfo)
+    long page = ::sysconf(_SC_PAGESIZE);
+    void* region =
+        ::mmap(NULL, page, PROT_READ | PROT_WRITE, MAGIC_MMAP_FLAGS, -1, 0);
+    if (!region)
     {
-        error("Failed to open {MOUNTINFO_PATH}: {ERRNO_DESCRIPTION}", "MOUNTINFO_PATH",
-            mountinfo_path, "ERRNO_DESCRIPTION", ::strerror(errno), "ERRNO", errno);
+        error("Failed to map buffer: {ERRNO_DESCRIPTION}", "ERRNO_DESCRIPTION",
+              ::strerror(errno), "ERRNO", errno);
         throw std::system_category().default_error_condition(errno);
     }
 
-    bool simicsfs = false;
+    ::memcpy(region, &header, sizeof(header));
+    trigger(12, region);
+    bool isSimics = static_cast<bool>(::memcmp(region, &magic, sizeof(magic)));
 
-    struct mntent *mntent;
-    while ((mntent = ::getmntent(mntinfo)))
+    int rc = ::munmap(region, page);
+    if (rc == -1)
     {
-        if (!::strcmp("fuse.simicsfs-client", mntent->mnt_type))
-        {
-            simicsfs = true;
-            break;
-        }
+        warning("Failed to unmap buffer: {ERRNO_DESCRIPTION}",
+                "ERRNO_DESCRIPTION", ::strerror(errno), "ERRNO", errno);
     }
 
-    ::endmntent(mntinfo);
-
-    return simicsfs;
+    return isSimics;
 }
 
 bool SimicsExecutionEnvironment::probe()
@@ -74,7 +102,8 @@ void SimicsExecutionEnvironment::run(PlatformManager& pm, Inventory* inventory)
     }
     catch (const std::exception& ex)
     {
-        error("Exception caught in a simics environment: {EXCEPTION}", "EXCEPTION", ex);
+        error("Exception caught in a simics environment: {EXCEPTION}",
+              "EXCEPTION", ex);
     }
     catch (...)
     {
@@ -89,7 +118,8 @@ bool HardwareExecutionEnvironment::probe()
     return !SimicsExecutionEnvironment::isSimicsExecutionEnvironment();
 }
 
-void HardwareExecutionEnvironment::run(PlatformManager& pm, Inventory* inventory)
+void HardwareExecutionEnvironment::run(PlatformManager& pm,
+                                       Inventory* inventory)
 {
     debug("Executing in a hardware environment, propagating all exceptions");
     pm.detectPlatformFrus(inventory);
