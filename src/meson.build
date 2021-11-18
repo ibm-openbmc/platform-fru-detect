@@ -3,6 +3,7 @@ subdir('platforms')
 subdir('devices')
 
 sdbusplus_dep = dependency('sdbusplus', fallback: [ 'sdbusplus', 'sdbusplus_dep' ])
+sdeventplus_dep = dependency('sdeventplus', fallback: [ 'sdeventplus', 'sdeventplus_dep' ])
 phosphor_logging_dep = dependency('phosphor-logging',
 				  fallback: [ 'phosphor-logging', 'phosphor_logging_dep' ])
 
@@ -15,7 +16,7 @@ inventory_dep = declare_dependency(sources: 'inventory.cpp',
 				   include_directories: '.',
 				   dependencies: [ sdbusplus_dep, phosphor_logging_dep ])
 
-fru_deps = [ sysfs_dep, platforms_dep, inventory_dep, devices_dep ]
+fru_deps = [ sysfs_dep, platforms_dep, inventory_dep, devices_dep, sdeventplus_dep ]
 
 platform_fru_detect_sources = [
     'environment.cpp',

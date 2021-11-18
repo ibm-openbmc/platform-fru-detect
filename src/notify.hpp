@@ -4,6 +4,8 @@
 #include <functional>
 #include <map>
 #include <stdexcept>
+#include <sdeventplus/event.hpp>
+#include <sdeventplus/source/io.hpp>
 
 class NotifySink;
 
@@ -18,8 +20,9 @@ class Notifier
     void run();
 
   private:
-    int epollfd;
-    int exitfd;
+    sdeventplus::Event sdEvent;
+    std::map<int, std::unique_ptr<sdeventplus::source::IO>> sources;
+
 };
 
 class NotifySink
