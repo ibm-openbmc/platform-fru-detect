@@ -222,6 +222,11 @@ SysfsI2CBus Nisqually0z::getFlettSlotI2CBus(int slot) const
 
 bool Nisqually0z::isFlettPresentAt(int slot)
 {
+    if (!flett_slot_presence_map.contains(slot))
+    {
+        return false;
+    }
+
     std::string path = Flett::getInventoryPathFor(this, slot);
 
     bool populated = inventory->isPresent(path);
@@ -297,11 +302,19 @@ SysfsI2CBus Nisqually1z::getFlettSlotI2CBus(int slot) const
  */
 bool Nisqually1z::isFlettPresentAt(int slot)
 {
-    bool present = flettPresenceLines.at(slot).get_value();
+    bool present = false;
+    if (flettPresenceLines.contains(slot))
+    {
+        present = flettPresenceLines.at(slot).get_value();
 
-    debug("Flett {FLETT_ID} presence for slot {PCIE_SLOT}: {FLETT_PRESENT}",
-          "FLETT_ID", getFlettIndex(slot), "PCIE_SLOT", slot, "FLETT_PRESENT",
-          present);
+        debug("Flett {FLETT_ID} presence for slot {PCIE_SLOT}: {FLETT_PRESENT}",
+              "FLETT_ID", getFlettIndex(slot), "PCIE_SLOT", slot,
+              "FLETT_PRESENT", present);
+    }
+    else
+    {
+        debug("Slot {SLOT} is not a Flett slot", "SLOT", slot);
+    }
 
     return present;
 }
