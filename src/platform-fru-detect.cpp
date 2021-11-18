@@ -55,6 +55,8 @@ int main(void)
     SimicsExecutionEnvironment simics;
     em.enrollEnvironment(&simics);
 
+    inventory.watchSlotPowerState(&pm);
+
     em.run(pm);
 
     return 0;

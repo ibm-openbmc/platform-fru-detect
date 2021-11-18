@@ -233,6 +233,8 @@ class PlatformManager
     void enrollPlatform(const std::string& model, Platform* platform);
     bool isSupportedPlatform() noexcept;
     void detectPlatformFrus();
+    void slotPowerStateChanged(int slot, bool powerOn);
+    bool ignoreSlotPowerState(const std::string& slotPath);
 
   private:
     std::map<std::string, Platform*> platforms;
@@ -248,6 +250,8 @@ class Platform
 
     virtual void enrollWith(PlatformManager& pm) = 0;
     virtual void detectFrus(Notifier& notifier) = 0;
+    virtual void slotPowerStateChanged(int slot, bool powerOn) = 0;
+    virtual bool ignoreSlotPowerState(const std::string& slotPath) const = 0;
     static inline bool
         isSupportedModel(const std::vector<std::string>& supportedModels,
                          const std::string& actualModel)

@@ -12,6 +12,9 @@ const std::vector<std::string> Rainier0z::modelNames{
 const std::vector<std::string> Rainier1z::modelNames{
     "Rainier 1S4U", "Rainier 4U", "Rainier 2U"};
 
+static constexpr auto rainierPCIeCardInventoryRoot =
+    "/xyz/openbmc_project/inventory/system/chassis/motherboard/pcieslot";
+
 bool Rainier0z::isPresent(const std::string& model)
 {
     return Platform::isSupportedModel(modelNames, model);
@@ -36,6 +39,16 @@ void Rainier0z::detectFrus(Notifier& notifier)
     ingraham.unplug(notifier, ingraham.UNPLUG_RETAINS_INVENTORY);
 }
 
+void Rainier0z::slotPowerStateChanged(int slot, bool powerOn)
+{
+    nisqually.slotPowerStateChanged(slot, powerOn);
+}
+
+bool Rainier0z::ignoreSlotPowerState(const std::string& slotPath) const
+{
+    return !slotPath.starts_with(rainierPCIeCardInventoryRoot);
+}
+
 bool Rainier1z::isPresent(const std::string& model)
 {
     return Platform::isSupportedModel(modelNames, model);
@@ -58,4 +71,14 @@ void Rainier1z::detectFrus(Notifier& notifier)
 
     /* Clean up the application state but leave the inventory in-tact. */
     ingraham.unplug(notifier, ingraham.UNPLUG_RETAINS_INVENTORY);
+}
+
+void Rainier1z::slotPowerStateChanged(int slot, bool powerOn)
+{
+    nisqually.slotPowerStateChanged(slot, powerOn);
+}
+
+bool Rainier1z::ignoreSlotPowerState(const std::string& slotPath) const
+{
+    return !slotPath.starts_with(rainierPCIeCardInventoryRoot);
 }

@@ -25,6 +25,10 @@ static const std::map<int, int> flett_mux_channel_map = {
     {11, 1},
 };
 
+static const std::map<int, int> pcie_slot_mux_channel_map = {
+    {0, 0}, {1, 1}, {2, 2}, {3, 0},  {4, 1},
+    {7, 1}, {8, 3}, {9, 2}, {10, 0}, {11, 1}};
+
 static const std::map<int, int> flett_slot_presence_map = {
     {8, 8},
     {9, 9},
@@ -51,6 +55,13 @@ static const std::map<int, int> flett_connector_slot_map = {
     {2, 10},
     {3, 11},
 };
+
+static const std::map<int, int> pcie_card_tmp435_address_map = {
+    {0, 0x4C}, {1, 0x4D}, {2, 0x4E}, {3, 0x4C},  {4, 0x4D},
+    {7, 0x4E}, {8, 0x4D}, {9, 0x4C}, {10, 0x4C}, {11, 0x4D}};
+
+static const std::array<int, 10> cable_card_slots = {0, 1, 2, 3,  4,
+                                                     7, 8, 9, 10, 11};
 
 /* Nisqually */
 
@@ -210,6 +221,40 @@ void Nisqually::detectFlettCards(Notifier& notifier)
     }
 }
 
+bool Nisqually::isCableCardPresentAt(int slot) const
+{
+    if (std::find(cable_card_slots.begin(), cable_card_slots.end(), slot) ==
+        cable_card_slots.end())
+    {
+        return false;
+    }
+
+    // This also handles cable cards
+    std::string path = Flett::getInventoryPathFor(this, slot);
+
+    if (!inventory->isPresent(path))
+    {
+        debug("Inventory reports slot {PCIE_SLOT} is not populated",
+              "PCIE_SLOT", slot);
+        return false;
+    }
+
+    // 6B99 = 4U Bear Lake cable card
+    // 6B92 = 2U Bear River cable card
+    if (inventory->isModel(path, "6B99") || inventory->isModel(path, "6B92"))
+    {
+        debug(
+            "Inventory reports slot {PCIE_SLOT} is populated with a cable card",
+            "PCIE_SLOT", slot);
+        return true;
+    }
+
+    debug("Inventory reports the card in slot {PCIE_SLOT} is not a cable card",
+          "PCIE_SLOT", slot);
+
+    return false;
+}
+
 /* Nisqually0z */
 
 Nisqually0z::Nisqually0z(Inventory* inventory) : Nisqually(inventory)
@@ -250,6 +295,11 @@ bool Nisqually0z::isFlettPresentAt(int slot)
           "PCIE_SLOT", slot);
 
     return true;
+}
+
+SysfsI2CBus Nisqually0z::getCableCardI2CBus(int slot) const
+{
+    return Ingraham::getPCIeSlotI2CBus(slot);
 }
 
 /* Nisqually1z */
@@ -317,4 +367,70 @@ bool Nisqually1z::isFlettPresentAt(int slot)
     }
 
     return present;
+}
+
+SysfsI2CBus Nisqually1z::getCableCardI2CBus(int slot) const
+{
+    SysfsI2CBus rootBus = Ingraham::getPCIeSlotI2CBus(slot);
+    SysfsI2CMux mux(rootBus, Nisqually1z::slotMuxAddress);
+
+    int channel = pcie_slot_mux_channel_map.at(slot);
+
+    return SysfsI2CBus(mux, channel);
+}
+
+void Nisqually::slotPowerStateChanged(int slot, bool powerOn)
+{
+    debug("Nisqually slot power state changed slot {SLOT} state {STATE}",
+          "SLOT", slot, "STATE", powerOn);
+
+    handlePcieCardTMP435s(slot, powerOn);
+}
+
+void Nisqually::handlePcieCardTMP435s(int slot, bool powerOn)
+{
+    try
+    {
+        std::optional<SysfsI2CBus> bus;
+        if (isFlettPresentAt(slot))
+        {
+            bus = getFlettSlotI2CBus(slot);
+        }
+        else if (isCableCardPresentAt(slot))
+        {
+            bus = getCableCardI2CBus(slot);
+        }
+        else
+        {
+            return;
+        }
+
+        if (powerOn)
+        {
+            debug("Calling tmp435 new_device for slot {SLOT} address {ADDRESS}",
+                  "SLOT", slot, "ADDRESS",
+                  pcie_card_tmp435_address_map.at(slot));
+            bus->requireDevice("tmp435", pcie_card_tmp435_address_map.at(slot));
+        }
+        else
+        {
+            debug(
+                "Calling tmp435 releaseDevice for slot {SLOT} address {ADDRESS}",
+                "SLOT", slot, "ADDRESS", pcie_card_tmp435_address_map.at(slot));
+            bus->releaseDevice(pcie_card_tmp435_address_map.at(slot));
+        }
+    }
+    catch (const std::exception& ex)
+    {
+        info(
+            "Failed requiring or releasing TMP435 in PCIE slot {SLOT}, powerOn = {STATE}: {EX}",
+            "SLOT", slot, "STATE", powerOn, "EX", ex);
+    }
+    catch (...)
+    {
+        // May get here if device is already in requested state, so don't crash
+        info(
+            "Failed requiring or releasing TMP435 in PCIE slot {SLOT}, powerOn = {STATE}",
+            "SLOT", slot, "STATE", powerOn);
+    }
 }

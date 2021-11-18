@@ -178,6 +178,8 @@ class Nisqually : public Device, FRU
     Nisqually& operator=(const Nisqually&& other) = delete;
 
     virtual SysfsI2CBus getFlettSlotI2CBus(int slot) const = 0;
+    virtual SysfsI2CBus getCableCardI2CBus(int slot) const = 0;
+    void slotPowerStateChanged(int slot, bool powerOn);
 
     /* Device */
     virtual void plug(Notifier& notifier) override;
@@ -191,6 +193,8 @@ class Nisqually : public Device, FRU
 
   protected:
     virtual bool isFlettPresentAt(int slot) = 0;
+    bool isCableCardPresentAt(int slot) const;
+    void handlePcieCardTMP435s(int slot, bool powerOn);
 
     Inventory* inventory;
 
@@ -225,6 +229,7 @@ class Nisqually0z : public Nisqually
 
     /* Nisqually */
     virtual SysfsI2CBus getFlettSlotI2CBus(int slot) const override;
+    virtual SysfsI2CBus getCableCardI2CBus(int slot) const override;
 
   protected:
     /* Nisqually */
@@ -244,6 +249,7 @@ class Nisqually1z : public Nisqually
 
     /* Nisqually */
     virtual SysfsI2CBus getFlettSlotI2CBus(int slot) const override;
+    virtual SysfsI2CBus getCableCardI2CBus(int slot) const override;
 
   protected:
     /* Nisqually */
@@ -316,6 +322,8 @@ class Rainier0z : public Platform
     virtual void enrollWith(PlatformManager& pm) override;
     virtual void detectFrus(Notifier& notifier) override;
     static bool isPresent(const std::string& model);
+    void slotPowerStateChanged(int slot, bool powerOn) override;
+    bool ignoreSlotPowerState(const std::string& slotPath) const override;
 
   private:
     Nisqually0z nisqually;
@@ -335,6 +343,8 @@ class Rainier1z : public Platform
     virtual void enrollWith(PlatformManager& pm) override;
     virtual void detectFrus(Notifier& notifier) override;
     static bool isPresent(const std::string& model);
+    void slotPowerStateChanged(int slot, bool powerOn) override;
+    bool ignoreSlotPowerState(const std::string& slotPath) const override;
 
   private:
     Nisqually1z nisqually;

@@ -29,3 +29,13 @@ void PlatformManager::detectPlatformFrus()
 
     platforms[model]->detectFrus(notifier);
 }
+
+void PlatformManager::slotPowerStateChanged(int slot, bool powerOn)
+{
+    platforms[model]->slotPowerStateChanged(slot, powerOn);
+}
+
+bool PlatformManager::ignoreSlotPowerState(const std::string& slotPath)
+{
+    return platforms[model]->ignoreSlotPowerState(slotPath);
+}

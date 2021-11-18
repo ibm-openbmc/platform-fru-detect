@@ -1,9 +1,12 @@
 /* SPDX-License-Identifier: Apache-2.0 */
 #include "inventory.hpp"
 
+#include "platform.hpp"
+
 #include <phosphor-logging/lg2.hpp>
-#include <sdbusplus/bus.hpp>
-#include <sdbusplus/message.hpp>
+#include <xyz/openbmc_project/State/Decorator/PowerState/server.hpp>
+
+#include <regex>
 
 PHOSPHOR_LOG2_USING;
 
@@ -22,7 +25,12 @@ static constexpr auto DBUS_PROPERTY_IFACE = "org.freedesktop.DBus.Properties";
 static constexpr auto INVENTORY_DECORATOR_ASSET_IFACE =
     "xyz.openbmc_project.Inventory.Decorator.Asset";
 
+static constexpr auto POWER_STATE_IFACE =
+    "xyz.openbmc_project.State.Decorator.PowerState";
+
 using namespace inventory;
+using PowerState =
+    sdbusplus::xyz::openbmc_project::State::Decorator::server::PowerState;
 
 void InventoryManager::updateObject(const std::string& path,
                                     const ObjectType& updates)
@@ -81,8 +89,9 @@ bool InventoryManager::isPresent(const std::string& path)
     catch (const sdbusplus::exception::exception& ex)
     {
         /* TODO: Define an exception for inventory operations? */
-        info("Failed to determine device presence at path {INVENTORY_PATH}",
-             "INVENTORY_PATH", absolute);
+        /* This is expected for PCIe slots populated with non-cable cards  */
+        debug("Failed to determine device presence at path {INVENTORY_PATH}",
+              "INVENTORY_PATH", absolute);
         debug(
             "Inventory lookup for device at path {INVENTORY_PATH} resulted in an exception: {EXCEPTION}",
             "INVENTORY_PATH", absolute, "EXCEPTION", ex);
@@ -112,8 +121,9 @@ bool InventoryManager::isModel(const std::string& path,
     catch (const sdbusplus::exception::exception& ex)
     {
         /* TODO: Define an exception for inventory operations? */
-        info("Failed to determine device presence at path {INVENTORY_PATH}",
-             "INVENTORY_PATH", absolute);
+        /* This is expected for PCIe slots populated with non-cable cards  */
+        debug("Failed to determine device presence at path {INVENTORY_PATH}",
+              "INVENTORY_PATH", absolute);
         debug(
             "Inventory lookup for device at path {INVENTORY_PATH} resulted in an exception: {EXCEPTION}",
             "INVENTORY_PATH", absolute, "EXCEPTION", ex);
@@ -152,6 +162,61 @@ void inventory::accumulate(std::map<std::string, ObjectType>& store,
     {
         store[path] = updates;
     }
+}
+
+void InventoryManager::watchSlotPowerState(PlatformManager* pm)
+{
+    namespace match_rules = sdbusplus::bus::match::rules;
+
+    slotPowerStateChangedMatch = std::make_unique<sdbusplus::bus::match::match>(
+        dbus,
+        match_rules::propertiesChangedNamespace(
+            "/xyz/openbmc_project/inventory", POWER_STATE_IFACE),
+        std::bind(&InventoryManager::slotPowerStateChanged, this,
+                  std::placeholders::_1, pm));
+}
+
+void InventoryManager::slotPowerStateChanged(sdbusplus::message::message& msg,
+                                             PlatformManager* pm)
+{
+    std::string path = msg.get_path();
+    std::map<std::string, std::variant<std::string>> properties;
+    std::string interface;
+    msg.read(interface, properties);
+
+    if (interface != POWER_STATE_IFACE)
+    {
+        return;
+    }
+
+    if (!properties.contains("PowerState"))
+    {
+        return;
+    }
+
+    auto value = std::get<std::string>(properties.at("PowerState"));
+    auto state = PowerState::convertStateFromString(value);
+    auto slot = getSlotFromPath(path);
+
+    // Don't care about NVME drive power states
+    if (!pm->ignoreSlotPowerState(path))
+    {
+        pm->slotPowerStateChanged(slot, state == PowerState::State::On);
+    }
+}
+
+int InventoryManager::getSlotFromPath(const std::string& path)
+{
+    std::regex exp{R"((\d+)$)"};
+    std::smatch match;
+
+    if (std::regex_search(path, match, exp))
+    {
+        auto slot = match[1].str().c_str();
+        return (std::atoi(slot));
+    }
+
+    throw std::runtime_error{"Bad slot path: " + path};
 }
 
 /* PublishWhenPresentInventoryDecorator */

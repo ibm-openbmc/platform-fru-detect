@@ -1,6 +1,10 @@
 /* SPDX-License-Identifier: Apache-2.0 */
 #pragma once
 
+#include <sdbusplus/bus.hpp>
+#include <sdbusplus/bus/match.hpp>
+#include <sdbusplus/message.hpp>
+
 #include <map>
 #include <string>
 #include <variant>
@@ -14,6 +18,8 @@ namespace bus
 class bus;
 }
 } // namespace sdbusplus
+
+class PlatformManager;
 
 namespace inventory
 {
@@ -66,9 +72,13 @@ class InventoryManager : public Inventory
     virtual bool isPresent(const std::string& path) override;
     virtual bool isModel(const std::string& path,
                          const std::string& model) override;
+    void watchSlotPowerState(PlatformManager* pm);
+    int getSlotFromPath(const std::string& path);
 
   private:
+    void slotPowerStateChanged(sdbusplus::message::message&, PlatformManager*);
     sdbusplus::bus::bus& dbus;
+    std::unique_ptr<sdbusplus::bus::match::match> slotPowerStateChangedMatch;
 };
 
 /* Unifies the split we have with WilliwakasNVMeDrive and FlettNVMeDrive */
