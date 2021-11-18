@@ -232,7 +232,7 @@ class PlatformManager
     const std::string& getPlatformModel() noexcept;
     void enrollPlatform(const std::string& model, Platform* platform);
     bool isSupportedPlatform() noexcept;
-    void detectPlatformFrus(Inventory*);
+    void detectPlatformFrus();
 
   private:
     std::map<std::string, Platform*> platforms;
@@ -242,9 +242,20 @@ class PlatformManager
 class Platform
 {
   public:
-    Platform() = default;
+    Platform(Inventory* inventory) : inventory(inventory)
+    {}
     virtual ~Platform() = default;
 
     virtual void enrollWith(PlatformManager& pm) = 0;
-    virtual void detectFrus(Notifier& notifier, Inventory* inventory) = 0;
+    virtual void detectFrus(Notifier& notifier) = 0;
+    static inline bool
+        isSupportedModel(const std::vector<std::string>& supportedModels,
+                         const std::string& actualModel)
+    {
+        return std::find(supportedModels.begin(), supportedModels.end(),
+                         actualModel) != supportedModels.end();
+    }
+
+  protected:
+    Inventory* inventory;
 };

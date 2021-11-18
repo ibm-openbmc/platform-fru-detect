@@ -20,11 +20,22 @@ int main(void)
 {
     PlatformManager pm;
 
-    Rainier0z rainier0z;
-    rainier0z.enrollWith(pm);
+    sdbusplus::bus::bus dbus = sdbusplus::bus::new_default();
+    InventoryManager inventory(dbus);
+    PublishWhenPresentInventoryDecorator decoratedInventory(&inventory);
+    std::unique_ptr<Rainier0z> rainier0z;
+    std::unique_ptr<Rainier1z> rainier1z;
 
-    Rainier1z rainier1z;
-    rainier1z.enrollWith(pm);
+    if (Rainier0z::isPresent(pm.getPlatformModel()))
+    {
+        rainier0z = std::make_unique<Rainier0z>(&decoratedInventory);
+        rainier0z->enrollWith(pm);
+    }
+    else if (Rainier1z::isPresent(pm.getPlatformModel()))
+    {
+        rainier1z = std::make_unique<Rainier1z>(&decoratedInventory);
+        rainier1z->enrollWith(pm);
+    }
 
     if (!pm.isSupportedPlatform())
     {
@@ -44,11 +55,7 @@ int main(void)
     SimicsExecutionEnvironment simics;
     em.enrollEnvironment(&simics);
 
-    sdbusplus::bus::bus dbus = sdbusplus::bus::new_default();
-    InventoryManager inventory(dbus);
-    PublishWhenPresentInventoryDecorator decoratedInventory(&inventory);
-
-    em.run(pm, &decoratedInventory);
+    em.run(pm);
 
     return 0;
 }

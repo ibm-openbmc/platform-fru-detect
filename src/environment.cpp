@@ -18,13 +18,13 @@ void EnvironmentManager::enrollEnvironment(ExecutionEnvironment* env)
     environments.push_back(env);
 }
 
-void EnvironmentManager::run(PlatformManager& pm, Inventory* inventory)
+void EnvironmentManager::run(PlatformManager& pm)
 {
     for (auto& env : environments)
     {
         if (env->probe())
         {
-            return env->run(pm, inventory);
+            return env->run(pm);
         }
     }
 }
@@ -92,13 +92,13 @@ bool SimicsExecutionEnvironment::probe()
     return SimicsExecutionEnvironment::isSimicsExecutionEnvironment();
 }
 
-void SimicsExecutionEnvironment::run(PlatformManager& pm, Inventory* inventory)
+void SimicsExecutionEnvironment::run(PlatformManager& pm)
 {
     /* Work around any issues in simics modelling to unblock CI */
     warning("Executing in a simics environment, catching all exceptions");
     try
     {
-        pm.detectPlatformFrus(inventory);
+        pm.detectPlatformFrus();
     }
     catch (const std::exception& ex)
     {
@@ -118,9 +118,8 @@ bool HardwareExecutionEnvironment::probe()
     return !SimicsExecutionEnvironment::isSimicsExecutionEnvironment();
 }
 
-void HardwareExecutionEnvironment::run(PlatformManager& pm,
-                                       Inventory* inventory)
+void HardwareExecutionEnvironment::run(PlatformManager& pm)
 {
     debug("Executing in a hardware environment, propagating all exceptions");
-    pm.detectPlatformFrus(inventory);
+    pm.detectPlatformFrus();
 }

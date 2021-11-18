@@ -17,6 +17,7 @@
 
 class Flett;
 class Inventory;
+class InventoryManager;
 class Nisqually;
 class Williwakas;
 
@@ -306,19 +307,37 @@ class Ingraham : public Device
 class Rainier0z : public Platform
 {
   public:
-    Rainier0z() = default;
+    Rainier0z(Inventory* inventory) :
+        Platform(inventory), nisqually(inventory),
+        ingraham(inventory, &nisqually)
+    {}
     virtual ~Rainier0z() = default;
 
     virtual void enrollWith(PlatformManager& pm) override;
-    virtual void detectFrus(Notifier& notifier, Inventory* inventory) override;
+    virtual void detectFrus(Notifier& notifier) override;
+    static bool isPresent(const std::string& model);
+
+  private:
+    Nisqually0z nisqually;
+    Ingraham ingraham;
+    static const std::vector<std::string> modelNames;
 };
 
 class Rainier1z : public Platform
 {
   public:
-    Rainier1z() = default;
+    Rainier1z(Inventory* inventory) :
+        Platform(inventory), nisqually(inventory),
+        ingraham(inventory, &nisqually)
+    {}
     virtual ~Rainier1z() = default;
 
     virtual void enrollWith(PlatformManager& pm) override;
-    virtual void detectFrus(Notifier& notifier, Inventory* inventory) override;
+    virtual void detectFrus(Notifier& notifier) override;
+    static bool isPresent(const std::string& model);
+
+  private:
+    Nisqually1z nisqually;
+    Ingraham ingraham;
+    static const std::vector<std::string> modelNames;
 };

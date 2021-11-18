@@ -14,7 +14,7 @@ class EnvironmentManager
     ~EnvironmentManager() = default;
 
     void enrollEnvironment(ExecutionEnvironment* env);
-    void run(PlatformManager& pm, Inventory* inventory);
+    void run(PlatformManager& pm);
 
   private:
     std::list<ExecutionEnvironment*> environments;
@@ -27,7 +27,7 @@ class ExecutionEnvironment
     virtual ~ExecutionEnvironment() = default;
 
     virtual bool probe() = 0;
-    virtual void run(PlatformManager& pm, Inventory* inventory) = 0;
+    virtual void run(PlatformManager& pm) = 0;
 };
 
 class SimicsExecutionEnvironment : public ExecutionEnvironment
@@ -40,7 +40,7 @@ class SimicsExecutionEnvironment : public ExecutionEnvironment
 
     /* ExecutionEnvironment */
     virtual bool probe() override;
-    virtual void run(PlatformManager& pm, Inventory* inventory) override;
+    virtual void run(PlatformManager& pm) override;
 };
 
 class HardwareExecutionEnvironment : public ExecutionEnvironment
@@ -51,5 +51,5 @@ class HardwareExecutionEnvironment : public ExecutionEnvironment
 
     /* ExecutionEnvironment */
     virtual bool probe() override;
-    virtual void run(PlatformManager& pm, Inventory* inventory) override;
+    virtual void run(PlatformManager& pm) override;
 };
