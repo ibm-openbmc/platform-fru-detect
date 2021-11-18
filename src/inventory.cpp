@@ -28,6 +28,10 @@ static constexpr auto INVENTORY_DECORATOR_ASSET_IFACE =
 static constexpr auto POWER_STATE_IFACE =
     "xyz.openbmc_project.State.Decorator.PowerState";
 
+static constexpr auto MAPPER_BUS_NAME = "xyz.openbmc_project.ObjectMapper";
+static constexpr auto MAPPER_PATH = "/xyz/openbmc_project/object_mapper";
+static constexpr auto MAPPER_IFACE = "xyz.openbmc_project.ObjectMapper";
+
 using namespace inventory;
 using PowerState =
     sdbusplus::xyz::openbmc_project::State::Decorator::server::PowerState;
@@ -174,6 +178,10 @@ void InventoryManager::watchSlotPowerState(PlatformManager* pm)
             "/xyz/openbmc_project/inventory", POWER_STATE_IFACE),
         std::bind(&InventoryManager::slotPowerStateChanged, this,
                   std::placeholders::_1, pm));
+
+    // Bind drivers for devices in any currently powered on slots, so after a
+    // reboot at runtime they will be re-enabled.
+    checkSlotPowerStates(pm);
 }
 
 void InventoryManager::slotPowerStateChanged(sdbusplus::message::message& msg,
@@ -202,6 +210,76 @@ void InventoryManager::slotPowerStateChanged(sdbusplus::message::message& msg,
     if (!pm->ignoreSlotPowerState(path))
     {
         pm->slotPowerStateChanged(slot, state == PowerState::State::On);
+    }
+}
+
+void InventoryManager::checkSlotPowerStates(PlatformManager* pm)
+{
+    auto call = dbus.new_method_call(MAPPER_BUS_NAME, MAPPER_PATH, MAPPER_IFACE,
+                                     "GetSubTreePaths");
+
+    std::vector<std::string> interfaces{POWER_STATE_IFACE};
+    call.append("/xyz/openbmc_project/inventory", 0, interfaces);
+
+    try
+    {
+        auto reply = dbus.call(call);
+
+        std::vector<std::string> paths;
+        reply.read(paths);
+
+        for (const auto& path : paths)
+        {
+            // Don't care about NVME slot power states
+            if (pm->ignoreSlotPowerState(path))
+            {
+                debug("Ignoring slot power state on {PATH}", "PATH", path);
+                continue;
+            }
+
+            debug("found powerState on path {PATH}", "PATH", path);
+            checkSlotPowerState(path, pm);
+        }
+    }
+    catch (const sdbusplus::exception::exception& ex)
+    {
+        info("D-Bus exception finding slot power state paths: {EXCEPTION}",
+             "EXCEPTION", ex);
+    }
+}
+
+void InventoryManager::checkSlotPowerState(const std::string& slotPath,
+                                           PlatformManager* pm)
+{
+    try
+    {
+        auto call = dbus.new_method_call(INVENTORY_BUS_NAME, slotPath.c_str(),
+                                         DBUS_PROPERTY_IFACE, "Get");
+
+        call.append(POWER_STATE_IFACE, "PowerState");
+
+        auto reply = dbus.call(call);
+
+        std::variant<std::string> property;
+        reply.read(property);
+
+        auto value = std::get<std::string>(property);
+        auto state = PowerState::convertStateFromString(value);
+        auto slot = getSlotFromPath(slotPath);
+
+        debug("checkSlotPowerStates found slot {SLOT} state = {STATE}", "SLOT",
+              slot, "STATE", value);
+
+        if (state == PowerState::State::On)
+        {
+            pm->slotPowerStateChanged(slot, true);
+        }
+    }
+    catch (const sdbusplus::exception::exception& ex)
+
+    {
+        info("D-Bus exception reading slot power state on {PATH}: {EXCEPTION}",
+             "PATH", slotPath, "EXCEPTION", ex);
     }
 }
 

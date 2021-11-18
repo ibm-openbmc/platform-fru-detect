@@ -77,6 +77,8 @@ class InventoryManager : public Inventory
 
   private:
     void slotPowerStateChanged(sdbusplus::message::message&, PlatformManager*);
+    void checkSlotPowerStates(PlatformManager*);
+    void checkSlotPowerState(const std::string& slotPath, PlatformManager* pm);
     sdbusplus::bus::bus& dbus;
     std::unique_ptr<sdbusplus::bus::match::match> slotPowerStateChangedMatch;
 };
