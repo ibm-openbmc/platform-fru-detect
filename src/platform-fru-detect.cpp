@@ -1,4 +1,5 @@
 /* SPDX-License-Identifier: Apache-2.0 */
+/* Copyright IBM Corp. 2021 */
 #include "environment.hpp"
 #include "inventory.hpp"
 #include "platform.hpp"
