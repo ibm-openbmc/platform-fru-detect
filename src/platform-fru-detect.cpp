@@ -47,9 +47,8 @@ int main(void)
 
     sdbusplus::bus::bus dbus = sdbusplus::bus::new_default();
     InventoryManager inventory(dbus);
-    PublishWhenPresentInventoryDecorator decoratedInventory(&inventory);
 
-    em.run(pm, &decoratedInventory);
+    em.run(pm, &inventory);
 
     return 0;
 }

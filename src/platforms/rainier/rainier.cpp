@@ -3,6 +3,8 @@
 
 #include "platforms/rainier.hpp"
 
+#include "inventory.hpp"
+
 void Rainier0z::enrollWith(PlatformManager& pm)
 {
     pm.enrollPlatform("Rainier 1S4U Pass 1", this);
@@ -34,8 +36,9 @@ void Rainier1z::enrollWith(PlatformManager& pm)
 
 void Rainier1z::detectFrus(Notifier& notifier, Inventory* inventory)
 {
-    Nisqually1z nisqually(inventory);
-    Ingraham ingraham(inventory, &nisqually);
+    PublishWhenPresentInventoryDecorator decoratedInventory(inventory);
+    Nisqually1z nisqually(&decoratedInventory);
+    Ingraham ingraham(&decoratedInventory, &nisqually);
 
     /* Cold-plug devices */
     ingraham.plug(notifier);
