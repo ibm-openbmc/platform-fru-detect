@@ -46,9 +46,10 @@ int main(void)
     em.enrollEnvironment(&simics);
 
     sdbusplus::bus::bus dbus = sdbusplus::bus::new_default();
+    Notifier notifier;
     InventoryManager inventory(dbus);
 
-    em.run(pm, &inventory);
+    em.run(pm, notifier, &inventory);
 
     return 0;
 }

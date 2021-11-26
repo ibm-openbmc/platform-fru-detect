@@ -24,9 +24,8 @@ bool PlatformManager::isSupportedPlatform() noexcept
     return platforms.contains(model);
 }
 
-void PlatformManager::detectPlatformFrus(Inventory* inventory)
+void PlatformManager::detectPlatformFrus(Notifier& notifier,
+                                         Inventory* inventory)
 {
-    Notifier notifier;
-
     platforms[model]->detectFrus(notifier, inventory);
 }
