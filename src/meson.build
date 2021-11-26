@@ -18,6 +18,7 @@ inventory_dep = declare_dependency(sources: 'inventory.cpp',
 fru_deps = [ sysfs_dep, platforms_dep, inventory_dep, devices_dep ]
 
 platform_fru_detect_sources = [
+    'dbus.cpp',
     'environment.cpp',
     'i2c.cpp',
     'inventory.cpp',
