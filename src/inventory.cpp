@@ -4,6 +4,7 @@
 
 #include <phosphor-logging/lg2.hpp>
 #include <sdbusplus/bus.hpp>
+#include <sdbusplus/bus/match.hpp>
 #include <sdbusplus/message.hpp>
 
 PHOSPHOR_LOG2_USING;
@@ -24,6 +25,29 @@ static constexpr auto INVENTORY_DECORATOR_ASSET_IFACE =
     "xyz.openbmc_project.Inventory.Decorator.Asset";
 
 using namespace inventory;
+using namespace dbus;
+
+std::weak_ptr<PropertiesChangedListener>
+    InventoryManager::addPropertiesChangedListener(
+        const std::string& path, const std::string& interface,
+        std::function<void(PropertiesChanged&&)> callback)
+{
+    auto pcl = sharedPropertiesChangedListener(dbus, path, interface, callback);
+    return *(listeners.insert(pcl).first);
+}
+
+void InventoryManager::removePropertiesChangedListener(
+    std::weak_ptr<PropertiesChangedListener> listener)
+{
+    std::shared_ptr<PropertiesChangedListener> shared = listener.lock();
+    if (!listeners.contains(shared))
+    {
+        debug("Cannot remove unrecognised PropertiesChangedListener");
+        return;
+    }
+
+    listeners.erase(shared);
+}
 
 void InventoryManager::updateObject(const std::string& path,
                                     const ObjectType& updates)
@@ -161,6 +185,20 @@ PublishWhenPresentInventoryDecorator::PublishWhenPresentInventoryDecorator(
     Inventory* inventory) :
     inventory(inventory)
 {}
+
+std::weak_ptr<PropertiesChangedListener>
+    PublishWhenPresentInventoryDecorator::addPropertiesChangedListener(
+        const std::string& path, const std::string& interface,
+        std::function<void(PropertiesChanged&&)> callback)
+{
+    return inventory->addPropertiesChangedListener(path, interface, callback);
+}
+
+void PublishWhenPresentInventoryDecorator::removePropertiesChangedListener(
+    std::weak_ptr<PropertiesChangedListener> listener)
+{
+    inventory->removePropertiesChangedListener(listener);
+}
 
 void PublishWhenPresentInventoryDecorator::updateObject(
     const std::string& path, const ObjectType& updates)

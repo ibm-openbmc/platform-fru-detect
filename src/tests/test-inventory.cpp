@@ -13,6 +13,23 @@ static constexpr auto TEST_INTERFACE_2 = "interface.Test.2";
 
 struct MockInventory : public Inventory
 {
+    virtual std::weak_ptr<dbus::PropertiesChangedListener>
+        addPropertiesChangedListener(
+            [[maybe_unused]] const std::string& path,
+            [[maybe_unused]] const std::string& interface,
+            [[maybe_unused]] std::function<void(dbus::PropertiesChanged&&)>
+                callback)
+    {
+        throw std::logic_error("Unimplemented");
+    }
+
+    virtual void removePropertiesChangedListener(
+        [[maybe_unused]] std::weak_ptr<dbus::PropertiesChangedListener>
+            listener)
+    {
+        throw std::logic_error("Unimplemented");
+    }
+
     virtual void updateObject(const std::string& path,
                               const inventory::ObjectType& updates) override
     {

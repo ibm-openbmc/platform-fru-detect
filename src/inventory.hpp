@@ -2,7 +2,11 @@
 /* Copyright IBM Corp. 2021 */
 #pragma once
 
+#include "dbus.hpp"
+
+#include <functional>
 #include <map>
+#include <set>
 #include <string>
 #include <variant>
 #include <vector>
@@ -44,6 +48,13 @@ class Inventory
     Inventory() = default;
     virtual ~Inventory() = default;
 
+    virtual std::weak_ptr<dbus::PropertiesChangedListener>
+        addPropertiesChangedListener(
+            const std::string& path, const std::string& interface,
+            std::function<void(dbus::PropertiesChanged&& props)> callback) = 0;
+    virtual void removePropertiesChangedListener(
+        std::weak_ptr<dbus::PropertiesChangedListener> listener) = 0;
+
     virtual void updateObject(const std::string& path,
                               const inventory::ObjectType& updates) = 0;
     virtual void markPresent(const std::string& path) = 0;
@@ -60,6 +71,13 @@ class InventoryManager : public Inventory
     ~InventoryManager() = default;
 
     /* Inventory */
+    virtual std::weak_ptr<dbus::PropertiesChangedListener>
+        addPropertiesChangedListener(
+            const std::string& path, const std::string& interface,
+            std::function<void(dbus::PropertiesChanged&& props)> callback)
+            override;
+    virtual void removePropertiesChangedListener(
+        std::weak_ptr<dbus::PropertiesChangedListener> listener) override;
     virtual void updateObject(const std::string& path,
                               const inventory::ObjectType& updates) override;
     virtual void markPresent(const std::string& path) override;
@@ -70,6 +88,7 @@ class InventoryManager : public Inventory
 
   private:
     sdbusplus::bus::bus& dbus;
+    std::set<std::shared_ptr<dbus::PropertiesChangedListener>> listeners;
 };
 
 /* Unifies the split we have with WilliwakasNVMeDrive and FlettNVMeDrive */
@@ -80,6 +99,13 @@ class PublishWhenPresentInventoryDecorator : public Inventory
     ~PublishWhenPresentInventoryDecorator() = default;
 
     /* Inventory */
+    virtual std::weak_ptr<dbus::PropertiesChangedListener>
+        addPropertiesChangedListener(
+            const std::string& path, const std::string& interface,
+            std::function<void(dbus::PropertiesChanged&& props)> callback)
+            override;
+    virtual void removePropertiesChangedListener(
+        std::weak_ptr<dbus::PropertiesChangedListener> listener) override;
     virtual void updateObject(const std::string& path,
                               const inventory::ObjectType& updates) override;
     virtual void markPresent(const std::string& path) override;

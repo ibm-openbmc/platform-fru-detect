@@ -11,7 +11,7 @@ cpp = meson.get_compiler('cpp')
 i2c_dep = cpp.find_library('i2c')
 
 # Used by inventory tests
-inventory_dep = declare_dependency(sources: 'inventory.cpp',
+inventory_dep = declare_dependency(sources: [ 'inventory.cpp', 'dbus.cpp' ],
 				   include_directories: '.',
 				   dependencies: [ sdbusplus_dep, phosphor_logging_dep ])
 
