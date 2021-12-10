@@ -31,7 +31,3 @@ executable('platform-fru-detect',
 	   sources: platform_fru_detect_sources,
 	   dependencies: [ fru_deps, phosphor_logging_dep, i2c_dep ],
 	   install: true)
-
-if not get_option('tests').disabled()
-    subdir('tests')
-endif
