@@ -83,6 +83,19 @@ class Interface
     const InterfaceType addProperties;
     const InterfaceType removeProperties;
 };
+
+class I2CDevice : public Interface
+{
+  public:
+    explicit I2CDevice(int bus, int address) :
+        Interface(INVENTORY_DECORATOR_I2CDEVICE_IFACE,
+                  {{"Bus", static_cast<size_t>(bus)},
+                   {"Address", static_cast<size_t>(address)}},
+                  {{"Bus", static_cast<size_t>(INT_MAX)},
+                   {"Address", static_cast<size_t>(0)}})
+    {}
+    ~I2CDevice() = default;
+};
 } // namespace interfaces
 } // namespace inventory
 
