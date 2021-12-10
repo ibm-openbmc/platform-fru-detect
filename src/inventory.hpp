@@ -96,6 +96,22 @@ class I2CDevice : public Interface
     {}
     ~I2CDevice() = default;
 };
+
+class VINI : public Interface
+{
+  public:
+    explicit VINI(const std::vector<uint8_t>&& model,
+                  const std::vector<uint8_t>&& serial) :
+        Interface(INVENTORY_IPZVPD_VINI_IFACE,
+                  {{"RT", std::vector<uint8_t>({'V', 'I', 'N', 'I'})},
+                   {"CC", model},
+                   {"SN", serial}},
+                  {{"RT", std::vector<uint8_t>({'V', 'I', 'N', 'I'})},
+                   {"CC", std::vector<uint8_t>(0)},
+                   {"SN", std::vector<uint8_t>(0)}})
+    {}
+    ~VINI() = default;
+};
 } // namespace interfaces
 } // namespace inventory
 
