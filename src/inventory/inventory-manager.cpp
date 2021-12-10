@@ -64,6 +64,26 @@ void InventoryManager::updateObject(const std::string& path,
     dbus.call(call);
 }
 
+void InventoryManager::add(const std::string& path,
+                           const interfaces::Interface iface)
+{
+    ObjectType updates;
+
+    iface.populateObject(updates);
+
+    updateObject(path, updates);
+}
+
+void InventoryManager::remove(const std::string& path,
+                              const interfaces::Interface iface)
+{
+    ObjectType updates;
+
+    iface.depopulateObject(updates);
+
+    updateObject(path, updates);
+}
+
 void InventoryManager::markPresent(const std::string& path)
 {
     std::string absolute = std::string("/xyz/openbmc_project/inventory") + path;
@@ -145,105 +165,4 @@ bool InventoryManager::isModel(const std::string& path,
     }
 
     return false;
-}
-
-/* inventory::accumulate */
-
-void inventory::accumulate(std::map<std::string, ObjectType>& store,
-                           const std::string& path, const ObjectType& updates)
-{
-    if (store.contains(path))
-    {
-        auto& object = store[path];
-
-        for (const auto& [ikey, ival] : updates)
-        {
-            if (object.contains(ikey))
-            {
-                auto& interface = object[ikey];
-
-                for (const auto& [pkey, pval] : ival)
-                {
-                    interface[pkey] = pval;
-                }
-            }
-            else
-            {
-                object[ikey] = ival;
-            }
-        }
-    }
-    else
-    {
-        store[path] = updates;
-    }
-}
-
-/* PublishWhenPresentInventoryDecorator */
-
-PublishWhenPresentInventoryDecorator::PublishWhenPresentInventoryDecorator(
-    Inventory* inventory) :
-    inventory(inventory)
-{}
-
-std::weak_ptr<PropertiesChangedListener>
-    PublishWhenPresentInventoryDecorator::addPropertiesChangedListener(
-        const std::string& path, const std::string& interface,
-        std::function<void(PropertiesChanged&&)> callback)
-{
-    return inventory->addPropertiesChangedListener(path, interface, callback);
-}
-
-void PublishWhenPresentInventoryDecorator::removePropertiesChangedListener(
-    std::weak_ptr<PropertiesChangedListener> listener)
-{
-    inventory->removePropertiesChangedListener(listener);
-}
-
-void PublishWhenPresentInventoryDecorator::updateObject(
-    const std::string& path, const ObjectType& updates)
-{
-    inventory::accumulate(objectCache, path, updates);
-
-    if (presentCache.contains(path) && presentCache[path])
-    {
-        inventory->updateObject(path, objectCache[path]);
-        inventory->markPresent(path);
-    }
-}
-
-void PublishWhenPresentInventoryDecorator::markPresent(const std::string& path)
-{
-    bool alreadyPresent = presentCache.contains(path) && presentCache[path];
-
-    presentCache.insert_or_assign(path, true);
-
-    if (!alreadyPresent && objectCache.contains(path))
-    {
-        inventory->updateObject(path, objectCache[path]);
-        inventory->markPresent(path);
-    }
-}
-
-void PublishWhenPresentInventoryDecorator::markAbsent(const std::string& path)
-{
-    bool wasPresent = !presentCache.contains(path) || presentCache[path];
-
-    presentCache.insert_or_assign(path, false);
-
-    if (wasPresent)
-    {
-        inventory->markAbsent(path);
-    }
-}
-
-bool PublishWhenPresentInventoryDecorator::isPresent(const std::string& path)
-{
-    return inventory->isPresent(path);
-}
-
-bool PublishWhenPresentInventoryDecorator::isModel(const std::string& path,
-                                                   const std::string& model)
-{
-    return inventory->isModel(path, model);
 }

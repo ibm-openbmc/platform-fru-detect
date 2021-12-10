@@ -3,6 +3,7 @@
 #pragma once
 
 #include "devices/nvme.hpp"
+#include "inventory.hpp"
 #include "notify.hpp"
 #include "platform.hpp"
 #include "sysfs/i2c.hpp"
@@ -52,6 +53,8 @@ class FlettNVMeDrive : public BasicNVMeDrive
 
     const Nisqually* nisqually;
     const Flett* flett;
+    const inventory::interfaces::I2CDevice basic;
+    const inventory::interfaces::VINI vini;
 };
 
 class Flett : public Device

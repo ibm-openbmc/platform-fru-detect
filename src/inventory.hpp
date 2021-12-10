@@ -5,6 +5,7 @@
 #include "dbus.hpp"
 
 #include <functional>
+#include <list>
 #include <map>
 #include <set>
 #include <string>
@@ -37,9 +38,6 @@ static constexpr auto INVENTORY_DECORATOR_I2CDEVICE_IFACE =
     "xyz.openbmc_project.Inventory.Decorator.I2CDevice";
 
 static constexpr auto INVENTORY_IPZVPD_VINI_IFACE = "com.ibm.ipzvpd.VINI";
-
-void accumulate(std::map<std::string, inventory::ObjectType>& store,
-                const std::string& path, const inventory::ObjectType& updates);
 
 namespace interfaces
 {
@@ -128,8 +126,10 @@ class Inventory
     virtual void removePropertiesChangedListener(
         std::weak_ptr<dbus::PropertiesChangedListener> listener) = 0;
 
-    virtual void updateObject(const std::string& path,
-                              const inventory::ObjectType& updates) = 0;
+    virtual void add(const std::string& path,
+                     const inventory::interfaces::Interface iface) = 0;
+    virtual void remove(const std::string& path,
+                        const inventory::interfaces::Interface iface) = 0;
     virtual void markPresent(const std::string& path) = 0;
     virtual void markAbsent(const std::string& path) = 0;
     virtual bool isPresent(const std::string& path) = 0;
@@ -151,8 +151,10 @@ class InventoryManager : public Inventory
             override;
     virtual void removePropertiesChangedListener(
         std::weak_ptr<dbus::PropertiesChangedListener> listener) override;
-    virtual void updateObject(const std::string& path,
-                              const inventory::ObjectType& updates) override;
+    virtual void add(const std::string& path,
+                     const inventory::interfaces::Interface iface) override;
+    virtual void remove(const std::string& path,
+                        const inventory::interfaces::Interface iface) override;
     virtual void markPresent(const std::string& path) override;
     virtual void markAbsent(const std::string& path) override;
     virtual bool isPresent(const std::string& path) override;
@@ -160,6 +162,9 @@ class InventoryManager : public Inventory
                          const std::string& model) override;
 
   private:
+    virtual void updateObject(const std::string& path,
+                              const inventory::ObjectType& updates);
+
     sdbusplus::bus::bus& dbus;
     std::set<std::shared_ptr<dbus::PropertiesChangedListener>> listeners;
 };
@@ -179,8 +184,10 @@ class PublishWhenPresentInventoryDecorator : public Inventory
             override;
     virtual void removePropertiesChangedListener(
         std::weak_ptr<dbus::PropertiesChangedListener> listener) override;
-    virtual void updateObject(const std::string& path,
-                              const inventory::ObjectType& updates) override;
+    virtual void add(const std::string& path,
+                     const inventory::interfaces::Interface iface) override;
+    virtual void remove(const std::string& path,
+                        const inventory::interfaces::Interface iface) override;
     virtual void markPresent(const std::string& path) override;
     virtual void markAbsent(const std::string& path) override;
     virtual bool isPresent(const std::string& path) override;
@@ -189,6 +196,7 @@ class PublishWhenPresentInventoryDecorator : public Inventory
 
   private:
     Inventory* inventory;
-    std::map<std::string, inventory::ObjectType> objectCache;
+    std::map<std::string, std::list<inventory::interfaces::Interface>>
+        objectCache;
     std::map<std::string, bool> presentCache;
 };
