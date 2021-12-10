@@ -40,6 +40,50 @@ static constexpr auto INVENTORY_IPZVPD_VINI_IFACE = "com.ibm.ipzvpd.VINI";
 
 void accumulate(std::map<std::string, inventory::ObjectType>& store,
                 const std::string& path, const inventory::ObjectType& updates);
+
+namespace interfaces
+{
+class Interface
+{
+  public:
+    Interface(const std::string& interface, const InterfaceType&& addProperties,
+              const InterfaceType&& removeProperties) :
+        interface(interface),
+        addProperties(addProperties), removeProperties(removeProperties)
+    {}
+    virtual ~Interface() = default;
+    bool operator==(const Interface& other) const = default;
+
+    void populateObject(ObjectType& object) const
+    {
+        updateObject(object, addProperties);
+    }
+
+    void depopulateObject(ObjectType& object) const
+    {
+        updateObject(object, removeProperties);
+    }
+
+  private:
+    void updateObject(ObjectType& object, const InterfaceType& updates) const
+    {
+        if (!object.contains(interface))
+        {
+            object.try_emplace(interface);
+        }
+
+        InterfaceType& container = object[interface];
+        for (const auto& [property, value] : updates)
+        {
+            container[property] = value;
+        }
+    }
+
+    const std::string interface;
+    const InterfaceType addProperties;
+    const InterfaceType removeProperties;
+};
+} // namespace interfaces
 } // namespace inventory
 
 class Inventory
