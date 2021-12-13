@@ -233,7 +233,7 @@ class PlatformManager
     const std::string& getPlatformModel() noexcept;
     void enrollPlatform(const std::string& model, Platform* platform);
     bool isSupportedPlatform() noexcept;
-    void detectPlatformFrus(Inventory*);
+    void detectPlatformFrus(Notifier& notifier, Inventory*);
 
   private:
     std::map<std::string, Platform*> platforms;

@@ -1,6 +1,7 @@
 subdir('sysfs')
 subdir('platforms')
 subdir('devices')
+subdir('inventory')
 
 sdbusplus_dep = dependency('sdbusplus', fallback: [ 'sdbusplus', 'sdbusplus_dep' ])
 phosphor_logging_dep = dependency('phosphor-logging',
@@ -11,16 +12,18 @@ cpp = meson.get_compiler('cpp')
 i2c_dep = cpp.find_library('i2c')
 
 # Used by inventory tests
-inventory_dep = declare_dependency(sources: 'inventory.cpp',
+inventory_test_dep = declare_dependency(sources: [ 'dbus.cpp' ],
 				   include_directories: '.',
-				   dependencies: [ sdbusplus_dep, phosphor_logging_dep ])
+				   dependencies: [ inventory_dep,
+						   sdbusplus_dep,
+						   phosphor_logging_dep ])
 
 fru_deps = [ sysfs_dep, platforms_dep, inventory_dep, devices_dep ]
 
 platform_fru_detect_sources = [
+    'dbus.cpp',
     'environment.cpp',
     'i2c.cpp',
-    'inventory.cpp',
     'notify.cpp',
     'platform.cpp',
     'platform-fru-detect.cpp',

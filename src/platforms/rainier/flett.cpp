@@ -21,7 +21,10 @@ PHOSPHOR_LOG2_USING;
 FlettNVMeDrive::FlettNVMeDrive(Inventory* inventory, const Nisqually* nisqually,
                                const Flett* flett, int index) :
     BasicNVMeDrive(flett->getDriveBus(index), inventory, index),
-    nisqually(nisqually), flett(flett)
+    nisqually(nisqually), flett(flett),
+    basic(flett->getDriveBus(index).getAddress(), eepromAddress),
+    vini(std::vector<uint8_t>({'N', 'V', 'M', 'e'}),
+         std::move(this->getSerial()))
 {}
 
 void FlettNVMeDrive::plug([[maybe_unused]] Notifier& notifier)
@@ -55,56 +58,21 @@ void FlettNVMeDrive::addToInventory(Inventory* inventory)
 {
     std::string path = getInventoryPath();
 
-    decorateWithI2CDevice(path, inventory);
-    decorateWithVINI(path, inventory);
+    inventory->add(path, basic);
+    inventory->add(path, vini);
 }
 
-void FlettNVMeDrive::removeFromInventory([[maybe_unused]] Inventory* inventory)
+void FlettNVMeDrive::removeFromInventory(Inventory* inventory)
 {
-    debug(
-        "I'm not sure how to remove drive {NVME_ID} on Flett {FLETT_ID} from the inventory!",
-        "NVME_ID", index, "FLETT_ID", flett->getIndex());
+    std::string path = getInventoryPath();
+
+    inventory->remove(path, vini);
+    inventory->remove(path, basic);
 }
 
 bool FlettNVMeDrive::isPresent(SysfsI2CBus bus)
 {
     return bus.isDevicePresent(NVMeDrive::eepromAddress);
-}
-
-void FlettNVMeDrive::decorateWithI2CDevice(const std::string& path,
-                                           Inventory* inventory) const
-{
-    size_t bus = static_cast<size_t>(flett->getDriveBus(index).getAddress());
-    size_t address = static_cast<size_t>(NVMeDrive::eepromAddress);
-
-    inventory::ObjectType updates = {
-        {
-            inventory::INVENTORY_DECORATOR_I2CDEVICE_IFACE,
-            {
-                {"Bus", bus},
-                {"Address", address},
-            },
-        },
-    };
-
-    inventory->updateObject(path, updates);
-}
-
-void FlettNVMeDrive::decorateWithVINI(const std::string& path,
-                                      Inventory* inventory) const
-{
-    inventory::ObjectType updates = {
-        {
-            inventory::INVENTORY_IPZVPD_VINI_IFACE,
-            {
-                {"RT", std::vector<uint8_t>({'V', 'I', 'N', 'I'})},
-                {"CC", std::vector<uint8_t>({'N', 'V', 'M', 'e'})},
-                {"SN", this->getSerial()},
-            },
-        },
-    };
-
-    inventory->updateObject(path, updates);
 }
 
 /* Flett */

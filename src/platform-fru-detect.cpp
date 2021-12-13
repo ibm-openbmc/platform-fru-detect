@@ -1,5 +1,6 @@
 /* SPDX-License-Identifier: Apache-2.0 */
 /* Copyright IBM Corp. 2021 */
+#include "dbus.hpp"
 #include "environment.hpp"
 #include "inventory.hpp"
 #include "platform.hpp"
@@ -46,10 +47,15 @@ int main(void)
     em.enrollEnvironment(&simics);
 
     sdbusplus::bus::bus dbus = sdbusplus::bus::new_default();
+    Notifier notifier;
     InventoryManager inventory(dbus);
-    PublishWhenPresentInventoryDecorator decoratedInventory(&inventory);
 
-    em.run(pm, &decoratedInventory);
+    DBusNotifySink dbusSink(dbus);
+    notifier.add(&dbusSink);
+
+    em.run(pm, notifier, &inventory);
+
+    notifier.remove(&dbusSink);
 
     return 0;
 }

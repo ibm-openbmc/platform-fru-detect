@@ -11,4 +11,4 @@ endif
 
 test('test-inventory',
      executable('test-inventory', 'test-inventory.cpp',
-		dependencies: [ inventory_dep, gtest_dep ]))
+		dependencies: [ inventory_dep, inventory_test_dep, gtest_dep ]))

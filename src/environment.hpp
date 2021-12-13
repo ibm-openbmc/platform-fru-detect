@@ -2,6 +2,7 @@
 /* Copyright IBM Corp. 2021 */
 #pragma once
 
+#include "notify.hpp"
 #include "platform.hpp"
 
 #include <list>
@@ -15,7 +16,7 @@ class EnvironmentManager
     ~EnvironmentManager() = default;
 
     void enrollEnvironment(ExecutionEnvironment* env);
-    void run(PlatformManager& pm, Inventory* inventory);
+    void run(PlatformManager& pm, Notifier& notifier, Inventory* inventory);
 
   private:
     std::list<ExecutionEnvironment*> environments;
@@ -28,7 +29,8 @@ class ExecutionEnvironment
     virtual ~ExecutionEnvironment() = default;
 
     virtual bool probe() = 0;
-    virtual void run(PlatformManager& pm, Inventory* inventory) = 0;
+    virtual void run(PlatformManager& pm, Notifier& notifier,
+                     Inventory* inventory) = 0;
 };
 
 class SimicsExecutionEnvironment : public ExecutionEnvironment
@@ -41,7 +43,8 @@ class SimicsExecutionEnvironment : public ExecutionEnvironment
 
     /* ExecutionEnvironment */
     virtual bool probe() override;
-    virtual void run(PlatformManager& pm, Inventory* inventory) override;
+    virtual void run(PlatformManager& pm, Notifier& notifier,
+                     Inventory* inventory) override;
 };
 
 class HardwareExecutionEnvironment : public ExecutionEnvironment
@@ -52,5 +55,6 @@ class HardwareExecutionEnvironment : public ExecutionEnvironment
 
     /* ExecutionEnvironment */
     virtual bool probe() override;
-    virtual void run(PlatformManager& pm, Inventory* inventory) override;
+    virtual void run(PlatformManager& pm, Notifier& notifier,
+                     Inventory* inventory) override;
 };
