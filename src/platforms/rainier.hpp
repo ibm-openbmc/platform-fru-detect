@@ -43,8 +43,6 @@ class FlettNVMeDrive : public BasicNVMeDrive
 
     /* FRU */
     virtual std::string getInventoryPath() const override;
-    virtual void addToInventory(Inventory* inventory) override;
-    virtual void removeFromInventory(Inventory* inventory) override;
 
   private:
     void decorateWithI2CDevice(const std::string& path,
@@ -53,8 +51,6 @@ class FlettNVMeDrive : public BasicNVMeDrive
 
     const Nisqually* nisqually;
     const Flett* flett;
-    const inventory::interfaces::I2CDevice basic;
-    const inventory::interfaces::VINI vini;
 };
 
 class Flett : public Device
