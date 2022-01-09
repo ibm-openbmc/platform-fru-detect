@@ -162,7 +162,24 @@ void Notifier::run()
         }
 
         /* If it's not the exitfd sentinel it's a regular NotifySink */
-        sink->notify(*this);
+        try
+        {
+            sink->notify(*this);
+        }
+        catch (const std::exception& ex)
+        {
+            error(
+                "Unhandled exception in notifier callback, disabling sink: {EXCEPTION}",
+                "EXCEPTION", ex);
+            remove(sink);
+        }
+        catch (const std::error_condition& err)
+        {
+            error(
+                "Unhandled error condition in notifier callback, disabling sink: {ERROR}",
+                "ERROR", err.value());
+            remove(sink);
+        }
     }
 
     if (rc < 0)
