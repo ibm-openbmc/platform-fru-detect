@@ -69,7 +69,7 @@ std::vector<uint8_t>
 {
     std::vector<uint8_t> manufacturer;
     if (metadata.size() >= 2) {
-        manufacturer.insert(metadata.begin(), metadata.begin(),
+        manufacturer.insert(manufacturer.begin(), metadata.begin(),
                             metadata.begin() + 2);
     } else {
         warning("Invalid metadata length: {METADATA_LENGTH}", "METADATA_LENGTH", metadata.size());
@@ -82,7 +82,7 @@ std::vector<uint8_t>
 {
     std::vector<uint8_t> serial;
     if (metadata.size() >= 2) {
-        serial.insert(metadata.begin(), metadata.begin() + 2, metadata.end());
+        serial.insert(serial.begin(), metadata.begin() + 2, metadata.end());
     } else {
         warning("No drive serial data present. Invalid metadata of length: {METADATA_LENGTH}",
                 "METADATA_LENGTH", metadata.size());
