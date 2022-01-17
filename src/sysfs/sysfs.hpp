@@ -10,10 +10,10 @@
 class SysfsEntry
 {
   public:
-    SysfsEntry(std::filesystem::path path) : path(path)
+    SysfsEntry(std::filesystem::path path, bool check = true) : path(path)
     {
 
-        if (!std::filesystem::exists(path))
+        if (check && !std::filesystem::exists(path))
         {
             lg2::error("sysfs path '{SYSFS_PATH}' does not exist", "SYSFS_PATH",
                        path.string());
