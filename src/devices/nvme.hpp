@@ -52,6 +52,8 @@ class BasicNVMeDrive : public NVMeDrive
     static bool isDriveReady(const SysfsI2CBus& bus);
 
     BasicNVMeDrive(const SysfsI2CBus& bus, Inventory* inventory, int index);
+    BasicNVMeDrive(const SysfsI2CBus& bus, Inventory* inventory, int index,
+                   const std::vector<uint8_t>&& metadata);
     virtual ~BasicNVMeDrive() = default;
 
     /* FRU */
@@ -68,9 +70,6 @@ class BasicNVMeDrive : public NVMeDrive
         extractManufacturer(const std::vector<uint8_t>& metadata);
     static std::vector<uint8_t>
         extractSerial(const std::vector<uint8_t>& metadata);
-
-    BasicNVMeDrive(const SysfsI2CBus& bus, Inventory* inventory, int index,
-                   const std::vector<uint8_t>&& metadata);
 
     static constexpr int endpointAddress = 0x6a;
     static constexpr int vendorMetadataOffset = 0x08;
