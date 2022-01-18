@@ -68,8 +68,12 @@ std::vector<uint8_t>
     BasicNVMeDrive::extractManufacturer(const std::vector<uint8_t>& metadata)
 {
     std::vector<uint8_t> manufacturer;
-    manufacturer.insert(metadata.begin(), metadata.begin(),
-                        metadata.begin() + 2);
+    if (metadata.size() >= 2) {
+        manufacturer.insert(manufacturer.begin(), metadata.begin(),
+                            metadata.begin() + 2);
+    } else {
+        warning("Invalid metadata length: {METADATA_LENGTH}", "METADATA_LENGTH", metadata.size());
+    }
     return manufacturer;
 }
 
@@ -77,7 +81,12 @@ std::vector<uint8_t>
     BasicNVMeDrive::extractSerial(const std::vector<uint8_t>& metadata)
 {
     std::vector<uint8_t> serial;
-    serial.insert(metadata.begin(), metadata.begin() + 2, metadata.end());
+    if (metadata.size() >= 2) {
+        serial.insert(serial.begin(), metadata.begin() + 2, metadata.end());
+    } else {
+        warning("No drive serial data present. Invalid metadata of length: {METADATA_LENGTH}",
+                "METADATA_LENGTH", metadata.size());
+    }
     return serial;
 }
 

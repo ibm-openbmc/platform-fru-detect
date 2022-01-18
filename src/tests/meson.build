@@ -12,3 +12,11 @@ endif
 test('test-inventory',
      executable('test-inventory', 'test-inventory.cpp',
 		dependencies: [ inventory_dep, inventory_test_dep, gtest_dep ]))
+test('test-nvme',
+     executable('test-nvme', 'test-nvme.cpp',
+	        dependencies: [ headers_dep,
+			        devices_dep,
+				sysfs_dep,
+				libgpiodcxx_dep,
+				phosphor_logging_dep,
+				gtest_dep ]))
