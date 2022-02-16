@@ -42,8 +42,8 @@ void EnvironmentManager::run(PlatformManager& pm, Notifier& notifier,
                  : "memory")
 #else
 #define trigger(r, p)                                                          \
-    (void)r;                                                                   \
-    (void)p;
+    (void)(r);                                                                 \
+    (void)(p);
 #endif
 
 #define MAGIC_MMAP_FLAGS                                                       \
