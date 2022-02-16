@@ -192,10 +192,9 @@ class PolledDevicePresence : public NotifySink
   private:
     uint64_t drain()
     {
-        uint64_t res;
-        ssize_t rc;
+        uint64_t res = 0;
 
-        rc = ::read(this->timerfd, &res, sizeof(res));
+        ssize_t rc = ::read(this->timerfd, &res, sizeof(res));
         if (rc != sizeof(res))
         {
             if (rc == -1)

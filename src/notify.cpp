@@ -129,7 +129,7 @@ void Notifier::remove(NotifySink* sink)
 void Notifier::run()
 {
     struct epoll_event event;
-    int rc;
+    int rc = 0;
 
     while ((rc = ::epoll_wait(epollfd, &event, 1, -1)) > 0)
     {
@@ -139,8 +139,8 @@ void Notifier::run()
         if (!sink)
         {
             struct signalfd_siginfo fdsi;
-            ssize_t ingress;
-            ingress = read(exitfd, &fdsi, sizeof(fdsi));
+
+            ssize_t ingress = read(exitfd, &fdsi, sizeof(fdsi));
             if (ingress != sizeof(fdsi))
             {
                 error(

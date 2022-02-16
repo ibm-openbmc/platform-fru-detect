@@ -29,8 +29,7 @@ namespace i2c
 bool isDeviceResponsive(const SysfsI2CBus& bus, int address)
 {
     fs::path path = bus.getBusDevice();
-    unsigned long funcs;
-    int rc;
+    unsigned long funcs = 0;
 
     int fd = ::open(path.c_str(), O_RDWR);
     if (fd == -1)
@@ -42,7 +41,7 @@ bool isDeviceResponsive(const SysfsI2CBus& bus, int address)
         throw std::system_category().default_error_condition(errno);
     }
 
-    rc = ::ioctl(fd, I2C_FUNCS, &funcs);
+    int rc = ::ioctl(fd, I2C_FUNCS, &funcs);
     if (rc == -1)
     {
         warning(
@@ -94,8 +93,7 @@ void oneshotSMBusBlockRead(const SysfsI2CBus& bus, int address, uint8_t command,
                            std::vector<uint8_t>& data)
 {
     fs::path path = bus.getBusDevice();
-    unsigned long funcs;
-    int rc;
+    unsigned long funcs = 0;
 
     int fd = ::open(path.c_str(), O_RDWR);
     if (fd == -1)
@@ -107,7 +105,7 @@ void oneshotSMBusBlockRead(const SysfsI2CBus& bus, int address, uint8_t command,
         throw std::system_category().default_error_condition(errno);
     }
 
-    rc = ::ioctl(fd, I2C_FUNCS, &funcs);
+    int rc = ::ioctl(fd, I2C_FUNCS, &funcs);
     if (rc == -1)
     {
         error(
