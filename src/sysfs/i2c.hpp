@@ -63,11 +63,10 @@ class SysfsI2CBus : public SysfsEntry
 class SysfsI2CDevice : public SysfsEntry
 {
   public:
-    SysfsI2CDevice(const SysfsI2CDevice& device) : SysfsEntry(device)
-    {}
-    SysfsI2CDevice(std::filesystem::path path) : SysfsEntry(path)
+    SysfsI2CDevice(const std::filesystem::path& path) : SysfsEntry(path)
     {}
     SysfsI2CDevice(SysfsI2CBus bus, int address);
+    SysfsI2CDevice(const SysfsI2CDevice& device) = default;
     virtual ~SysfsI2CDevice() = default;
 
     SysfsI2CBus getBus();
