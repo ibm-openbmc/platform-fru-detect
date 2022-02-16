@@ -31,6 +31,7 @@ bool isDeviceResponsive(const SysfsI2CBus& bus, int address)
     fs::path path = bus.getBusDevice();
     unsigned long funcs = 0;
 
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
     int fd = ::open(path.c_str(), O_RDWR);
     if (fd == -1)
     {
@@ -41,6 +42,7 @@ bool isDeviceResponsive(const SysfsI2CBus& bus, int address)
         throw std::system_category().default_error_condition(errno);
     }
 
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
     int rc = ::ioctl(fd, I2C_FUNCS, &funcs);
     if (rc == -1)
     {
@@ -60,6 +62,7 @@ bool isDeviceResponsive(const SysfsI2CBus& bus, int address)
         goto cleanup_fd;
     }
 
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
     rc = ::ioctl(fd, I2C_SLAVE, address);
     if (rc == -1)
     {
@@ -95,6 +98,7 @@ void oneshotSMBusBlockRead(const SysfsI2CBus& bus, int address, uint8_t command,
     fs::path path = bus.getBusDevice();
     unsigned long funcs = 0;
 
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
     int fd = ::open(path.c_str(), O_RDWR);
     if (fd == -1)
     {
@@ -105,6 +109,7 @@ void oneshotSMBusBlockRead(const SysfsI2CBus& bus, int address, uint8_t command,
         throw std::system_category().default_error_condition(errno);
     }
 
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
     int rc = ::ioctl(fd, I2C_FUNCS, &funcs);
     if (rc == -1)
     {
@@ -124,6 +129,7 @@ void oneshotSMBusBlockRead(const SysfsI2CBus& bus, int address, uint8_t command,
         goto cleanup_fd;
     }
 
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
     rc = ::ioctl(fd, I2C_SLAVE, address);
     if (rc == -1)
     {

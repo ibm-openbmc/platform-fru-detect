@@ -66,15 +66,11 @@ int SysfsI2CBus::getAddress() const
 
 std::filesystem::path SysfsI2CBus::getBusDevice() const
 {
-    char devpath[PATH_MAX];
+    std::ostringstream ss;
 
-    int rc = snprintf(devpath, PATH_MAX - 1, "/dev/i2c-%d", getAddress());
-    if (rc > PATH_MAX - 1)
-    {
-        throw std::logic_error("Formatting bus device path failed");
-    }
-    devpath[rc] = '\0';
-    return devpath;
+    ss << "/dev/i2c-" << getAddress();
+
+    return ss.str();
 }
 
 std::filesystem::path SysfsI2CBus::getDevicePath(int address)
