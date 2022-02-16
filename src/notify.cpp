@@ -110,7 +110,7 @@ void Notifier::remove(NotifySink* sink)
         return;
     }
 
-    int rc = ::epoll_ctl(epollfd, EPOLL_CTL_DEL, fd, NULL);
+    int rc = ::epoll_ctl(epollfd, EPOLL_CTL_DEL, fd, nullptr);
     if (rc < 0)
     {
         error(

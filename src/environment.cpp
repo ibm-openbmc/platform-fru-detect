@@ -67,7 +67,7 @@ bool SimicsExecutionEnvironment::isSimicsExecutionEnvironment()
 {
     long page = ::sysconf(_SC_PAGESIZE);
     void* region =
-        ::mmap(NULL, page, PROT_READ | PROT_WRITE, MAGIC_MMAP_FLAGS, -1, 0);
+        ::mmap(nullptr, page, PROT_READ | PROT_WRITE, MAGIC_MMAP_FLAGS, -1, 0);
     if (!region)
     {
         error("Failed to map buffer: {ERRNO_DESCRIPTION}", "ERRNO_DESCRIPTION",
