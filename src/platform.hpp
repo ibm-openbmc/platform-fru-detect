@@ -102,7 +102,7 @@ class PolledDevicePresence : public NotifySink
 {
   public:
     PolledDevicePresence() = default;
-    PolledDevicePresence(Connector<T>* connector, std::function<bool()> poll) :
+    PolledDevicePresence(Connector<T>* connector, const std::function<bool()>& poll) :
         connector(connector), poll(poll), timerfd(-1)
     {}
     ~PolledDevicePresence() override = default;

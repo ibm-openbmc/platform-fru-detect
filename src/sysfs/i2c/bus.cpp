@@ -18,7 +18,7 @@ static constexpr std::array<const char*, 8> mux_channel_map = {
     "channel-4", "channel-5", "channel-6", "channel-7",
 };
 
-SysfsI2CBus::SysfsI2CBus(SysfsI2CMux mux, int channel) :
+SysfsI2CBus::SysfsI2CBus(const SysfsI2CMux& mux, int channel) :
     SysfsEntry(mux.getPath() / mux_channel_map.at(channel))
 {}
 
@@ -144,7 +144,7 @@ SysfsI2CDevice SysfsI2CBus::requireDevice(std::string type, int address)
         return {path};
     }
 
-    return newDevice(type, address);
+    return newDevice(std::move(type), address);
 }
 
 void SysfsI2CBus::releaseDevice(int address)
@@ -162,7 +162,7 @@ void SysfsI2CBus::releaseDevice(int address)
 
 SysfsI2CDevice SysfsI2CBus::probeDevice(std::string type, int address)
 {
-    SysfsI2CDevice device = requireDevice(type, address);
+    SysfsI2CDevice device = requireDevice(std::move(type), address);
 
     std::filesystem::path driver = device.getPath() / "driver";
 

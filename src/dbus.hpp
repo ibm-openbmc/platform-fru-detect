@@ -60,5 +60,5 @@ class PropertiesChangedListener;
 std::shared_ptr<PropertiesChangedListener> sharedPropertiesChangedListener(
     sdbusplus::bus::bus& bus, const std::string& path,
     const std::string& interface,
-    std::function<void(PropertiesChanged&&)> callback);
+    const std::function<void(PropertiesChanged&&)>& callback);
 } // namespace dbus

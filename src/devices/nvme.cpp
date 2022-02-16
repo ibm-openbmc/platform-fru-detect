@@ -49,7 +49,7 @@ bool BasicNVMeDrive::isDriveReady(const SysfsI2CBus& bus)
     return false;
 }
 
-std::vector<uint8_t> BasicNVMeDrive::fetchMetadata(SysfsI2CBus bus)
+std::vector<uint8_t> BasicNVMeDrive::fetchMetadata(const SysfsI2CBus& bus)
 {
     std::vector<uint8_t> data;
 

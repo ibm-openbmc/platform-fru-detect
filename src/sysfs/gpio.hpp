@@ -14,12 +14,12 @@ PHOSPHOR_LOG2_USING;
 class SysfsGPIOChip : public SysfsEntry
 {
   public:
-    SysfsGPIOChip(SysfsEntry entry) :
+    SysfsGPIOChip(const SysfsEntry& entry) :
         SysfsEntry(SysfsGPIOChip::getGPIOChipPath(entry))
     {}
     ~SysfsGPIOChip() override = default;
 
-    static bool hasGPIOChip(SysfsEntry entry)
+    static bool hasGPIOChip(const SysfsEntry& entry)
     {
         /* FIXME: This is the deprecated attribute */
         return std::filesystem::exists(entry.getPath() / "gpio");
@@ -31,7 +31,7 @@ class SysfsGPIOChip : public SysfsEntry
     }
 
   private:
-    static std::filesystem::path getGPIOChipPath(SysfsEntry entry)
+    static std::filesystem::path getGPIOChipPath(const SysfsEntry& entry)
     {
         namespace fs = std::filesystem;
 

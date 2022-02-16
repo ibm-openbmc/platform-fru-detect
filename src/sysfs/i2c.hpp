@@ -14,7 +14,7 @@ class SysfsI2CDevice;
 class SysfsI2CDeviceDriverBindException : public std::exception
 {
   public:
-    SysfsI2CDeviceDriverBindException(SysfsEntry entry)
+    SysfsI2CDeviceDriverBindException(const SysfsEntry& entry)
     {
         description.append("No driver bound for ");
         description.append(entry.getPath().string());
@@ -34,10 +34,10 @@ class SysfsI2CDeviceDriverBindException : public std::exception
 class SysfsI2CBus : public SysfsEntry
 {
   public:
-    SysfsI2CBus(std::filesystem::path path, bool check = true) :
+    SysfsI2CBus(const std::filesystem::path& path, bool check = true) :
         SysfsEntry(path, check)
     {}
-    SysfsI2CBus(SysfsI2CMux mux, int channel);
+    SysfsI2CBus(const SysfsI2CMux& mux, int channel);
 
     bool isMuxBus();
     int getMuxChannel();
@@ -65,7 +65,7 @@ class SysfsI2CDevice : public SysfsEntry
   public:
     SysfsI2CDevice(const std::filesystem::path& path) : SysfsEntry(path)
     {}
-    SysfsI2CDevice(SysfsI2CBus bus, int address);
+    SysfsI2CDevice(const SysfsI2CBus& bus, int address);
     SysfsI2CDevice(const SysfsI2CDevice& device) = default;
     ~SysfsI2CDevice() override = default;
 
@@ -74,17 +74,17 @@ class SysfsI2CDevice : public SysfsEntry
     int getAddress();
 
   private:
-    static std::string generateI2CDeviceID(SysfsI2CBus bus, int address);
+    static std::string generateI2CDeviceID(const SysfsI2CBus& bus, int address);
 };
 
 class SysfsI2CMux : public SysfsI2CDevice
 {
   public:
-    SysfsI2CMux(SysfsI2CDevice device) : SysfsI2CDevice(device)
+    SysfsI2CMux(const SysfsI2CDevice& device) : SysfsI2CDevice(device)
     {}
-    SysfsI2CMux(std::filesystem::path path) : SysfsI2CDevice(path)
+    SysfsI2CMux(const std::filesystem::path& path) : SysfsI2CDevice(path)
     {}
-    SysfsI2CMux(SysfsI2CBus bus, int address) : SysfsI2CDevice(bus, address)
+    SysfsI2CMux(const SysfsI2CBus& bus, int address) : SysfsI2CDevice(bus, address)
     {}
 
     ~SysfsI2CMux() override = default;

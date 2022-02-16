@@ -64,7 +64,7 @@ class BasicNVMeDrive : public NVMeDrive
     const std::vector<uint8_t>& getSerial() const;
 
   private:
-    static std::vector<uint8_t> fetchMetadata(SysfsI2CBus bus);
+    static std::vector<uint8_t> fetchMetadata(const SysfsI2CBus& bus);
     static std::vector<uint8_t>
         extractManufacturer(const std::vector<uint8_t>& metadata);
     static std::vector<uint8_t>
