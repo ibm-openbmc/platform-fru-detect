@@ -2,12 +2,11 @@
 /* Copyright IBM Corp. 2021 */
 #include "sysfs/i2c.hpp"
 
-#include <limits.h>
-
 #include <phosphor-logging/lg2.hpp>
 
 #include <array>
 #include <cassert>
+#include <climits>
 #include <fstream>
 #include <iostream>
 #include <sstream>

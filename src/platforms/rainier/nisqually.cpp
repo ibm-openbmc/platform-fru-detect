@@ -6,12 +6,11 @@
 #include "sysfs/gpio.hpp"
 #include "sysfs/i2c.hpp"
 
-#include <errno.h>
-
 #include <gpiod.hpp>
 #include <phosphor-logging/lg2.hpp>
 
 #include <cassert>
+#include <cerrno>
 #include <filesystem>
 #include <ranges>
 #include <stdexcept>

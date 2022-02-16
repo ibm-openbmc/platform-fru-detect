@@ -3,8 +3,7 @@
 #include "platforms/everest.hpp"
 #include "sysfs/gpio.hpp"
 
-#include <errno.h>
-
+#include <cerrno>
 #include <stdexcept>
 
 Bellavista::Bellavista(Inventory* inventory) :

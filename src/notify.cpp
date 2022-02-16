@@ -8,12 +8,12 @@
 #include <phosphor-logging/lg2.hpp>
 
 #include <cerrno>
+#include <csignal>
 #include <cstring>
 #include <system_error>
 
 extern "C"
 {
-#include <signal.h>
 #include <sys/epoll.h>
 #include <sys/signalfd.h>
 };
