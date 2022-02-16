@@ -24,6 +24,7 @@ fru_deps = [ headers_dep, sysfs_dep, platforms_dep, inventory_dep, devices_dep ]
 
 platform_fru_detect_sources = [
     'dbus.cpp',
+    'descriptor.cpp',
     'environment.cpp',
     'i2c.cpp',
     'notify.cpp',
