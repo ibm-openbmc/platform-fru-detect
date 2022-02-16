@@ -4,8 +4,13 @@
 
 #include "gtest/gtest.h"
 
+// NOLINTNEXTLINE(readability-identifier-naming)
 static constexpr auto TEST_PATH = "/path/test";
+
+// NOLINTNEXTLINE(readability-identifier-naming)
 static constexpr auto TEST_PATH_1 = "/path/test/1";
+
+// NOLINTNEXTLINE(readability-identifier-naming)
 static constexpr auto TEST_PATH_2 = "/path/test/2";
 
 using namespace inventory;

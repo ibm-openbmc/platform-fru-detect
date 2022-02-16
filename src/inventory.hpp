@@ -30,13 +30,16 @@ using InterfaceType = std::map<std::string, PropertyType>;
 using ObjectType = std::map<std::string, InterfaceType>;
 
 // https://github.com/openbmc/phosphor-dbus-interfaces/blob/08baf48ad5f15774d393fbbf4e9479a0ef3e82d0/yaml/xyz/openbmc_project/Inventory/Item.interface.yaml
+// NOLINTNEXTLINE(readability-identifier-naming)
 static constexpr auto INVENTORY_ITEM_IFACE =
     "xyz.openbmc_project.Inventory.Item";
 
 // https://github.com/openbmc/phosphor-dbus-interfaces/blob/08baf48ad5f15774d393fbbf4e9479a0ef3e82d0/yaml/xyz/openbmc_project/Inventory/Decorator/I2CDevice.interface.yaml
+// NOLINTNEXTLINE(readability-identifier-naming)
 static constexpr auto INVENTORY_DECORATOR_I2CDEVICE_IFACE =
     "xyz.openbmc_project.Inventory.Decorator.I2CDevice";
 
+// NOLINTNEXTLINE(readability-identifier-naming)
 static constexpr auto INVENTORY_IPZVPD_VINI_IFACE = "com.ibm.ipzvpd.VINI";
 
 namespace interfaces

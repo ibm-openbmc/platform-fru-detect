@@ -85,7 +85,7 @@ Williwakas::Williwakas(Inventory* inventory, const Nisqually* nisqually,
                       Connector<WilliwakasNVMeDrive>(inventory, this, 7),
                   }}
 {
-    SysfsI2CBus bus(Williwakas::drive_backplane_bus.at(index));
+    SysfsI2CBus bus(Williwakas::driveBackplaneBus.at(index));
 
     SysfsI2CDevice dev =
         bus.probeDevice("pca9552", Williwakas::drivePresenceDeviceAddress);
@@ -94,13 +94,13 @@ Williwakas::Williwakas(Inventory* inventory, const Nisqually* nisqually,
 
     gpiod::chip chip(chipName, gpiod::chip::OPEN_BY_NAME);
 
-    std::vector<unsigned int> offsets(Williwakas::drive_presence_map.begin(),
-                                      Williwakas::drive_presence_map.end());
+    std::vector<unsigned int> offsets(Williwakas::drivePresenceMap.begin(),
+                                      Williwakas::drivePresenceMap.end());
 
     assert(Williwakas::drive_presence_map.size() == lines.size());
     for (std::size_t i = 0; i < lines.size(); i++)
     {
-        auto line = chip.get_line(Williwakas::drive_presence_map[i]);
+        auto line = chip.get_line(Williwakas::drivePresenceMap[i]);
         line.request({program_invocation_short_name,
                       gpiod::line::DIRECTION_INPUT, gpiod::line::ACTIVE_LOW});
         lines[i] = line;

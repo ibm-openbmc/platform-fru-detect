@@ -135,13 +135,13 @@ class Williwakas : public Device, FRU
   private:
     static constexpr int drivePresenceDeviceAddress = 0x60;
 
-    static constexpr std::array<const char*, 3> drive_backplane_bus = {
+    static constexpr std::array<const char*, 3> driveBackplaneBus = {
         "/sys/bus/i2c/devices/i2c-13",
         "/sys/bus/i2c/devices/i2c-14",
         "/sys/bus/i2c/devices/i2c-15",
     };
 
-    static constexpr std::array<int, 8> drive_presence_map = {
+    static constexpr std::array<int, 8> drivePresenceMap = {
         8, 9, 10, 11, 12, 13, 14, 15,
     };
 
@@ -189,9 +189,9 @@ class Nisqually : public Device, FRU
     Inventory* inventory;
 
   private:
-    static constexpr const char* williwakas_presence_device_path =
+    static constexpr const char* williwakasPresenceDevicePath =
         "/sys/bus/i2c/devices/0-0020";
-    static constexpr std::array<int, 3> williwakas_presence_map = {7, 6, 5};
+    static constexpr std::array<int, 3> williwakasPresenceMap = {7, 6, 5};
 
     void detectFlettCards(Notifier& notifier);
 
@@ -246,7 +246,7 @@ class Nisqually1z : public Nisqually
   private:
     static constexpr int slotMuxAddress = 0x70;
 
-    static constexpr const char* flett_presence_device_path =
+    static constexpr const char* flettPresenceDevicePath =
         "/sys/bus/i2c/devices/8-0061";
 
     gpiod::chip flettPresenceChip;
@@ -271,26 +271,13 @@ class Ingraham : public Device
     void unplug(Notifier& notifier, int mode = Device::UNPLUG_REMOVES_INVENTORY) override;
 
   private:
-    static constexpr std::array<const char*, 4> pcie_slot_busses = {
-        "i2c-4",
-        "i2c-5",
-        "i2c-6",
-        "i2c-11",
-    };
-
-    static constexpr std::array<const char*, 12> pcie_slot_bus_map = {
+    static constexpr std::array<const char*, 12> pcieSlotBusMap = {
         "/sys/bus/i2c/devices/i2c-4",  "/sys/bus/i2c/devices/i2c-4",
         "/sys/bus/i2c/devices/i2c-4",  "/sys/bus/i2c/devices/i2c-5",
         "/sys/bus/i2c/devices/i2c-5",  nullptr,
         "/sys/bus/i2c/devices/i2c-6",  "/sys/bus/i2c/devices/i2c-6",
         "/sys/bus/i2c/devices/i2c-6",  "/sys/bus/i2c/devices/i2c-6",
         "/sys/bus/i2c/devices/i2c-11", "/sys/bus/i2c/devices/i2c-11",
-    };
-
-    static constexpr std::array<const char*, 3> williwakas_bus_map = {
-        "/sys/bus/i2c/devices/i2c-13",
-        "/sys/bus/i2c/devices/i2c-14",
-        "/sys/bus/i2c/devices/i2c-15",
     };
 
     Inventory* inventory;

@@ -13,13 +13,13 @@
 
 PHOSPHOR_LOG2_USING_WITH_FLAGS;
 
-static constexpr std::array<const char*, 8> mux_channel_map = {
+static constexpr std::array<const char*, 8> muxChannelMap = {
     "channel-0", "channel-1", "channel-2", "channel-3",
     "channel-4", "channel-5", "channel-6", "channel-7",
 };
 
 SysfsI2CBus::SysfsI2CBus(const SysfsI2CMux& mux, int channel) :
-    SysfsEntry(mux.getPath() / mux_channel_map.at(channel))
+    SysfsEntry(mux.getPath() / muxChannelMap.at(channel))
 {}
 
 int SysfsI2CBus::getMuxChannel()
@@ -88,18 +88,18 @@ bool SysfsI2CBus::isDevicePresent(int address)
 
 SysfsI2CDevice SysfsI2CBus::newDevice(std::string type, int address)
 {
-    std::fstream new_device(path / "new_device", new_device.out);
-    if (!new_device.is_open())
+    std::fstream newDevice(path / "new_device", newDevice.out);
+    if (!newDevice.is_open())
     {
         warning("Failed to open '{SYSFS_I2C_NEW_DEVICE_PATH}'",
                 "SYSFS_I2C_NEW_DEVICE_PATH", path.string());
         throw -1;
     }
 
-    new_device << type << " 0x" << std::hex << address << "\n";
-    new_device.flush();
+    newDevice << type << " 0x" << std::hex << address << "\n";
+    newDevice.flush();
 
-    if (new_device.bad() || new_device.fail())
+    if (newDevice.bad() || newDevice.fail())
     {
         warning(
             "Failed to add new device {I2C_DEVICE_TYPE} at {I2C_DEVICE_ADDRESS} via '{SYSFS_I2C_NEW_DEVICE_PATH}'",
@@ -113,18 +113,18 @@ SysfsI2CDevice SysfsI2CBus::newDevice(std::string type, int address)
 
 void SysfsI2CBus::deleteDevice(int address)
 {
-    std::fstream delete_device(path / "delete_device", delete_device.out);
-    if (!delete_device.is_open())
+    std::fstream deleteDevice(path / "delete_device", deleteDevice.out);
+    if (!deleteDevice.is_open())
     {
         warning("Failed to open '{SYSFS_I2C_DELETE_DEVICE_PATH}'",
                 "SYSFS_I2C_DELETE_DEVICE_PATH", path);
         throw -1;
     }
 
-    delete_device << "0x" << std::hex << address << "\n";
-    delete_device.flush();
+    deleteDevice << "0x" << std::hex << address << "\n";
+    deleteDevice.flush();
 
-    if (delete_device.bad() || delete_device.fail())
+    if (deleteDevice.bad() || deleteDevice.fail())
     {
         warning(
             "Failed to delete device at {I2C_DEVICE_ADDRESS} via '{SYSFS_I2C_DELETE_DEVICE_PATH}'",

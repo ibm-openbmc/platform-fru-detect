@@ -18,14 +18,14 @@
 
 PHOSPHOR_LOG2_USING;
 
-static const std::map<int, int> flett_mux_channel_map = {
+static const std::map<int, int> flettMuxChannelMap = {
     {8, 3},
     {9, 2},
     {10, 0},
     {11, 1},
 };
 
-static const std::map<int, int> flett_slot_presence_map = {
+static const std::map<int, int> flettSlotPresenceMap = {
     {8, 8},
     {9, 9},
     {10, 10},
@@ -38,14 +38,14 @@ static const std::map<int, int> flett_slot_presence_map = {
  * the schematics haven't elided the support for the presence of three pairs. We
  * follow the schematics as an engineering reference point.
  */
-static const std::map<int, int> flett_slot_index_map = {
+static const std::map<int, int> flettSlotIndexMap = {
     {8, 0},
     {9, 2},
     {10, 0},
     {11, 1},
 };
 
-static const std::map<int, int> flett_connector_slot_map = {
+static const std::map<int, int> flettConnectorSlotMap = {
     {0, 8},
     {1, 9},
     {2, 10},
@@ -56,7 +56,7 @@ static const std::map<int, int> flett_connector_slot_map = {
 
 int Nisqually::getFlettIndex(int slot)
 {
-    return flett_slot_index_map.at(slot);
+    return flettSlotIndexMap.at(slot);
 }
 
 Nisqually::Nisqually(Inventory* inventory) :
@@ -68,7 +68,7 @@ Nisqually::Nisqually(Inventory* inventory) :
                           }},
     williwakasPresenceChip(
         SysfsGPIOChip(
-            std::filesystem::path(Nisqually::williwakas_presence_device_path))
+            std::filesystem::path(Nisqually::williwakasPresenceDevicePath))
             .getName()
             .string(),
         gpiod::chip::OPEN_BY_NAME),
@@ -79,9 +79,9 @@ Nisqually::Nisqually(Inventory* inventory) :
     }}
 {
     for (int i :
-         std::views::iota(0UL, Nisqually::williwakas_presence_map.size()))
+         std::views::iota(0UL, Nisqually::williwakasPresenceMap.size()))
     {
-        int offset = Nisqually::williwakas_presence_map.at(i);
+        int offset = Nisqually::williwakasPresenceMap.at(i);
         gpiod::line line = williwakasPresenceChip.get_line(offset);
         line.request({program_invocation_short_name,
                       gpiod::line::DIRECTION_INPUT, gpiod::line::ACTIVE_LOW});
@@ -182,7 +182,7 @@ void Nisqually::detectFlettCards(Notifier& notifier)
     debug("Locating Flett cards");
 
     /* FIXME: do something more ergonomic */
-    for (auto& [connector, slot] : flett_connector_slot_map)
+    for (auto& [connector, slot] : flettConnectorSlotMap)
     {
         if (!isFlettPresentAt(slot))
         {
@@ -253,7 +253,7 @@ Nisqually1z::Nisqually1z(Inventory* inventory) :
     Nisqually(inventory),
     flettPresenceChip(
         SysfsGPIOChip(
-            std::filesystem::path(Nisqually1z::flett_presence_device_path))
+            std::filesystem::path(Nisqually1z::flettPresenceDevicePath))
             .getName()
             .string(),
         gpiod::chip::OPEN_BY_NAME)
@@ -266,9 +266,9 @@ Nisqually1z::Nisqually1z(Inventory* inventory) :
                                                 Nisqually1z::slotMuxAddress);
 
     /* Iterate in terms of Flett slot numbers for mapping to presence lines */
-    for (auto& slot : flett_connector_slot_map | std::views::values)
+    for (auto& slot : flettConnectorSlotMap | std::views::values)
     {
-        int offset = flett_slot_presence_map.at(slot);
+        int offset = flettSlotPresenceMap.at(slot);
         gpiod::line line = flettPresenceChip.get_line(offset);
         line.request({program_invocation_short_name,
                       gpiod::line::DIRECTION_INPUT, gpiod::line::ACTIVE_LOW});
@@ -284,7 +284,7 @@ SysfsI2CBus Nisqually1z::getFlettSlotI2CBus(int slot) const
     debug("Looking up mux channel for Flett in slot {PCIE_SLOT}", "PCIE_SLOT",
           slot);
 
-    int channel = flett_mux_channel_map.at(slot);
+    int channel = flettMuxChannelMap.at(slot);
 
     return {mux, channel};
 }
