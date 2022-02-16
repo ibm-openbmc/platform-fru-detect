@@ -20,9 +20,9 @@ class SysfsI2CDeviceDriverBindException : public std::exception
         description.append(entry.getPath().string());
     }
 
-    ~SysfsI2CDeviceDriverBindException() = default;
+    ~SysfsI2CDeviceDriverBindException() override = default;
 
-    virtual const char* what() const noexcept
+    const char* what() const noexcept override
     {
         return description.c_str();
     }
@@ -67,7 +67,7 @@ class SysfsI2CDevice : public SysfsEntry
     {}
     SysfsI2CDevice(SysfsI2CBus bus, int address);
     SysfsI2CDevice(const SysfsI2CDevice& device) = default;
-    virtual ~SysfsI2CDevice() = default;
+    ~SysfsI2CDevice() override = default;
 
     SysfsI2CBus getBus();
     std::string getID();
@@ -87,7 +87,7 @@ class SysfsI2CMux : public SysfsI2CDevice
     SysfsI2CMux(SysfsI2CBus bus, int address) : SysfsI2CDevice(bus, address)
     {}
 
-    virtual ~SysfsI2CMux() = default;
+    ~SysfsI2CMux() override = default;
 
     static int extractChannel(std::string& name);
 };

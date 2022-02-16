@@ -14,17 +14,16 @@ class BasecampNVMeDrive : public BasicNVMeDrive
   public:
     BasecampNVMeDrive(Inventory* inventory, const Basecamp* basecamp,
                       int index);
-    ~BasecampNVMeDrive() = default;
+    ~BasecampNVMeDrive() override = default;
 
     /* Device */
-    virtual void plug(Notifier& notifier) override;
-    virtual void unplug(Notifier& notifier,
-                        int mode = UNPLUG_REMOVES_INVENTORY) override;
+    void plug(Notifier& notifier) override;
+    void unplug(Notifier& notifier, int mode = UNPLUG_REMOVES_INVENTORY) override;
 
     /* FRU */
-    virtual std::string getInventoryPath() const override;
-    virtual void addToInventory(Inventory* inventory) override;
-    virtual void removeFromInventory(Inventory* inventory) override;
+    std::string getInventoryPath() const override;
+    void addToInventory(Inventory* inventory) override;
+    void removeFromInventory(Inventory* inventory) override;
 
   private:
     const Basecamp* basecamp;
@@ -36,7 +35,7 @@ class Basecamp : public Device, FRU
     explicit Basecamp(Inventory* inventory, const Bellavista* bellavista);
     Basecamp(const Basecamp& other) = delete;
     Basecamp(const Basecamp&& other) = delete;
-    ~Basecamp() = default;
+    ~Basecamp() override = default;
 
     Basecamp& operator=(const Basecamp& other) = delete;
     Basecamp& operator=(const Basecamp&& other) = delete;
@@ -44,14 +43,13 @@ class Basecamp : public Device, FRU
     SysfsI2CBus getDriveBus(int index) const;
 
     /* Device */
-    virtual void plug(Notifier& notifier) override;
-    virtual void unplug(Notifier& notifier,
-                        int mode = Device::UNPLUG_REMOVES_INVENTORY) override;
+    void plug(Notifier& notifier) override;
+    void unplug(Notifier& notifier, int mode = Device::UNPLUG_REMOVES_INVENTORY) override;
 
     /* FRU */
-    virtual std::string getInventoryPath() const override;
-    virtual void addToInventory(Inventory* inventory) override;
-    virtual void removeFromInventory(Inventory* inventory) override;
+    std::string getInventoryPath() const override;
+    void addToInventory(Inventory* inventory) override;
+    void removeFromInventory(Inventory* inventory) override;
 
   private:
     static constexpr const char* drive_metadata_bus =
@@ -82,20 +80,19 @@ class Bellavista : public Device, FRU
     explicit Bellavista(Inventory* inventory);
     Bellavista(const Bellavista& other) = delete;
     Bellavista(const Bellavista&& other) = delete;
-    ~Bellavista() = default;
+    ~Bellavista() override = default;
 
     Bellavista& operator=(const Bellavista& other) = delete;
     Bellavista& operator=(const Bellavista&& other) = delete;
 
     /* Device */
-    virtual void plug(Notifier& notifier) override;
-    virtual void unplug(Notifier& notifier,
-                        int mode = Device::UNPLUG_REMOVES_INVENTORY) override;
+    void plug(Notifier& notifier) override;
+    void unplug(Notifier& notifier, int mode = Device::UNPLUG_REMOVES_INVENTORY) override;
 
     /* FRU */
-    virtual std::string getInventoryPath() const override;
-    virtual void addToInventory(Inventory* inventory) override;
-    virtual void removeFromInventory(Inventory* inventory) override;
+    std::string getInventoryPath() const override;
+    void addToInventory(Inventory* inventory) override;
+    void removeFromInventory(Inventory* inventory) override;
 
   private:
     static constexpr const char* basecamp_presence_device_path =
@@ -115,15 +112,14 @@ class Tola : public Device
     explicit Tola(Inventory* inventory);
     Tola(const Tola& other) = delete;
     Tola(const Tola&& other) = delete;
-    ~Tola() = default;
+    ~Tola() override = default;
 
     Tola& operator=(const Tola& other) = delete;
     Tola& operator=(const Tola&& other) = delete;
 
     /* Device */
-    virtual void plug(Notifier& notifier) override;
-    virtual void unplug(Notifier& notifier,
-                        int mode = Device::UNPLUG_REMOVES_INVENTORY) override;
+    void plug(Notifier& notifier) override;
+    void unplug(Notifier& notifier, int mode = Device::UNPLUG_REMOVES_INVENTORY) override;
 
   private:
     Inventory* inventory;
@@ -134,9 +130,9 @@ class Everest : public Platform
 {
   public:
     Everest() = default;
-    ~Everest() = default;
+    ~Everest() override = default;
 
     /* Platform */
-    virtual void enrollWith(PlatformManager& pm) override;
-    virtual void detectFrus(Notifier& notifier, Inventory* inventory) override;
+    void enrollWith(PlatformManager& pm) override;
+    void detectFrus(Notifier& notifier, Inventory* inventory) override;
 };

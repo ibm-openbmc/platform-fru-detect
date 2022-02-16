@@ -17,7 +17,7 @@ class SysfsGPIOChip : public SysfsEntry
     SysfsGPIOChip(SysfsEntry entry) :
         SysfsEntry(SysfsGPIOChip::getGPIOChipPath(entry))
     {}
-    virtual ~SysfsGPIOChip() = default;
+    ~SysfsGPIOChip() override = default;
 
     static bool hasGPIOChip(SysfsEntry entry)
     {

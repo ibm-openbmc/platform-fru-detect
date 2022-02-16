@@ -18,21 +18,20 @@ class NVMeDrive : public Device, FRU
     NVMeDrive(Inventory* inventory, int index) :
         inventory(inventory), index(index)
     {}
-    virtual ~NVMeDrive() = default;
+    ~NVMeDrive() override = default;
 
     /* FRU */
-    virtual std::string getInventoryPath() const override
+    std::string getInventoryPath() const override
     {
         throw std::logic_error("Not implemented");
     }
 
-    virtual void addToInventory([[maybe_unused]] Inventory* inventory) override
+    void addToInventory([[maybe_unused]] Inventory* inventory) override
     {
         throw std::logic_error("Not implemented");
     }
 
-    virtual void
-        removeFromInventory([[maybe_unused]] Inventory* inventory) override
+    void removeFromInventory([[maybe_unused]] Inventory* inventory) override
     {
         throw std::logic_error("Not implemented");
     }
@@ -54,11 +53,11 @@ class BasicNVMeDrive : public NVMeDrive
     BasicNVMeDrive(const SysfsI2CBus& bus, Inventory* inventory, int index);
     BasicNVMeDrive(const SysfsI2CBus& bus, Inventory* inventory, int index,
                    const std::vector<uint8_t>&& metadata);
-    virtual ~BasicNVMeDrive() = default;
+    ~BasicNVMeDrive() override = default;
 
     /* FRU */
-    virtual void addToInventory(Inventory* inventory) override;
-    virtual void removeFromInventory(Inventory* inventory) override;
+    void addToInventory(Inventory* inventory) override;
+    void removeFromInventory(Inventory* inventory) override;
 
   protected:
     const std::vector<uint8_t>& getManufacturer() const;

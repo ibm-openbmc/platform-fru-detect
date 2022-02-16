@@ -105,13 +105,13 @@ class PolledDevicePresence : public NotifySink
     PolledDevicePresence(Connector<T>* connector, std::function<bool()> poll) :
         connector(connector), poll(poll), timerfd(-1)
     {}
-    virtual ~PolledDevicePresence() = default;
+    ~PolledDevicePresence() override = default;
 
     PolledDevicePresence<T>&
         operator=(const PolledDevicePresence<T>& other) = default;
 
     /* NotifySink */
-    virtual void arm() override
+    void arm() override
     {
         assert(timerfd == -1 && "Bad state: timer already armed");
 
@@ -143,12 +143,12 @@ class PolledDevicePresence : public NotifySink
         }
     }
 
-    virtual int getFD() override
+    int getFD() override
     {
         return timerfd;
     }
 
-    virtual void notify(Notifier& notifier) override
+    void notify(Notifier& notifier) override
     {
         drain();
 
@@ -182,7 +182,7 @@ class PolledDevicePresence : public NotifySink
         }
     }
 
-    virtual void disarm() override
+    void disarm() override
     {
         assert(timer > -1 && "Bad state: Timer already disarmed");
         ::close(timerfd);

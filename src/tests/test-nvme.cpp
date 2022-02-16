@@ -14,10 +14,10 @@ class TestNVMeDrive : public BasicNVMeDrive
     {}
 
     /* Device */
-    virtual void plug([[maybe_unused]] Notifier& notifier)
+    void plug([[maybe_unused]] Notifier& notifier) override
     {}
-    virtual void unplug([[maybe_unused]] Notifier& notifier,
-                        [[maybe_unused]] int mode = UNPLUG_REMOVES_INVENTORY)
+    void unplug([[maybe_unused]] Notifier& notifier,
+                [[maybe_unused]] int mode = UNPLUG_REMOVES_INVENTORY) override
     {}
 };
 
