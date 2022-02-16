@@ -286,7 +286,7 @@ SysfsI2CBus Nisqually1z::getFlettSlotI2CBus(int slot) const
 
     int channel = flett_mux_channel_map.at(slot);
 
-    return SysfsI2CBus(mux, channel);
+    return {mux, channel};
 }
 
 /*

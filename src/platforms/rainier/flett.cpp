@@ -137,7 +137,7 @@ SysfsI2CBus Flett::getDriveBus(int index) const
     SysfsI2CMux flettMux(nisqually->getFlettSlotI2CBus(slot),
                          flett_slot_mux_map.at(slot));
 
-    return SysfsI2CBus(flettMux, flett_drive_channel_map.at(index));
+    return {flettMux, flett_drive_channel_map.at(index)};
 }
 
 void Flett::plug(Notifier& notifier)
