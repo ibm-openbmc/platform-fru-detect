@@ -184,7 +184,7 @@ class Nisqually : public Device, FRU
     void removeFromInventory(Inventory* inventory) override;
 
   protected:
-    virtual bool isFlettPresentAt(int slot) = 0;
+    bool isFlettPresentAt(int slot);
 
     Inventory* inventory;
 
@@ -219,10 +219,6 @@ class Nisqually0z : public Nisqually
 
     /* Nisqually */
     SysfsI2CBus getFlettSlotI2CBus(int slot) const override;
-
-  protected:
-    /* Nisqually */
-    bool isFlettPresentAt(int slot) override;
 };
 
 class Nisqually1z : public Nisqually
@@ -239,18 +235,8 @@ class Nisqually1z : public Nisqually
     /* Nisqually */
     SysfsI2CBus getFlettSlotI2CBus(int slot) const override;
 
-  protected:
-    /* Nisqually */
-    bool isFlettPresentAt(int slot) override;
-
   private:
     static constexpr int slotMuxAddress = 0x70;
-
-    static constexpr const char* flettPresenceDevicePath =
-        "/sys/bus/i2c/devices/8-0061";
-
-    gpiod::chip flettPresenceChip;
-    std::map<int, gpiod::line> flettPresenceLines;
 };
 
 class Ingraham : public Device

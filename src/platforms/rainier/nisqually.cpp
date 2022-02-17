@@ -25,13 +25,6 @@ static const std::map<int, int> flettMuxChannelMap = {
     {11, 1},
 };
 
-static const std::map<int, int> flettSlotPresenceMap = {
-    {8, 8},
-    {9, 9},
-    {10, 10},
-    {11, 11},
-};
-
 /* See Rainier_System_Workbook_v1.7.pdf, 4.4.4 NVMe JBOF to Backplane Cabling
  *
  * The workbook dictates that only two Williwakas/Flett pairs are present, but
@@ -167,6 +160,33 @@ void Nisqually::removeFromInventory([[maybe_unused]] Inventory* inventory)
     throw std::logic_error("Unimplemented");
 }
 
+bool Nisqually::isFlettPresentAt(int slot)
+{
+    std::string path = Flett::getInventoryPathFor(this, slot);
+
+    bool populated = inventory->isPresent(path);
+    if (!populated)
+    {
+        debug("Inventory reports slot {PCIE_SLOT} is not populated",
+              "PCIE_SLOT", slot);
+        return false;
+    }
+
+    bool validModel = inventory->isModel(path, "6B87");
+    if (!validModel)
+    {
+        debug(
+            "Inventory reports the card in slot {PCIE_SLOT} is not a Flett card",
+            "PCIE_SLOT", slot);
+        return false;
+    }
+
+    debug("Inventory reports slot {PCIE_SLOT} is populated with Flett card",
+          "PCIE_SLOT", slot);
+
+    return true;
+}
+
 bool Nisqually::isWilliwakasPresent(int index)
 {
     bool present = williwakasPresenceLines.at(index).get_value();
@@ -220,43 +240,9 @@ SysfsI2CBus Nisqually0z::getFlettSlotI2CBus(int slot) const
     return Ingraham::getPCIeSlotI2CBus(slot);
 }
 
-bool Nisqually0z::isFlettPresentAt(int slot)
-{
-    std::string path = Flett::getInventoryPathFor(this, slot);
-
-    bool populated = inventory->isPresent(path);
-    if (!populated)
-    {
-        debug("Inventory reports slot {PCIE_SLOT} is not populated",
-              "PCIE_SLOT", slot);
-        return false;
-    }
-
-    bool validModel = inventory->isModel(path, "6B87");
-    if (!validModel)
-    {
-        debug(
-            "Inventory reports the card in slot {PCIE_SLOT} is not a Flett card",
-            "PCIE_SLOT", slot);
-        return false;
-    }
-
-    debug("Inventory reports slot {PCIE_SLOT} is populated with Flett card",
-          "PCIE_SLOT", slot);
-
-    return true;
-}
-
 /* Nisqually1z */
 
-Nisqually1z::Nisqually1z(Inventory* inventory) :
-    Nisqually(inventory),
-    flettPresenceChip(
-        SysfsGPIOChip(
-            std::filesystem::path(Nisqually1z::flettPresenceDevicePath))
-            .getName()
-            .string(),
-        gpiod::chip::OPEN_BY_NAME)
+Nisqually1z::Nisqually1z(Inventory* inventory) : Nisqually(inventory)
 {
     /* Slot 9 is on the same mux as slot 8 */
     Ingraham::getPCIeSlotI2CBus(8).probeDevice("pca9546",
@@ -264,16 +250,6 @@ Nisqually1z::Nisqually1z(Inventory* inventory) :
     /* Slot 11 is on the same mux as slot 10 */
     Ingraham::getPCIeSlotI2CBus(10).probeDevice("pca9546",
                                                 Nisqually1z::slotMuxAddress);
-
-    /* Iterate in terms of Flett slot numbers for mapping to presence lines */
-    for (auto& slot : flettConnectorSlotMap | std::views::values)
-    {
-        int offset = flettSlotPresenceMap.at(slot);
-        gpiod::line line = flettPresenceChip.get_line(offset);
-        line.request({program_invocation_short_name,
-                      gpiod::line::DIRECTION_INPUT, gpiod::line::ACTIVE_LOW});
-        flettPresenceLines[slot] = line;
-    }
 }
 
 SysfsI2CBus Nisqually1z::getFlettSlotI2CBus(int slot) const
@@ -287,21 +263,4 @@ SysfsI2CBus Nisqually1z::getFlettSlotI2CBus(int slot) const
     int channel = flettMuxChannelMap.at(slot);
 
     return {mux, channel};
-}
-
-/*
- * Note that Bear River and Bear Lake cards also assert the presence GPIO.
- * However, if they are present in slots that can also house Flett cards there
- * will be no associated Williwakas card and as such there will be no drives
- * detected.
- */
-bool Nisqually1z::isFlettPresentAt(int slot)
-{
-    bool present = flettPresenceLines.at(slot).get_value();
-
-    debug("Flett {FLETT_ID} presence for slot {PCIE_SLOT}: {FLETT_PRESENT}",
-          "FLETT_ID", getFlettIndex(slot), "PCIE_SLOT", slot, "FLETT_PRESENT",
-          present);
-
-    return present;
 }
