@@ -9,18 +9,24 @@
 
 PHOSPHOR_LOG2_USING;
 
+// NOLINTNEXTLINE(readability-identifier-naming)
 static constexpr auto INVENTORY_BUS_NAME =
     "xyz.openbmc_project.Inventory.Manager";
 
 // https://github.com/openbmc/phosphor-dbus-interfaces/blob/08baf48ad5f15774d393fbbf4e9479a0ef3e82d0/yaml/xyz/openbmc_project/Inventory/Manager.interface.yaml
+// NOLINTNEXTLINE(readability-identifier-naming)
 static constexpr auto INVENTORY_MANAGER_IFACE =
     "xyz.openbmc_project.Inventory.Manager";
+
+// NOLINTNEXTLINE(readability-identifier-naming)
 static constexpr auto INVENTORY_MANAGER_OBJECT =
     "/xyz/openbmc_project/inventory";
 
 // https://dbus.freedesktop.org/doc/dbus-specification.html#standard-interfaces-properties
+// NOLINTNEXTLINE(readability-identifier-naming)
 static constexpr auto DBUS_PROPERTY_IFACE = "org.freedesktop.DBus.Properties";
 
+// NOLINTNEXTLINE(readability-identifier-naming)
 static constexpr auto INVENTORY_DECORATOR_ASSET_IFACE =
     "xyz.openbmc_project.Inventory.Decorator.Asset";
 

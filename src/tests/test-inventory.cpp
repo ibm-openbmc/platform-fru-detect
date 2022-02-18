@@ -4,8 +4,13 @@
 
 #include "gtest/gtest.h"
 
+// NOLINTNEXTLINE(readability-identifier-naming)
 static constexpr auto TEST_PATH = "/path/test";
+
+// NOLINTNEXTLINE(readability-identifier-naming)
 static constexpr auto TEST_PATH_1 = "/path/test/1";
+
+// NOLINTNEXTLINE(readability-identifier-naming)
 static constexpr auto TEST_PATH_2 = "/path/test/2";
 
 using namespace inventory;
@@ -42,24 +47,24 @@ static void accumulate(std::map<std::string, ObjectType>& store,
 
 struct MockInventory : public Inventory
 {
-    virtual std::weak_ptr<dbus::PropertiesChangedListener>
+    std::weak_ptr<dbus::PropertiesChangedListener>
         addPropertiesChangedListener(
             [[maybe_unused]] const std::string& path,
             [[maybe_unused]] const std::string& interface,
             [[maybe_unused]] std::function<void(dbus::PropertiesChanged&&)>
-                callback)
+                callback) override
     {
         throw std::logic_error("Unimplemented");
     }
 
-    virtual void removePropertiesChangedListener(
+    void removePropertiesChangedListener(
         [[maybe_unused]] std::weak_ptr<dbus::PropertiesChangedListener>
-            listener)
+            listener) override
     {
         throw std::logic_error("Unimplemented");
     }
 
-    virtual void add(const std::string& path, interfaces::Interface iface)
+    void add(const std::string& path, interfaces::Interface iface) override
     {
         ObjectType update;
 
@@ -68,7 +73,7 @@ struct MockInventory : public Inventory
         accumulate(store, path, update);
     }
 
-    virtual void remove(const std::string& path, interfaces::Interface iface)
+    void remove(const std::string& path, interfaces::Interface iface) override
     {
         ObjectType update;
 
@@ -77,22 +82,22 @@ struct MockInventory : public Inventory
         accumulate(store, path, update);
     }
 
-    virtual void markPresent(const std::string& path) override
+    void markPresent(const std::string& path) override
     {
         present.insert_or_assign(path, true);
     }
 
-    virtual void markAbsent(const std::string& path) override
+    void markAbsent(const std::string& path) override
     {
         present.insert_or_assign(path, false);
     }
 
-    virtual bool isPresent(const std::string& path) override
+    bool isPresent(const std::string& path) override
     {
         return present.at(path);
     }
 
-    virtual bool isModel([[maybe_unused]] const std::string& path,
+    bool isModel([[maybe_unused]] const std::string& path,
                          [[maybe_unused]] const std::string& model) override
     {
         throw std::logic_error("Unimplemented");

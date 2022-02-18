@@ -3,22 +3,21 @@
 #include "platforms/everest.hpp"
 #include "sysfs/gpio.hpp"
 
-#include <errno.h>
-
+#include <cerrno>
 #include <stdexcept>
 
 Bellavista::Bellavista(Inventory* inventory) :
     inventory(inventory),
     basecampPresenceChip(
         SysfsGPIOChip(
-            std::filesystem::path(Bellavista::basecamp_presence_device_path))
+            std::filesystem::path(Bellavista::basecampPresenceDevicePath))
             .getName()
             .string(),
         gpiod::chip::OPEN_BY_NAME),
     basecampConnector(this->inventory, this)
 {
     basecampPresenceLine =
-        basecampPresenceChip.get_line(Bellavista::basecamp_presence_offset);
+        basecampPresenceChip.get_line(Bellavista::basecampPresenceOffset);
     basecampPresenceLine.request({program_invocation_short_name,
                                   gpiod::line::DIRECTION_INPUT,
                                   gpiod::line::ACTIVE_LOW});

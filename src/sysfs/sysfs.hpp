@@ -10,7 +10,7 @@
 class SysfsEntry
 {
   public:
-    SysfsEntry(std::filesystem::path path, bool check = true) : path(path)
+    SysfsEntry(const std::filesystem::path& path, bool check = true) : path(path)
     {
 
         if (check && !std::filesystem::exists(path))

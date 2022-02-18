@@ -30,13 +30,16 @@ using InterfaceType = std::map<std::string, PropertyType>;
 using ObjectType = std::map<std::string, InterfaceType>;
 
 // https://github.com/openbmc/phosphor-dbus-interfaces/blob/08baf48ad5f15774d393fbbf4e9479a0ef3e82d0/yaml/xyz/openbmc_project/Inventory/Item.interface.yaml
+// NOLINTNEXTLINE(readability-identifier-naming)
 static constexpr auto INVENTORY_ITEM_IFACE =
     "xyz.openbmc_project.Inventory.Item";
 
 // https://github.com/openbmc/phosphor-dbus-interfaces/blob/08baf48ad5f15774d393fbbf4e9479a0ef3e82d0/yaml/xyz/openbmc_project/Inventory/Decorator/I2CDevice.interface.yaml
+// NOLINTNEXTLINE(readability-identifier-naming)
 static constexpr auto INVENTORY_DECORATOR_I2CDEVICE_IFACE =
     "xyz.openbmc_project.Inventory.Decorator.I2CDevice";
 
+// NOLINTNEXTLINE(readability-identifier-naming)
 static constexpr auto INVENTORY_IPZVPD_VINI_IFACE = "com.ibm.ipzvpd.VINI";
 
 namespace interfaces
@@ -92,7 +95,7 @@ class I2CDevice : public Interface
                   {{"Bus", static_cast<size_t>(INT_MAX)},
                    {"Address", static_cast<size_t>(0)}})
     {}
-    ~I2CDevice() = default;
+    ~I2CDevice() override = default;
 };
 
 class VINI : public Interface
@@ -108,7 +111,7 @@ class VINI : public Interface
                    {"CC", std::vector<uint8_t>(0)},
                    {"SN", std::vector<uint8_t>(0)}})
     {}
-    ~VINI() = default;
+    ~VINI() override = default;
 };
 } // namespace interfaces
 } // namespace inventory
@@ -141,25 +144,22 @@ class InventoryManager : public Inventory
   public:
     InventoryManager(sdbusplus::bus::bus& dbus) : dbus(dbus)
     {}
-    ~InventoryManager() = default;
+    ~InventoryManager() override = default;
 
     /* Inventory */
-    virtual std::weak_ptr<dbus::PropertiesChangedListener>
+    std::weak_ptr<dbus::PropertiesChangedListener>
         addPropertiesChangedListener(
             const std::string& path, const std::string& interface,
             std::function<void(dbus::PropertiesChanged&& props)> callback)
             override;
-    virtual void removePropertiesChangedListener(
+    void removePropertiesChangedListener(
         std::weak_ptr<dbus::PropertiesChangedListener> listener) override;
-    virtual void add(const std::string& path,
-                     const inventory::interfaces::Interface iface) override;
-    virtual void remove(const std::string& path,
-                        const inventory::interfaces::Interface iface) override;
-    virtual void markPresent(const std::string& path) override;
-    virtual void markAbsent(const std::string& path) override;
-    virtual bool isPresent(const std::string& path) override;
-    virtual bool isModel(const std::string& path,
-                         const std::string& model) override;
+    void add(const std::string& path, const inventory::interfaces::Interface iface) override;
+    void remove(const std::string& path, const inventory::interfaces::Interface iface) override;
+    void markPresent(const std::string& path) override;
+    void markAbsent(const std::string& path) override;
+    bool isPresent(const std::string& path) override;
+    bool isModel(const std::string& path, const std::string& model) override;
 
   private:
     virtual void updateObject(const std::string& path,
@@ -174,25 +174,22 @@ class PublishWhenPresentInventoryDecorator : public Inventory
 {
   public:
     PublishWhenPresentInventoryDecorator(Inventory* inventory);
-    ~PublishWhenPresentInventoryDecorator() = default;
+    ~PublishWhenPresentInventoryDecorator() override = default;
 
     /* Inventory */
-    virtual std::weak_ptr<dbus::PropertiesChangedListener>
+    std::weak_ptr<dbus::PropertiesChangedListener>
         addPropertiesChangedListener(
             const std::string& path, const std::string& interface,
             std::function<void(dbus::PropertiesChanged&& props)> callback)
             override;
-    virtual void removePropertiesChangedListener(
+    void removePropertiesChangedListener(
         std::weak_ptr<dbus::PropertiesChangedListener> listener) override;
-    virtual void add(const std::string& path,
-                     const inventory::interfaces::Interface iface) override;
-    virtual void remove(const std::string& path,
-                        const inventory::interfaces::Interface iface) override;
-    virtual void markPresent(const std::string& path) override;
-    virtual void markAbsent(const std::string& path) override;
-    virtual bool isPresent(const std::string& path) override;
-    virtual bool isModel(const std::string& path,
-                         const std::string& model) override;
+    void add(const std::string& path, const inventory::interfaces::Interface iface) override;
+    void remove(const std::string& path, const inventory::interfaces::Interface iface) override;
+    void markPresent(const std::string& path) override;
+    void markAbsent(const std::string& path) override;
+    bool isPresent(const std::string& path) override;
+    bool isModel(const std::string& path, const std::string& model) override;
 
   private:
     Inventory* inventory;

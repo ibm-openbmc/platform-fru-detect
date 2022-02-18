@@ -28,11 +28,11 @@ class DBusNotifySink : public NotifySink
   public:
     explicit DBusNotifySink(sdbusplus::bus::bus& dbus);
     DBusNotifySink() = delete;
-    ~DBusNotifySink() = default;
+    ~DBusNotifySink() override = default;
 
     /* NotifySink */
-    virtual int getFD() override;
-    virtual void notify(Notifier& notifier) override;
+    int getFD() override;
+    void notify(Notifier& notifier) override;
 
   private:
     sdbusplus::bus::bus& dbus;
@@ -60,5 +60,5 @@ class PropertiesChangedListener;
 std::shared_ptr<PropertiesChangedListener> sharedPropertiesChangedListener(
     sdbusplus::bus::bus& bus, const std::string& path,
     const std::string& interface,
-    std::function<void(PropertiesChanged&&)> callback);
+    const std::function<void(PropertiesChanged&&)>& callback);
 } // namespace dbus

@@ -10,13 +10,13 @@
 class SysfsEEPROM : public SysfsEntry
 {
   public:
-    static bool isEEPROM(std::filesystem::path path);
+    static bool isEEPROM(const std::filesystem::path& path);
 
     SysfsEEPROM(const SysfsEEPROM& eeprom) : SysfsEntry(eeprom.path)
     {}
-    SysfsEEPROM(std::filesystem::path path) : SysfsEntry(path)
+    SysfsEEPROM(const std::filesystem::path& path) : SysfsEntry(path)
     {}
-    SysfsEEPROM(SysfsI2CDevice device) : SysfsEntry(device.getPath() / "eeprom")
+    SysfsEEPROM(const SysfsI2CDevice& device) : SysfsEntry(device.getPath() / "eeprom")
     {}
 
     SysfsEEPROM(SysfsEEPROM& other) = default;

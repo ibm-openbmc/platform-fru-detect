@@ -2,25 +2,24 @@
 /* Copyright IBM Corp. 2021 */
 #include "sysfs/i2c.hpp"
 
-#include <limits.h>
-
 #include <phosphor-logging/lg2.hpp>
 
 #include <array>
 #include <cassert>
+#include <climits>
 #include <fstream>
 #include <iostream>
 #include <sstream>
 
 PHOSPHOR_LOG2_USING_WITH_FLAGS;
 
-static constexpr std::array<const char*, 8> mux_channel_map = {
+static constexpr std::array<const char*, 8> muxChannelMap = {
     "channel-0", "channel-1", "channel-2", "channel-3",
     "channel-4", "channel-5", "channel-6", "channel-7",
 };
 
-SysfsI2CBus::SysfsI2CBus(SysfsI2CMux mux, int channel) :
-    SysfsEntry(mux.getPath() / mux_channel_map.at(channel))
+SysfsI2CBus::SysfsI2CBus(const SysfsI2CMux& mux, int channel) :
+    SysfsEntry(mux.getPath() / muxChannelMap.at(channel))
 {}
 
 int SysfsI2CBus::getMuxChannel()
@@ -66,15 +65,11 @@ int SysfsI2CBus::getAddress() const
 
 std::filesystem::path SysfsI2CBus::getBusDevice() const
 {
-    char devpath[PATH_MAX];
+    std::ostringstream ss;
 
-    int rc = snprintf(devpath, PATH_MAX - 1, "/dev/i2c-%d", getAddress());
-    if (rc > PATH_MAX - 1)
-    {
-        throw std::logic_error("Formatting bus device path failed");
-    }
-    devpath[rc] = '\0';
-    return devpath;
+    ss << "/dev/i2c-" << getAddress();
+
+    return ss.str();
 }
 
 std::filesystem::path SysfsI2CBus::getDevicePath(int address)
@@ -93,18 +88,18 @@ bool SysfsI2CBus::isDevicePresent(int address)
 
 SysfsI2CDevice SysfsI2CBus::newDevice(std::string type, int address)
 {
-    std::fstream new_device(path / "new_device", new_device.out);
-    if (!new_device.is_open())
+    std::fstream newDevice(path / "new_device", newDevice.out);
+    if (!newDevice.is_open())
     {
         warning("Failed to open '{SYSFS_I2C_NEW_DEVICE_PATH}'",
                 "SYSFS_I2C_NEW_DEVICE_PATH", path.string());
         throw -1;
     }
 
-    new_device << type << " 0x" << std::hex << address << "\n";
-    new_device.flush();
+    newDevice << type << " 0x" << std::hex << address << "\n";
+    newDevice.flush();
 
-    if (new_device.bad() || new_device.fail())
+    if (newDevice.bad() || newDevice.fail())
     {
         warning(
             "Failed to add new device {I2C_DEVICE_TYPE} at {I2C_DEVICE_ADDRESS} via '{SYSFS_I2C_NEW_DEVICE_PATH}'",
@@ -113,23 +108,23 @@ SysfsI2CDevice SysfsI2CBus::newDevice(std::string type, int address)
         throw -1;
     }
 
-    return SysfsI2CDevice(getDevicePath(address));
+    return {getDevicePath(address)};
 }
 
 void SysfsI2CBus::deleteDevice(int address)
 {
-    std::fstream delete_device(path / "delete_device", delete_device.out);
-    if (!delete_device.is_open())
+    std::fstream deleteDevice(path / "delete_device", deleteDevice.out);
+    if (!deleteDevice.is_open())
     {
         warning("Failed to open '{SYSFS_I2C_DELETE_DEVICE_PATH}'",
                 "SYSFS_I2C_DELETE_DEVICE_PATH", path);
         throw -1;
     }
 
-    delete_device << "0x" << std::hex << address << "\n";
-    delete_device.flush();
+    deleteDevice << "0x" << std::hex << address << "\n";
+    deleteDevice.flush();
 
-    if (delete_device.bad() || delete_device.fail())
+    if (deleteDevice.bad() || deleteDevice.fail())
     {
         warning(
             "Failed to delete device at {I2C_DEVICE_ADDRESS} via '{SYSFS_I2C_DELETE_DEVICE_PATH}'",
@@ -146,10 +141,10 @@ SysfsI2CDevice SysfsI2CBus::requireDevice(std::string type, int address)
         std::filesystem::path path = getDevicePath(address);
         debug("Device already exists at '{SYSFS_I2C_DEVICE_PATH}'",
               "SYSFS_I2C_DEVICE_PATH", path);
-        return SysfsI2CDevice(path);
+        return {path};
     }
 
-    return newDevice(type, address);
+    return newDevice(std::move(type), address);
 }
 
 void SysfsI2CBus::releaseDevice(int address)
@@ -167,7 +162,7 @@ void SysfsI2CBus::releaseDevice(int address)
 
 SysfsI2CDevice SysfsI2CBus::probeDevice(std::string type, int address)
 {
-    SysfsI2CDevice device = requireDevice(type, address);
+    SysfsI2CDevice device = requireDevice(std::move(type), address);
 
     std::filesystem::path driver = device.getPath() / "driver";
 

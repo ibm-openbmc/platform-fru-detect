@@ -61,23 +61,23 @@ Basecamp::Basecamp(Inventory* inventory, const Bellavista* bellavista) :
                      Connector<BasecampNVMeDrive>(inventory, this, 8),
                      Connector<BasecampNVMeDrive>(inventory, this, 9)}}
 {
-    SysfsI2CBus root(drive_metadata_bus);
-    SysfsI2CMux mux(root, drive_metadata_mux_address);
-    SysfsI2CBus bus(mux, drive_metadata_mux_channel);
+    SysfsI2CBus root(driveMetadataBus);
+    SysfsI2CMux mux(root, driveMetadataMuxAddress);
+    SysfsI2CBus bus(mux, driveMetadataMuxChannel);
 
     SysfsI2CDevice dev =
-        bus.probeDevice("pca9552", drive_presence_device_address);
+        bus.probeDevice("pca9552", drivePresenceDeviceAddress);
 
     std::string chipName = SysfsGPIOChip(dev).getName().string();
     gpiod::chip chip(chipName, gpiod::chip::OPEN_BY_NAME);
 
-    std::vector<unsigned int> offsets(drive_presence_map.begin(),
-                                      drive_presence_map.end());
+    std::vector<unsigned int> offsets(drivePresenceMap.begin(),
+                                      drivePresenceMap.end());
 
-    assert(drive_presence_map.size() == lines.size());
+    assert(drivePresenceMap.size() == lines.size());
     for (std::size_t i = 0; i < lines.size(); i++)
     {
-        auto line = chip.get_line(drive_presence_map[i]);
+        auto line = chip.get_line(drivePresenceMap[i]);
         line.request({program_invocation_short_name,
                       gpiod::line::DIRECTION_INPUT, gpiod::line::ACTIVE_LOW});
         lines[i] = line;
@@ -86,10 +86,10 @@ Basecamp::Basecamp(Inventory* inventory, const Bellavista* bellavista) :
 
 SysfsI2CBus Basecamp::getDriveBus(int index) const
 {
-    SysfsI2CBus root(drive_management_bus);
-    SysfsI2CMux driveMux(root, drive_mux_map.at(index));
+    SysfsI2CBus root(driveManagementBus);
+    SysfsI2CMux driveMux(root, driveMuxMap.at(index));
 
-    return SysfsI2CBus(driveMux, drive_channel_map.at(index));
+    return SysfsI2CBus(driveMux, driveChannelMap.at(index));
 }
 
 void Basecamp::plug(Notifier& notifier)

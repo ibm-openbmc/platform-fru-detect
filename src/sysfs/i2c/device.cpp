@@ -7,7 +7,7 @@
 
 namespace fs = std::filesystem;
 
-std::string SysfsI2CDevice::generateI2CDeviceID(SysfsI2CBus bus, int address)
+std::string SysfsI2CDevice::generateI2CDeviceID(const SysfsI2CBus& bus, int address)
 {
     std::ostringstream oss;
 
@@ -17,7 +17,7 @@ std::string SysfsI2CDevice::generateI2CDeviceID(SysfsI2CBus bus, int address)
     return oss.str();
 }
 
-SysfsI2CDevice::SysfsI2CDevice(SysfsI2CBus bus, int address) :
+SysfsI2CDevice::SysfsI2CDevice(const SysfsI2CBus& bus, int address) :
     SysfsEntry(fs::path(bus.getPath() / generateI2CDeviceID(bus, address)))
 {}
 
@@ -36,5 +36,5 @@ int SysfsI2CDevice::getAddress()
 
 SysfsI2CBus SysfsI2CDevice::getBus()
 {
-    return SysfsI2CBus(path.parent_path());
+    return {path.parent_path()};
 }

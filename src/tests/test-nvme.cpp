@@ -10,14 +10,15 @@ class TestNVMeDrive : public BasicNVMeDrive
   public:
     TestNVMeDrive(const SysfsI2CBus& bus, Inventory* inventory, int index,
                   const std::vector<uint8_t>&& metadata) :
+        // NOLINTNEXTLINE(performance-move-const-arg)
         BasicNVMeDrive(bus, inventory, index, std::move(metadata))
     {}
 
     /* Device */
-    virtual void plug([[maybe_unused]] Notifier& notifier)
+    void plug([[maybe_unused]] Notifier& notifier) override
     {}
-    virtual void unplug([[maybe_unused]] Notifier& notifier,
-                        [[maybe_unused]] int mode = UNPLUG_REMOVES_INVENTORY)
+    void unplug([[maybe_unused]] Notifier& notifier,
+                [[maybe_unused]] int mode = UNPLUG_REMOVES_INVENTORY) override
     {}
 };
 

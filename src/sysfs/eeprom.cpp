@@ -4,12 +4,12 @@
 
 #include "devices/nvme.hpp"
 
-bool SysfsEEPROM::isEEPROM(std::filesystem::path path)
+bool SysfsEEPROM::isEEPROM(const std::filesystem::path& path)
 {
     return path.filename().string() == "eeprom";
 }
 
 SysfsI2CDevice SysfsEEPROM::getDevice()
 {
-    return SysfsI2CDevice(path.parent_path());
+    return {path.parent_path()};
 }

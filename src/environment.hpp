@@ -39,22 +39,20 @@ class SimicsExecutionEnvironment : public ExecutionEnvironment
     static bool isSimicsExecutionEnvironment();
 
     SimicsExecutionEnvironment() = default;
-    ~SimicsExecutionEnvironment() = default;
+    ~SimicsExecutionEnvironment() override = default;
 
     /* ExecutionEnvironment */
-    virtual bool probe() override;
-    virtual void run(PlatformManager& pm, Notifier& notifier,
-                     Inventory* inventory) override;
+    bool probe() override;
+    void run(PlatformManager& pm, Notifier& notifier, Inventory* inventory) override;
 };
 
 class HardwareExecutionEnvironment : public ExecutionEnvironment
 {
   public:
     HardwareExecutionEnvironment() = default;
-    ~HardwareExecutionEnvironment() = default;
+    ~HardwareExecutionEnvironment() override = default;
 
     /* ExecutionEnvironment */
-    virtual bool probe() override;
-    virtual void run(PlatformManager& pm, Notifier& notifier,
-                     Inventory* inventory) override;
+    bool probe() override;
+    void run(PlatformManager& pm, Notifier& notifier, Inventory* inventory) override;
 };

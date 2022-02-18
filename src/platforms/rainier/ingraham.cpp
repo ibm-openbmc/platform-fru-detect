@@ -13,7 +13,7 @@ Ingraham::Ingraham(Inventory* inventory, Nisqually* nisqually) :
 
 SysfsI2CBus Ingraham::getPCIeSlotI2CBus(int slot)
 {
-    return SysfsI2CBus(fs::path(Ingraham::pcie_slot_bus_map.at(slot)));
+    return SysfsI2CBus(fs::path(Ingraham::pcieSlotBusMap.at(slot)));
 }
 
 void Ingraham::plug(Notifier& notifier)

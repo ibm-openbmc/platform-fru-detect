@@ -31,18 +31,17 @@ class FlettNVMeDrive : public BasicNVMeDrive
                             const Flett* flett, int index);
     FlettNVMeDrive(const FlettNVMeDrive& other) = delete;
     FlettNVMeDrive(const FlettNVMeDrive&& other) = delete;
-    ~FlettNVMeDrive() = default;
+    ~FlettNVMeDrive() override = default;
 
     FlettNVMeDrive& operator=(const FlettNVMeDrive& other) = delete;
     FlettNVMeDrive& operator=(const FlettNVMeDrive&& other) = delete;
 
     /* Device */
-    virtual void plug(Notifier& notifier) override;
-    virtual void unplug(Notifier& notifier,
-                        int mode = UNPLUG_REMOVES_INVENTORY) override;
+    void plug(Notifier& notifier) override;
+    void unplug(Notifier& notifier, int mode = UNPLUG_REMOVES_INVENTORY) override;
 
     /* FRU */
-    virtual std::string getInventoryPath() const override;
+    std::string getInventoryPath() const override;
 
   private:
     void decorateWithI2CDevice(const std::string& path,
@@ -62,7 +61,7 @@ class Flett : public Device
     explicit Flett(Inventory* inventory, const Nisqually* nisqually, int slot);
     Flett(const Flett& other) = delete;
     Flett(const Flett&& other) = delete;
-    ~Flett() = default;
+    ~Flett() override = default;
 
     Flett& operator=(const Flett& other) = delete;
     Flett& operator=(const Flett&& other) = delete;
@@ -71,9 +70,8 @@ class Flett : public Device
     SysfsI2CBus getDriveBus(int index) const;
 
     /* Device */
-    virtual void plug(Notifier& notifier) override;
-    virtual void unplug(Notifier& notifier,
-                        int mode = Device::UNPLUG_REMOVES_INVENTORY) override;
+    void plug(Notifier& notifier) override;
+    void unplug(Notifier& notifier, int mode = Device::UNPLUG_REMOVES_INVENTORY) override;
 
   private:
     Inventory* inventory;
@@ -90,20 +88,19 @@ class WilliwakasNVMeDrive : public NVMeDrive
                                  const Williwakas* backplane, int index);
     WilliwakasNVMeDrive(const WilliwakasNVMeDrive& other) = delete;
     WilliwakasNVMeDrive(const WilliwakasNVMeDrive&& other) = delete;
-    ~WilliwakasNVMeDrive() = default;
+    ~WilliwakasNVMeDrive() override = default;
 
     WilliwakasNVMeDrive& operator=(const WilliwakasNVMeDrive& other) = delete;
     WilliwakasNVMeDrive& operator=(const WilliwakasNVMeDrive&& other) = delete;
 
     /* Device */
-    virtual void plug(Notifier& notifier) override;
-    virtual void unplug(Notifier& notifier,
-                        int mode = UNPLUG_REMOVES_INVENTORY) override;
+    void plug(Notifier& notifier) override;
+    void unplug(Notifier& notifier, int mode = UNPLUG_REMOVES_INVENTORY) override;
 
     /* FRU */
-    virtual std::string getInventoryPath() const override;
-    virtual void addToInventory(Inventory* inventory) override;
-    virtual void removeFromInventory(Inventory* inventory) override;
+    std::string getInventoryPath() const override;
+    void addToInventory(Inventory* inventory) override;
+    void removeFromInventory(Inventory* inventory) override;
 
   private:
     const Williwakas* williwakas;
@@ -119,7 +116,7 @@ class Williwakas : public Device, FRU
                         int index);
     Williwakas(const Williwakas& other) = delete;
     Williwakas(const Williwakas&& other) = delete;
-    ~Williwakas() = default;
+    ~Williwakas() override = default;
 
     Williwakas& operator=(const Williwakas& other) = delete;
     Williwakas& operator=(const Williwakas&& other) = delete;
@@ -127,25 +124,24 @@ class Williwakas : public Device, FRU
     int getIndex() const;
 
     /* Device */
-    virtual void plug(Notifier& notifier) override;
-    virtual void unplug(Notifier& notifier,
-                        int mode = Device::UNPLUG_REMOVES_INVENTORY) override;
+    void plug(Notifier& notifier) override;
+    void unplug(Notifier& notifier, int mode = Device::UNPLUG_REMOVES_INVENTORY) override;
 
     /* FRU */
-    virtual std::string getInventoryPath() const override;
-    virtual void addToInventory(Inventory* inventory) override;
-    virtual void removeFromInventory(Inventory* inventory) override;
+    std::string getInventoryPath() const override;
+    void addToInventory(Inventory* inventory) override;
+    void removeFromInventory(Inventory* inventory) override;
 
   private:
     static constexpr int drivePresenceDeviceAddress = 0x60;
 
-    static constexpr std::array<const char*, 3> drive_backplane_bus = {
+    static constexpr std::array<const char*, 3> driveBackplaneBus = {
         "/sys/bus/i2c/devices/i2c-13",
         "/sys/bus/i2c/devices/i2c-14",
         "/sys/bus/i2c/devices/i2c-15",
     };
 
-    static constexpr std::array<int, 8> drive_presence_map = {
+    static constexpr std::array<int, 8> drivePresenceMap = {
         8, 9, 10, 11, 12, 13, 14, 15,
     };
 
@@ -171,7 +167,7 @@ class Nisqually : public Device, FRU
     explicit Nisqually(Inventory* inventory);
     Nisqually(const Nisqually& other) = delete;
     Nisqually(const Nisqually&& other) = delete;
-    virtual ~Nisqually() = default;
+    ~Nisqually() override = default;
 
     Nisqually& operator=(const Nisqually& other) = delete;
     Nisqually& operator=(const Nisqually&& other) = delete;
@@ -179,24 +175,23 @@ class Nisqually : public Device, FRU
     virtual SysfsI2CBus getFlettSlotI2CBus(int slot) const = 0;
 
     /* Device */
-    virtual void plug(Notifier& notifier) override;
-    virtual void unplug(Notifier& notifier,
-                        int mode = Device::UNPLUG_REMOVES_INVENTORY) override;
+    void plug(Notifier& notifier) override;
+    void unplug(Notifier& notifier, int mode = Device::UNPLUG_REMOVES_INVENTORY) override;
 
     /* FRU */
-    virtual std::string getInventoryPath() const override;
-    virtual void addToInventory(Inventory* inventory) override;
-    virtual void removeFromInventory(Inventory* inventory) override;
+    std::string getInventoryPath() const override;
+    void addToInventory(Inventory* inventory) override;
+    void removeFromInventory(Inventory* inventory) override;
 
   protected:
-    virtual bool isFlettPresentAt(int slot) = 0;
+    bool isFlettPresentAt(int slot);
 
     Inventory* inventory;
 
   private:
-    static constexpr const char* williwakas_presence_device_path =
+    static constexpr const char* williwakasPresenceDevicePath =
         "/sys/bus/i2c/devices/0-0020";
-    static constexpr std::array<int, 3> williwakas_presence_map = {7, 6, 5};
+    static constexpr std::array<int, 3> williwakasPresenceMap = {7, 6, 5};
 
     void detectFlettCards(Notifier& notifier);
 
@@ -217,17 +212,13 @@ class Nisqually0z : public Nisqually
     explicit Nisqually0z(Inventory* inventory);
     Nisqually0z(const Nisqually0z& other) = delete;
     Nisqually0z(const Nisqually0z&& other) = delete;
-    ~Nisqually0z() = default;
+    ~Nisqually0z() override = default;
 
     Nisqually0z& operator=(const Nisqually0z& other) = delete;
     Nisqually0z& operator=(const Nisqually0z&& other) = delete;
 
     /* Nisqually */
-    virtual SysfsI2CBus getFlettSlotI2CBus(int slot) const override;
-
-  protected:
-    /* Nisqually */
-    virtual bool isFlettPresentAt(int slot) override;
+    SysfsI2CBus getFlettSlotI2CBus(int slot) const override;
 };
 
 class Nisqually1z : public Nisqually
@@ -236,26 +227,16 @@ class Nisqually1z : public Nisqually
     explicit Nisqually1z(Inventory* inventory);
     Nisqually1z(const Nisqually1z& other) = delete;
     Nisqually1z(const Nisqually1z&& other) = delete;
-    ~Nisqually1z() = default;
+    ~Nisqually1z() override = default;
 
     Nisqually1z& operator=(const Nisqually1z& other) = delete;
     Nisqually1z& operator=(const Nisqually1z&& other) = delete;
 
     /* Nisqually */
-    virtual SysfsI2CBus getFlettSlotI2CBus(int slot) const override;
-
-  protected:
-    /* Nisqually */
-    virtual bool isFlettPresentAt(int slot) override;
+    SysfsI2CBus getFlettSlotI2CBus(int slot) const override;
 
   private:
     static constexpr int slotMuxAddress = 0x70;
-
-    static constexpr const char* flett_presence_device_path =
-        "/sys/bus/i2c/devices/8-0061";
-
-    gpiod::chip flettPresenceChip;
-    std::map<int, gpiod::line> flettPresenceLines;
 };
 
 class Ingraham : public Device
@@ -266,37 +247,23 @@ class Ingraham : public Device
     explicit Ingraham(Inventory* inventory, Nisqually* nisqually);
     Ingraham(const Ingraham& other) = delete;
     Ingraham(const Ingraham&& other) = delete;
-    ~Ingraham() = default;
+    ~Ingraham() override = default;
 
     Ingraham& operator=(const Ingraham& other) = delete;
     Ingraham& operator=(const Ingraham&& other) = delete;
 
     /* Device */
-    virtual void plug(Notifier& notifier) override;
-    virtual void unplug(Notifier& notifier,
-                        int mode = Device::UNPLUG_REMOVES_INVENTORY) override;
+    void plug(Notifier& notifier) override;
+    void unplug(Notifier& notifier, int mode = Device::UNPLUG_REMOVES_INVENTORY) override;
 
   private:
-    static constexpr std::array<const char*, 4> pcie_slot_busses = {
-        "i2c-4",
-        "i2c-5",
-        "i2c-6",
-        "i2c-11",
-    };
-
-    static constexpr std::array<const char*, 12> pcie_slot_bus_map = {
+    static constexpr std::array<const char*, 12> pcieSlotBusMap = {
         "/sys/bus/i2c/devices/i2c-4",  "/sys/bus/i2c/devices/i2c-4",
         "/sys/bus/i2c/devices/i2c-4",  "/sys/bus/i2c/devices/i2c-5",
         "/sys/bus/i2c/devices/i2c-5",  nullptr,
         "/sys/bus/i2c/devices/i2c-6",  "/sys/bus/i2c/devices/i2c-6",
         "/sys/bus/i2c/devices/i2c-6",  "/sys/bus/i2c/devices/i2c-6",
         "/sys/bus/i2c/devices/i2c-11", "/sys/bus/i2c/devices/i2c-11",
-    };
-
-    static constexpr std::array<const char*, 3> williwakas_bus_map = {
-        "/sys/bus/i2c/devices/i2c-13",
-        "/sys/bus/i2c/devices/i2c-14",
-        "/sys/bus/i2c/devices/i2c-15",
     };
 
     Inventory* inventory;
@@ -307,18 +274,18 @@ class Rainier0z : public Platform
 {
   public:
     Rainier0z() = default;
-    virtual ~Rainier0z() = default;
+    ~Rainier0z() override = default;
 
-    virtual void enrollWith(PlatformManager& pm) override;
-    virtual void detectFrus(Notifier& notifier, Inventory* inventory) override;
+    void enrollWith(PlatformManager& pm) override;
+    void detectFrus(Notifier& notifier, Inventory* inventory) override;
 };
 
 class Rainier1z : public Platform
 {
   public:
     Rainier1z() = default;
-    virtual ~Rainier1z() = default;
+    ~Rainier1z() override = default;
 
-    virtual void enrollWith(PlatformManager& pm) override;
-    virtual void detectFrus(Notifier& notifier, Inventory* inventory) override;
+    void enrollWith(PlatformManager& pm) override;
+    void detectFrus(Notifier& notifier, Inventory* inventory) override;
 };

@@ -43,7 +43,7 @@ class PropertiesChangedListener
 std::shared_ptr<PropertiesChangedListener> sharedPropertiesChangedListener(
     sdbusplus::bus::bus& dbus, const std::string& path,
     const std::string& interface,
-    std::function<void(PropertiesChanged&&)> callback)
+    const std::function<void(PropertiesChanged&&)>& callback)
 {
     auto wrapped = [callback](sdbusplus::message::message& msg) {
         callback(PropertiesChanged(msg));
