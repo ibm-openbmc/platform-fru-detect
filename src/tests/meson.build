@@ -22,3 +22,24 @@ test('test-nvme',
 				libgpiodcxx_dep,
 				phosphor_logging_dep,
 				gtest_dep ]))
+
+test('test-platform',
+     executable('test-platform',
+	        sources: [ 'test-platform.cpp',
+			   '../notify.cpp' ],
+	        dependencies: [ headers_dep,
+			        libgpiodcxx_dep,
+			        phosphor_logging_dep,
+			        gtest_dep ]))
+
+test('test-lights-out',
+     executable('test-lights-out',
+	        sources: ['test-lights-out.cpp',
+			  'mock-inventory.cpp',
+			  '../notify.cpp' ],
+	        dependencies: [ headers_dep,
+			        devices_dep,
+				inventory_dep,
+				libgpiodcxx_dep,
+				phosphor_logging_dep,
+				gtest_dep ]))

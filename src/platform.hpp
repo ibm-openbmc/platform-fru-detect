@@ -49,7 +49,8 @@ class Connector
   public:
     template <typename... DeviceArgs>
     Connector(int idx, DeviceArgs&&... args) :
-        idx(idx), device(), ctor([this, args...]() mutable {
+        state(CONNECTOR_UNINITIALISED), idx(idx), device(),
+        ctor([this, args...]() mutable {
             device.emplace(std::forward<DeviceArgs>(args)...);
         })
     {}
@@ -57,24 +58,39 @@ class Connector
 
     void populate(Notifier& notifier)
     {
-        if (device)
+        switch (state)
         {
-            return;
+            case CONNECTOR_UNINITIALISED:
+            case CONNECTOR_DEPOPULATED:
+                lg2::debug("Populating connector");
+                ctor();
+                device->plug(notifier);
+                state = CONNECTOR_POPULATED;
+                return;
+            case CONNECTOR_POPULATED:
+                return;
         }
-
-        ctor();
-        device->plug(notifier);
     }
 
     void depopulate(Notifier& notifier, int mode = T::UNPLUG_REMOVES_INVENTORY)
     {
-        if (!device)
+        switch (state)
         {
-            return;
+            case CONNECTOR_DEPOPULATED:
+                return;
+            case CONNECTOR_UNINITIALISED:
+                // Construct the device so we can explicitly unplug() it. This
+                // is used to e.g. remove the device from the inventory when it
+                // has been removed from the system while AC power is unplugged.
+                ctor();
+                [[fallthrough]];
+            case CONNECTOR_POPULATED:
+                lg2::debug("Depopulating connector");
+                device->unplug(notifier, mode);
+                device.reset();
+                state = CONNECTOR_DEPOPULATED;
+                return;
         }
-
-        device->unplug(notifier, mode);
-        device.reset();
     }
 
     int index() const
@@ -83,6 +99,14 @@ class Connector
     }
 
   private:
+    enum ConnectorState
+    {
+        CONNECTOR_UNINITIALISED,
+        CONNECTOR_DEPOPULATED,
+        CONNECTOR_POPULATED
+    };
+
+    ConnectorState state;
     const int idx;
     std::optional<T> device;
     std::function<void(void)> ctor;
@@ -164,7 +188,6 @@ class PolledDevicePresence : public NotifySink
 
         if (poll())
         {
-            lg2::debug("Presence asserted with unpopulated connector");
             try
             {
                 connector->populate(notifier);
@@ -179,7 +202,6 @@ class PolledDevicePresence : public NotifySink
         }
         else
         {
-            lg2::debug("Presence deasserted with populated connector");
             connector->depopulate(notifier);
         }
     }
