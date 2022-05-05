@@ -155,10 +155,6 @@ void Flett::unplug(Notifier& notifier, int mode)
 
     for (auto& connector : driveConnectors)
     {
-        if (connector.isPopulated())
-        {
-            connector.getDevice().unplug(notifier, mode);
-            connector.depopulate();
-        }
+        connector.depopulate(notifier, mode);
     }
 }

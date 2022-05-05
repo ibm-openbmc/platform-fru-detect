@@ -91,20 +91,12 @@ void Nisqually::unplug(Notifier& notifier, int mode)
 {
     for (auto& connector : williwakasConnectors)
     {
-        if (connector.isPopulated())
-        {
-            connector.getDevice().unplug(notifier, mode);
-            connector.depopulate();
-        }
+        connector.depopulate(notifier, mode);
     }
 
     for (auto& connector : flettConnectors)
     {
-        if (connector.isPopulated())
-        {
-            connector.getDevice().unplug(notifier, mode);
-            connector.depopulate();
-        }
+        connector.depopulate(notifier, mode);
     }
 }
 
@@ -126,8 +118,7 @@ void Nisqually::detectWilliwakasCards(Notifier& notifier)
 
         try
         {
-            williwakasConnectors[index].populate();
-            williwakasConnectors[index].getDevice().plug(notifier);
+            williwakasConnectors[index].populate(notifier);
             info("Initialised Williwakas {WILLIWAKAS_ID}", "WILLIWAKAS_ID",
                  index);
         }
@@ -211,8 +202,7 @@ void Nisqually::detectFlettCards(Notifier& notifier)
 
         try
         {
-            flettConnectors[connector].populate();
-            flettConnectors[connector].getDevice().plug(notifier);
+            flettConnectors[connector].populate(notifier);
             debug("Initialised Flett {FLETT_ID} in slot {PCIE_SLOT}",
                   "FLETT_ID", getFlettIndex(slot), "PCIE_SLOT", slot);
         }

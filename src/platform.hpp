@@ -24,54 +24,6 @@ extern "C"
 
 class Inventory;
 
-template <class T>
-class Connector
-{
-  public:
-    template <typename... Args>
-    Connector(Args&&... args) :
-        device(), ctor([this, args...]() mutable {
-            device.emplace(std::forward<Args>(args)...);
-        })
-    {}
-    ~Connector() = default;
-
-    void populate()
-    {
-        ctor();
-    }
-
-    void depopulate()
-    {
-        device.reset();
-    }
-
-    bool isPopulated()
-    {
-        return device.has_value();
-    }
-
-    T& getDevice()
-    {
-        return device.value();
-    }
-
-  private:
-    std::optional<T> device;
-    std::function<void(void)> ctor;
-};
-
-class FRU
-{
-  public:
-    FRU() = default;
-    virtual ~FRU() = default;
-
-    virtual std::string getInventoryPath() const = 0;
-    virtual void addToInventory(Inventory* inventory) = 0;
-    virtual void removeFromInventory(Inventory* inventory) = 0;
-};
-
 class Device
 {
   public:
@@ -90,6 +42,56 @@ class Device
 
 template <typename T>
 concept DerivesDevice = std::is_base_of<Device, T>::value;
+
+template <DerivesDevice T>
+class Connector
+{
+  public:
+    template <typename... Args>
+    Connector(Args&&... args) :
+        device(), ctor([this, args...]() mutable {
+            device.emplace(std::forward<Args>(args)...);
+        })
+    {}
+    ~Connector() = default;
+
+    void populate(Notifier& notifier)
+    {
+        if (device)
+        {
+            return;
+        }
+
+        ctor();
+        device->plug(notifier);
+    }
+
+    void depopulate(Notifier& notifier, int mode = T::UNPLUG_REMOVES_INVENTORY)
+    {
+        if (!device)
+        {
+            return;
+        }
+
+        device->unplug(notifier, mode);
+        device.reset();
+    }
+
+  private:
+    std::optional<T> device;
+    std::function<void(void)> ctor;
+};
+
+class FRU
+{
+  public:
+    FRU() = default;
+    virtual ~FRU() = default;
+
+    virtual std::string getInventoryPath() const = 0;
+    virtual void addToInventory(Inventory* inventory) = 0;
+    virtual void removeFromInventory(Inventory* inventory) = 0;
+};
 
 /*
  * TODO: Add multiple instances to a single timerfd to make it more efficient
@@ -156,31 +158,23 @@ class PolledDevicePresence : public NotifySink
 
         if (poll())
         {
-            if (!connector->isPopulated())
+            lg2::debug("Presence asserted with unpopulated connector");
+            try
             {
-                lg2::debug("Presence asserted with unpopulated connector");
-                try
-                {
-                    connector->populate();
-                    connector->getDevice().plug(notifier);
-                }
-                catch (const SysfsI2CDeviceDriverBindException& ex)
-                {
-                    lg2::error(
-                        "Failed to bind driver for device reporting present, disabling notifier: {EXCEPTION}",
-                        "EXCEPTION", ex);
-                    notifier.remove(this);
-                }
+                connector->populate(notifier);
+            }
+            catch (const SysfsI2CDeviceDriverBindException& ex)
+            {
+                lg2::error(
+                    "Failed to bind driver for device reporting present, disabling notifier: {EXCEPTION}",
+                    "EXCEPTION", ex);
+                notifier.remove(this);
             }
         }
         else
         {
-            if (connector->isPopulated())
-            {
-                lg2::debug("Presence deasserted with populated connector");
-                connector->getDevice().unplug(notifier);
-                connector->depopulate();
-            }
+            lg2::debug("Presence deasserted with populated connector");
+            connector->depopulate(notifier);
         }
     }
 

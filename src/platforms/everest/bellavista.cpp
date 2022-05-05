@@ -35,11 +35,7 @@ void Bellavista::plug(Notifier& notifier)
 void Bellavista::unplug(Notifier& notifier, int mode)
 {
     notifier.remove(&presenceAdaptor);
-    if (basecampConnector.isPopulated())
-    {
-        basecampConnector.getDevice().unplug(notifier, mode);
-        basecampConnector.depopulate();
-    }
+    basecampConnector.depopulate(notifier, mode);
 }
 
 std::string Bellavista::getInventoryPath() const

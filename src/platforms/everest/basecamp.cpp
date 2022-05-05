@@ -146,11 +146,7 @@ void Basecamp::unplug([[maybe_unused]] Notifier& notifier,
 
     for (auto& connector : driveConnectors)
     {
-        if (connector.isPopulated())
-        {
-            connector.getDevice().unplug(notifier, mode);
-            connector.depopulate();
-        }
+        connector.depopulate(notifier, mode);
     }
 }
 
