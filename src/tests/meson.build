@@ -10,7 +10,9 @@ if not gtest_dep.found()
 endif
 
 test('test-inventory',
-     executable('test-inventory', 'test-inventory.cpp',
+     executable('test-inventory',
+	        sources: [ 'test-inventory.cpp',
+			   'mock-inventory.cpp' ],
 		dependencies: [ inventory_dep, inventory_test_dep, gtest_dep ]))
 test('test-nvme',
      executable('test-nvme', 'test-nvme.cpp',
