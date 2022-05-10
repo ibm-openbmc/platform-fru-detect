@@ -128,8 +128,8 @@ void Nisqually::detectWilliwakasCards(Notifier& notifier)
         {
             williwakasConnectors[index].populate();
             williwakasConnectors[index].getDevice().plug(notifier);
-            debug("Initialised Williwakas {WILLIWAKAS_ID}", "WILLIWAKAS_ID",
-                  index);
+            info("Initialised Williwakas {WILLIWAKAS_ID}", "WILLIWAKAS_ID",
+                 index);
         }
         catch (const SysfsI2CDeviceDriverBindException& ex)
         {
