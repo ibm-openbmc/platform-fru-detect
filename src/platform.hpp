@@ -109,7 +109,7 @@ template <DerivesDevice T>
 class PolledDevicePresence : public NotifySink
 {
   public:
-    PolledDevicePresence() = default;
+    PolledDevicePresence() = delete;
     PolledDevicePresence(Connector<T>* connector,
                          const std::function<bool()>& poll) :
         connector(connector),
