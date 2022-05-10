@@ -223,6 +223,42 @@ class PolledDevicePresence : public NotifySink
     int timerfd;
 };
 
+template <DerivesDevice T>
+class PolledConnector
+{
+  public:
+    PolledConnector() = delete;
+    template <typename... DeviceArgs>
+    PolledConnector(int index, DeviceArgs&&... args) : connector(index, args...)
+    {}
+    ~PolledConnector() = default;
+
+    void start(Notifier& notifier, std::function<bool()>&& probe)
+    {
+        poller.emplace(&connector, probe);
+        notifier.add(&poller.value());
+    }
+
+    void stop(Notifier& notifier, int mode)
+    {
+        if (poller)
+        {
+            notifier.remove(&poller.value());
+            poller.reset();
+        }
+        connector.depopulate(notifier, mode);
+    }
+
+    int index() const
+    {
+        return connector.index();
+    }
+
+  private:
+    Connector<T> connector;
+    std::optional<PolledDevicePresence<T>> poller;
+};
+
 class Platform;
 
 class PlatformManager
