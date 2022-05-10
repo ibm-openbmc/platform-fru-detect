@@ -31,8 +31,7 @@ void FlettNVMeDrive::plug([[maybe_unused]] Notifier& notifier)
     addToInventory(inventory);
 }
 
-void FlettNVMeDrive::unplug([[maybe_unused]] Notifier& notifier,
-                            [[maybe_unused]] int mode)
+void FlettNVMeDrive::unplug([[maybe_unused]] Notifier& notifier, int mode)
 {
     if (mode == UNPLUG_REMOVES_INVENTORY)
     {
