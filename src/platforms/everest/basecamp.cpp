@@ -50,16 +50,18 @@ void BasecampNVMeDrive::removeFromInventory(Inventory* inventory)
 
 Basecamp::Basecamp(Inventory* inventory, const Bellavista* bellavista) :
     inventory(inventory), bellavista(bellavista),
-    driveConnectors{{Connector<BasecampNVMeDrive>(0, inventory, this, 0),
-                     Connector<BasecampNVMeDrive>(1, inventory, this, 1),
-                     Connector<BasecampNVMeDrive>(2, inventory, this, 2),
-                     Connector<BasecampNVMeDrive>(3, inventory, this, 3),
-                     Connector<BasecampNVMeDrive>(4, inventory, this, 4),
-                     Connector<BasecampNVMeDrive>(5, inventory, this, 5),
-                     Connector<BasecampNVMeDrive>(6, inventory, this, 6),
-                     Connector<BasecampNVMeDrive>(7, inventory, this, 7),
-                     Connector<BasecampNVMeDrive>(8, inventory, this, 8),
-                     Connector<BasecampNVMeDrive>(9, inventory, this, 9)}}
+    polledDriveConnectors{{
+        PolledConnector<BasecampNVMeDrive>(0, inventory, this, 0),
+        PolledConnector<BasecampNVMeDrive>(1, inventory, this, 1),
+        PolledConnector<BasecampNVMeDrive>(2, inventory, this, 2),
+        PolledConnector<BasecampNVMeDrive>(3, inventory, this, 3),
+        PolledConnector<BasecampNVMeDrive>(4, inventory, this, 4),
+        PolledConnector<BasecampNVMeDrive>(5, inventory, this, 5),
+        PolledConnector<BasecampNVMeDrive>(6, inventory, this, 6),
+        PolledConnector<BasecampNVMeDrive>(7, inventory, this, 7),
+        PolledConnector<BasecampNVMeDrive>(8, inventory, this, 8),
+        PolledConnector<BasecampNVMeDrive>(9, inventory, this, 9),
+    }}
 {
     SysfsI2CBus root(driveMetadataBus);
     SysfsI2CMux mux(root, driveMetadataMuxAddress);
@@ -126,27 +128,21 @@ class BasecampNVMeDrivePresence
 
 void Basecamp::plug(Notifier& notifier)
 {
-    for (std::size_t i = 0; i < presenceAdaptors.size(); i++)
+    for (auto& poller : polledDriveConnectors)
     {
-        gpiod::line* line = &lines[i];
-        SysfsI2CBus bus = getDriveBus(i);
-        presenceAdaptors[i] = PolledDevicePresence<BasecampNVMeDrive>(
-            &driveConnectors.at(i), BasecampNVMeDrivePresence(line, bus));
-        notifier.add(&presenceAdaptors.at(i));
+        auto index = poller.index();
+        auto presence =
+            BasecampNVMeDrivePresence(&lines.at(index), getDriveBus(index));
+        poller.start(notifier, std::move(presence));
     }
 }
 
 void Basecamp::unplug([[maybe_unused]] Notifier& notifier,
                       [[maybe_unused]] int mode)
 {
-    for (auto& adaptor : presenceAdaptors)
+    for (auto& poller : polledDriveConnectors)
     {
-        notifier.remove(&adaptor);
-    }
-
-    for (auto& connector : driveConnectors)
-    {
-        connector.depopulate(notifier, mode);
+        poller.stop(notifier, mode);
     }
 }
 

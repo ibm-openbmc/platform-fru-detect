@@ -72,8 +72,7 @@ class Basecamp : public Device, FRU
     Inventory* inventory;
     const Bellavista* bellavista;
     std::array<gpiod::line, 10> lines;
-    std::array<Connector<BasecampNVMeDrive>, 10> driveConnectors;
-    std::array<PolledDevicePresence<BasecampNVMeDrive>, 10> presenceAdaptors;
+    std::array<PolledConnector<BasecampNVMeDrive>, 10> polledDriveConnectors;
 };
 
 class Bellavista : public Device, FRU
@@ -105,8 +104,7 @@ class Bellavista : public Device, FRU
     Inventory* inventory;
     gpiod::chip basecampPresenceChip;
     gpiod::line basecampPresenceLine;
-    Connector<Basecamp> basecampConnector;
-    PolledDevicePresence<Basecamp> presenceAdaptor;
+    PolledConnector<Basecamp> polledBasecampConnector;
 };
 
 class Tola : public Device

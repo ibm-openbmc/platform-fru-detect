@@ -14,7 +14,7 @@ Bellavista::Bellavista(Inventory* inventory) :
             .getName()
             .string(),
         gpiod::chip::OPEN_BY_NAME),
-    basecampConnector(0, this->inventory, this)
+    polledBasecampConnector(0, this->inventory, this)
 {
     basecampPresenceLine =
         basecampPresenceChip.get_line(Bellavista::basecampPresenceOffset);
@@ -25,17 +25,13 @@ Bellavista::Bellavista(Inventory* inventory) :
 
 void Bellavista::plug(Notifier& notifier)
 {
-    presenceAdaptor =
-        PolledDevicePresence<Basecamp>(&basecampConnector, [this]() {
-            return this->basecampPresenceLine.get_value();
-        });
-    notifier.add(&presenceAdaptor);
+    polledBasecampConnector.start(
+        notifier, [this]() { return basecampPresenceLine.get_value(); });
 }
 
 void Bellavista::unplug(Notifier& notifier, int mode)
 {
-    notifier.remove(&presenceAdaptor);
-    basecampConnector.depopulate(notifier, mode);
+    polledBasecampConnector.stop(notifier, mode);
 }
 
 std::string Bellavista::getInventoryPath() const
