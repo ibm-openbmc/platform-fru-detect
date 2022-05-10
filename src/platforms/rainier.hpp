@@ -75,8 +75,7 @@ class Flett : public Device
     Inventory* inventory;
     const Nisqually* nisqually;
     int slot;
-    std::array<Connector<FlettNVMeDrive>, 8> driveConnectors;
-    std::array<PolledDevicePresence<FlettNVMeDrive>, 8> presenceAdaptors;
+    std::array<PolledConnector<FlettNVMeDrive>, 8> polledDriveConnectors;
 };
 
 class WilliwakasNVMeDrive : public NVMeDrive
@@ -152,8 +151,7 @@ class Williwakas : public Device, FRU
     /* There's a bug in the gpiod::line_bulk iterator that prevents us using it
      * effectively */
     std::array<gpiod::line, 8> lines;
-    std::array<Connector<WilliwakasNVMeDrive>, 8> driveConnectors;
-    std::array<PolledDevicePresence<WilliwakasNVMeDrive>, 8> presenceAdaptors;
+    std::array<PolledConnector<WilliwakasNVMeDrive>, 8> polledDriveConnectors;
 
     bool isDrivePresent(int index);
     void detectDrives(Notifier& notifier);

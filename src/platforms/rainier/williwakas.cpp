@@ -73,17 +73,17 @@ std::string Williwakas::getInventoryPathFor(const Nisqually* nisqually,
 Williwakas::Williwakas(Inventory* inventory, const Nisqually* nisqually,
                        int index) :
     inventory(inventory),
-    nisqually(nisqually),
-    index(index), driveConnectors{{
-                      Connector<WilliwakasNVMeDrive>(0, inventory, this, 0),
-                      Connector<WilliwakasNVMeDrive>(1, inventory, this, 1),
-                      Connector<WilliwakasNVMeDrive>(2, inventory, this, 2),
-                      Connector<WilliwakasNVMeDrive>(3, inventory, this, 3),
-                      Connector<WilliwakasNVMeDrive>(4, inventory, this, 4),
-                      Connector<WilliwakasNVMeDrive>(5, inventory, this, 5),
-                      Connector<WilliwakasNVMeDrive>(6, inventory, this, 6),
-                      Connector<WilliwakasNVMeDrive>(7, inventory, this, 7),
-                  }}
+    nisqually(nisqually), index(index),
+    polledDriveConnectors{{
+        PolledConnector<WilliwakasNVMeDrive>(0, inventory, this, 0),
+        PolledConnector<WilliwakasNVMeDrive>(1, inventory, this, 1),
+        PolledConnector<WilliwakasNVMeDrive>(2, inventory, this, 2),
+        PolledConnector<WilliwakasNVMeDrive>(3, inventory, this, 3),
+        PolledConnector<WilliwakasNVMeDrive>(4, inventory, this, 4),
+        PolledConnector<WilliwakasNVMeDrive>(5, inventory, this, 5),
+        PolledConnector<WilliwakasNVMeDrive>(6, inventory, this, 6),
+        PolledConnector<WilliwakasNVMeDrive>(7, inventory, this, 7),
+    }}
 {
     SysfsI2CBus bus(Williwakas::driveBackplaneBus.at(index));
 
@@ -132,25 +132,17 @@ void Williwakas::removeFromInventory([[maybe_unused]] Inventory* inventory)
 
 void Williwakas::plug(Notifier& notifier)
 {
-    assert(driveConnectors.size() == lines.size());
-    for (std::size_t i = 0; i < driveConnectors.size(); i++)
+    for (auto& poller : polledDriveConnectors)
     {
-        gpiod::line* line = &lines[i];
-        presenceAdaptors[i] = PolledDevicePresence<WilliwakasNVMeDrive>(
-            &driveConnectors.at(i), [line]() { return line->get_value(); });
-        notifier.add(&presenceAdaptors.at(i));
+        auto line = &lines.at(poller.index());
+        poller.start(notifier, [line]() { return line->get_value(); });
     }
 }
 
 void Williwakas::unplug(Notifier& notifier, int mode)
 {
-    for (auto& presenceAdaptor : presenceAdaptors)
+    for (auto& poller : polledDriveConnectors)
     {
-        notifier.remove(&presenceAdaptor);
-    }
-
-    for (auto& connector : driveConnectors)
-    {
-        connector.depopulate(notifier, mode);
+        poller.stop(notifier, mode);
     }
 }

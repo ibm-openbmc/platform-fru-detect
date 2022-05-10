@@ -91,25 +91,25 @@ std::string Flett::getInventoryPathFor(const Nisqually* nisqually, int slot)
 }
 
 Flett::Flett(Inventory* inventory, const Nisqually* nisqually, int slot) :
-    inventory(inventory), nisqually(nisqually),
-    slot(slot), driveConnectors{{
-                    Connector<FlettNVMeDrive>(0, inventory, this->nisqually,
-                                              this, flettChannelDriveMap.at(0)),
-                    Connector<FlettNVMeDrive>(1, inventory, this->nisqually,
-                                              this, flettChannelDriveMap.at(1)),
-                    Connector<FlettNVMeDrive>(2, inventory, this->nisqually,
-                                              this, flettChannelDriveMap.at(2)),
-                    Connector<FlettNVMeDrive>(3, inventory, this->nisqually,
-                                              this, flettChannelDriveMap.at(3)),
-                    Connector<FlettNVMeDrive>(4, inventory, this->nisqually,
-                                              this, flettChannelDriveMap.at(4)),
-                    Connector<FlettNVMeDrive>(5, inventory, this->nisqually,
-                                              this, flettChannelDriveMap.at(5)),
-                    Connector<FlettNVMeDrive>(6, inventory, this->nisqually,
-                                              this, flettChannelDriveMap.at(6)),
-                    Connector<FlettNVMeDrive>(7, inventory, this->nisqually,
-                                              this, flettChannelDriveMap.at(7)),
-                }}
+    inventory(inventory), nisqually(nisqually), slot(slot),
+    polledDriveConnectors{{
+        PolledConnector<FlettNVMeDrive>(0, inventory, this->nisqually, this,
+                                        flettChannelDriveMap.at(0)),
+        PolledConnector<FlettNVMeDrive>(1, inventory, this->nisqually, this,
+                                        flettChannelDriveMap.at(1)),
+        PolledConnector<FlettNVMeDrive>(2, inventory, this->nisqually, this,
+                                        flettChannelDriveMap.at(2)),
+        PolledConnector<FlettNVMeDrive>(3, inventory, this->nisqually, this,
+                                        flettChannelDriveMap.at(3)),
+        PolledConnector<FlettNVMeDrive>(4, inventory, this->nisqually, this,
+                                        flettChannelDriveMap.at(4)),
+        PolledConnector<FlettNVMeDrive>(5, inventory, this->nisqually, this,
+                                        flettChannelDriveMap.at(5)),
+        PolledConnector<FlettNVMeDrive>(6, inventory, this->nisqually, this,
+                                        flettChannelDriveMap.at(6)),
+        PolledConnector<FlettNVMeDrive>(7, inventory, this->nisqually, this,
+                                        flettChannelDriveMap.at(7)),
+    }}
 {
     SysfsI2CBus bus = nisqually->getFlettSlotI2CBus(slot);
 
@@ -136,25 +136,19 @@ SysfsI2CBus Flett::getDriveBus(int index) const
 
 void Flett::plug(Notifier& notifier)
 {
-    for (std::size_t i = 0; i < presenceAdaptors.size(); i++)
+    for (auto& poller : polledDriveConnectors)
     {
-        SysfsI2CBus bus = getDriveBus(flettChannelDriveMap.at(i));
-        presenceAdaptors[i] = PolledDevicePresence<FlettNVMeDrive>(
-            &driveConnectors.at(i),
-            [bus]() { return BasicNVMeDrive::isBasicEndpointPresent(bus); });
-        notifier.add(&presenceAdaptors.at(i));
+        const auto bus = getDriveBus(flettChannelDriveMap.at(poller.index()));
+        poller.start(notifier, [bus]() {
+            return BasicNVMeDrive::isBasicEndpointPresent(bus);
+        });
     }
 }
 
 void Flett::unplug(Notifier& notifier, int mode)
 {
-    for (auto& adaptor : presenceAdaptors)
+    for (auto& poller : polledDriveConnectors)
     {
-        notifier.remove(&adaptor);
-    }
-
-    for (auto& connector : driveConnectors)
-    {
-        connector.depopulate(notifier, mode);
+        poller.stop(notifier, mode);
     }
 }
