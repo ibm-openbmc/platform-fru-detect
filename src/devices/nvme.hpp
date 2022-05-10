@@ -12,29 +12,13 @@
 
 class Inventory;
 
-class NVMeDrive : public Device, FRU
+class NVMeDrive
 {
   public:
     NVMeDrive(Inventory* inventory, int index) :
         inventory(inventory), index(index)
     {}
-    ~NVMeDrive() override = default;
-
-    /* FRU */
-    std::string getInventoryPath() const override
-    {
-        throw std::logic_error("Not implemented");
-    }
-
-    void addToInventory([[maybe_unused]] Inventory* inventory) override
-    {
-        throw std::logic_error("Not implemented");
-    }
-
-    void removeFromInventory([[maybe_unused]] Inventory* inventory) override
-    {
-        throw std::logic_error("Not implemented");
-    }
+    virtual ~NVMeDrive() = default;
 
   protected:
     /* FRU Information Device, NVMe Storage Device (non-Carrier) */
@@ -44,7 +28,7 @@ class NVMeDrive : public Device, FRU
     int index;
 };
 
-class BasicNVMeDrive : public NVMeDrive
+class BasicNVMeDrive : public NVMeDrive, FRU
 {
   public:
     static bool isBasicEndpointPresent(const SysfsI2CBus& bus);

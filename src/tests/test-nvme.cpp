@@ -5,7 +5,7 @@
 
 #include "gtest/gtest.h"
 
-class TestNVMeDrive : public BasicNVMeDrive
+class TestNVMeDrive : public BasicNVMeDrive, public Device
 {
   public:
     TestNVMeDrive(const SysfsI2CBus& bus, Inventory* inventory, int index,
@@ -20,6 +20,12 @@ class TestNVMeDrive : public BasicNVMeDrive
     void unplug([[maybe_unused]] Notifier& notifier,
                 [[maybe_unused]] int mode = UNPLUG_REMOVES_INVENTORY) override
     {}
+
+    /* FRU */
+    std::string getInventoryPath() const override
+    {
+        return {""};
+    }
 };
 
 TEST(DriveMetadata, smallMetadata)

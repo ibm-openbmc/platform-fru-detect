@@ -22,7 +22,7 @@ class Inventory;
 class Nisqually;
 class Williwakas;
 
-class FlettNVMeDrive : public BasicNVMeDrive
+class FlettNVMeDrive : public BasicNVMeDrive, public Device
 {
   public:
     static bool isPresent(SysfsI2CBus bus);
@@ -78,7 +78,7 @@ class Flett : public Device
     std::array<PolledConnector<FlettNVMeDrive>, 8> polledDriveConnectors;
 };
 
-class WilliwakasNVMeDrive : public NVMeDrive
+class WilliwakasNVMeDrive : public NVMeDrive, public Device, public FRU
 {
   public:
     explicit WilliwakasNVMeDrive(Inventory* inventory,
@@ -104,7 +104,7 @@ class WilliwakasNVMeDrive : public NVMeDrive
     const Williwakas* williwakas;
 };
 
-class Williwakas : public Device, FRU
+class Williwakas : public Device, public FRU
 {
   public:
     static std::string getInventoryPathFor(const Nisqually* nisqually,

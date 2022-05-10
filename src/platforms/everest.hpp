@@ -9,7 +9,7 @@
 class Basecamp;
 class Bellavista;
 
-class BasecampNVMeDrive : public BasicNVMeDrive
+class BasecampNVMeDrive : public BasicNVMeDrive, public Device
 {
   public:
     BasecampNVMeDrive(Inventory* inventory, const Basecamp* basecamp,
@@ -30,7 +30,7 @@ class BasecampNVMeDrive : public BasicNVMeDrive
     const Basecamp* basecamp;
 };
 
-class Basecamp : public Device, FRU
+class Basecamp : public Device, public FRU
 {
   public:
     explicit Basecamp(Inventory* inventory, const Bellavista* bellavista);
@@ -75,7 +75,7 @@ class Basecamp : public Device, FRU
     std::array<PolledConnector<BasecampNVMeDrive>, 10> polledDriveConnectors;
 };
 
-class Bellavista : public Device, FRU
+class Bellavista : public Device, public FRU
 {
   public:
     explicit Bellavista(Inventory* inventory);
