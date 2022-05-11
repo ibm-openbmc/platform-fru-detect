@@ -11,7 +11,7 @@ class TestNVMeDrive : public BasicNVMeDrive, public Device
     TestNVMeDrive(const SysfsI2CBus& bus, Inventory* inventory, int index,
                   const std::vector<uint8_t>&& metadata) :
         // NOLINTNEXTLINE(performance-move-const-arg)
-        BasicNVMeDrive(bus, inventory, index, std::nullopt, std::move(metadata))
+        BasicNVMeDrive(bus, inventory, index, "", std::move(metadata))
     {}
 
     /* Device */
@@ -20,12 +20,6 @@ class TestNVMeDrive : public BasicNVMeDrive, public Device
     void unplug([[maybe_unused]] Notifier& notifier,
                 [[maybe_unused]] int mode = UNPLUG_REMOVES_INVENTORY) override
     {}
-
-    /* FRU */
-    std::string getInventoryPath() const override
-    {
-        return {""};
-    }
 };
 
 TEST(DriveMetadata, smallMetadata)

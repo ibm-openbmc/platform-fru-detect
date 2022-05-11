@@ -24,7 +24,6 @@ class BasecampNVMeDrive : public BasicNVMeDrive, public Device
                 int mode = UNPLUG_REMOVES_INVENTORY) override;
 
     /* FRU */
-    std::string getInventoryPath() const override;
     void addToInventory(Inventory* inventory) override;
     void removeFromInventory(Inventory* inventory) override;
 

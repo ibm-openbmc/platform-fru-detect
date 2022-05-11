@@ -35,10 +35,9 @@ class BasicNVMeDrive : public NVMeDrive, FRU
     static bool isBasicEndpointPresent(const SysfsI2CBus& bus);
 
     BasicNVMeDrive(const SysfsI2CBus& bus, Inventory* inventory, int index,
-                   std::optional<std::string> path = std::nullopt);
+                   std::string&& path);
     BasicNVMeDrive(const SysfsI2CBus& bus, Inventory* inventory, int index,
-                   std::optional<std::string> path,
-                   const std::vector<uint8_t>&& metadata);
+                   std::string&& path, const std::vector<uint8_t>&& metadata);
     ~BasicNVMeDrive() override = default;
 
     /* FRU */
@@ -60,7 +59,7 @@ class BasicNVMeDrive : public NVMeDrive, FRU
     static constexpr int endpointAddress = 0x6a;
     static constexpr int vendorMetadataOffset = 0x08;
 
-    const std::optional<std::string> inventoryPath;
+    const std::string inventoryPath;
     const inventory::interfaces::I2CDevice basic;
     const inventory::interfaces::VINI vini;
 

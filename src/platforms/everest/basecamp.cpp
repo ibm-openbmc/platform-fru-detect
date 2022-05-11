@@ -22,11 +22,6 @@ std::string BasecampNVMeDrive::getInventoryPathFor(const Basecamp* basecamp,
     return basecamp->getInventoryPath() + "/" + "nvme" + std::to_string(index);
 }
 
-std::string BasecampNVMeDrive::getInventoryPath() const
-{
-    return getInventoryPathFor(basecamp, index);
-}
-
 void BasecampNVMeDrive::plug([[maybe_unused]] Notifier& notifier)
 {
     debug("Drive {NVME_ID} plugged on Basecamp", "NVME_ID", index);

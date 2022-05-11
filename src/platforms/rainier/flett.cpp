@@ -51,11 +51,6 @@ std::string FlettNVMeDrive::getInventoryPathFor(const Nisqually* nisqually,
     return williwakasPath + "/" + "nvme" + std::to_string(index);
 }
 
-std::string FlettNVMeDrive::getInventoryPath() const
-{
-    return getInventoryPathFor(nisqually, flett, index);
-}
-
 bool FlettNVMeDrive::isPresent(SysfsI2CBus bus)
 {
     return bus.isDevicePresent(NVMeDrive::eepromAddress);

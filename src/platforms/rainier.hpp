@@ -43,9 +43,6 @@ class FlettNVMeDrive : public BasicNVMeDrive, public Device
     void unplug(Notifier& notifier,
                 int mode = UNPLUG_REMOVES_INVENTORY) override;
 
-    /* FRU */
-    std::string getInventoryPath() const override;
-
   private:
     const Nisqually* nisqually;
     const Flett* flett;
