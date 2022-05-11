@@ -9,11 +9,9 @@
 class Basecamp;
 class Bellavista;
 
-class BasecampNVMeDrive : public BasicNVMeDrive, public Device
+class BasecampNVMeDrive : public NVMeDrive, public Device, public FRU
 {
   public:
-    static std::string getInventoryPathFor(const Basecamp* basecamp, int index);
-
     BasecampNVMeDrive(Inventory* inventory, const Basecamp* basecamp,
                       int index);
     ~BasecampNVMeDrive() override = default;
@@ -24,6 +22,7 @@ class BasecampNVMeDrive : public BasicNVMeDrive, public Device
                 int mode = UNPLUG_REMOVES_INVENTORY) override;
 
     /* FRU */
+    std::string getInventoryPath() const override;
     void addToInventory(Inventory* inventory) override;
     void removeFromInventory(Inventory* inventory) override;
 
@@ -31,6 +30,7 @@ class BasecampNVMeDrive : public BasicNVMeDrive, public Device
     Inventory* inventory;
     const Basecamp* basecamp;
     int index;
+    std::optional<BasicNVMeDrive> drive;
 };
 
 class Basecamp : public Device, public FRU

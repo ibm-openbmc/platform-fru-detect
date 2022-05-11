@@ -11,26 +11,24 @@ PHOSPHOR_LOG2_USING;
 
 BasecampNVMeDrive::BasecampNVMeDrive(Inventory* inventory,
                                      const Basecamp* basecamp, int index) :
-    BasicNVMeDrive(basecamp->getDriveBus(index),
-                   getInventoryPathFor(basecamp, index)),
-    inventory(inventory), basecamp(basecamp), index(index)
+    inventory(inventory),
+    basecamp(basecamp), index(index)
 {}
-
-std::string BasecampNVMeDrive::getInventoryPathFor(const Basecamp* basecamp,
-                                                   int index)
-{
-    return basecamp->getInventoryPath() + "/" + "nvme" + std::to_string(index);
-}
 
 void BasecampNVMeDrive::plug([[maybe_unused]] Notifier& notifier)
 {
-    debug("Drive {NVME_ID} plugged on Basecamp", "NVME_ID", index);
+    drive.emplace(basecamp->getDriveBus(index), getInventoryPath());
     addToInventory(inventory);
+    debug("Drive {NVME_ID} plugged on Basecamp", "NVME_ID", index);
 }
 
 void BasecampNVMeDrive::unplug([[maybe_unused]] Notifier& notifier,
                                [[maybe_unused]] int mode)
 {
+    if (!drive)
+    {
+        drive.emplace(getInventoryPath());
+    }
     if (mode == UNPLUG_REMOVES_INVENTORY)
     {
         removeFromInventory(inventory);
@@ -38,16 +36,21 @@ void BasecampNVMeDrive::unplug([[maybe_unused]] Notifier& notifier,
     debug("Drive {NVME_ID} unplugged on Basecamp", "NVME_ID", index);
 }
 
+std::string BasecampNVMeDrive::getInventoryPath() const
+{
+    return basecamp->getInventoryPath() + "/" + "nvme" + std::to_string(index);
+}
+
 void BasecampNVMeDrive::addToInventory(Inventory* inventory)
 {
-    BasicNVMeDrive::addToInventory(inventory);
+    drive->addToInventory(inventory);
     inventory->markPresent(getInventoryPath());
 }
 
 void BasecampNVMeDrive::removeFromInventory(Inventory* inventory)
 {
-    BasicNVMeDrive::addToInventory(inventory);
     inventory->markAbsent(getInventoryPath());
+    drive->removeFromInventory(inventory);
 }
 
 Basecamp::Basecamp(Inventory* inventory, const Bellavista* bellavista) :
