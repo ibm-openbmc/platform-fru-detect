@@ -16,17 +16,12 @@ class Inventory;
 class NVMeDrive
 {
   public:
-    NVMeDrive(Inventory* inventory, int index) :
-        inventory(inventory), index(index)
-    {}
+    NVMeDrive() = default;
     virtual ~NVMeDrive() = default;
 
   protected:
     /* FRU Information Device, NVMe Storage Device (non-Carrier) */
     static constexpr int eepromAddress = 0x53;
-
-    Inventory* inventory;
-    int index;
 };
 
 class BasicNVMeDrive : public NVMeDrive, FRU
@@ -34,10 +29,9 @@ class BasicNVMeDrive : public NVMeDrive, FRU
   public:
     static bool isBasicEndpointPresent(const SysfsI2CBus& bus);
 
-    BasicNVMeDrive(const SysfsI2CBus& bus, Inventory* inventory, int index,
-                   std::string&& path);
-    BasicNVMeDrive(const SysfsI2CBus& bus, Inventory* inventory, int index,
-                   std::string&& path, const std::vector<uint8_t>&& metadata);
+    BasicNVMeDrive(const SysfsI2CBus& bus, std::string&& path);
+    BasicNVMeDrive(const SysfsI2CBus& bus, std::string&& path,
+                   const std::vector<uint8_t>&& metadata);
     ~BasicNVMeDrive() override = default;
 
     /* FRU */

@@ -19,8 +19,8 @@ PHOSPHOR_LOG2_USING;
 WilliwakasNVMeDrive::WilliwakasNVMeDrive(Inventory* inventory,
                                          const Williwakas* williwakas,
                                          int index) :
-    NVMeDrive(inventory, index),
-    williwakas(williwakas)
+    NVMeDrive(),
+    inventory(inventory), williwakas(williwakas), index(index)
 {}
 
 void WilliwakasNVMeDrive::plug([[maybe_unused]] Notifier& notifier)

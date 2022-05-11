@@ -28,7 +28,9 @@ class BasecampNVMeDrive : public BasicNVMeDrive, public Device
     void removeFromInventory(Inventory* inventory) override;
 
   private:
+    Inventory* inventory;
     const Basecamp* basecamp;
+    int index;
 };
 
 class Basecamp : public Device, public FRU

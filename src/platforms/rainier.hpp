@@ -44,8 +44,10 @@ class FlettNVMeDrive : public BasicNVMeDrive, public Device
                 int mode = UNPLUG_REMOVES_INVENTORY) override;
 
   private:
+    Inventory* inventory;
     const Nisqually* nisqually;
     const Flett* flett;
+    int index;
 };
 
 class Flett : public Device
@@ -100,7 +102,9 @@ class WilliwakasNVMeDrive : public NVMeDrive, public Device, public FRU
     void removeFromInventory(Inventory* inventory) override;
 
   private:
+    Inventory* inventory;
     const Williwakas* williwakas;
+    int index;
 };
 
 class Williwakas : public Device, public FRU

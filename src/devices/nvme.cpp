@@ -71,16 +71,13 @@ std::vector<uint8_t>
     return serial;
 }
 
-BasicNVMeDrive::BasicNVMeDrive(const SysfsI2CBus& bus, Inventory* inventory,
-                               int index, std::string&& path) :
-    BasicNVMeDrive(bus, inventory, index, std::move(path),
-                   BasicNVMeDrive::fetchMetadata(bus))
+BasicNVMeDrive::BasicNVMeDrive(const SysfsI2CBus& bus, std::string&& path) :
+    BasicNVMeDrive(bus, std::move(path), BasicNVMeDrive::fetchMetadata(bus))
 {}
 
-BasicNVMeDrive::BasicNVMeDrive(const SysfsI2CBus& bus, Inventory* inventory,
-                               int index, std::string&& path,
+BasicNVMeDrive::BasicNVMeDrive(const SysfsI2CBus& bus, std::string&& path,
                                const std::vector<uint8_t>&& metadata) :
-    NVMeDrive(inventory, index),
+    NVMeDrive(),
     inventoryPath(path), basic(bus.getAddress(), eepromAddress),
     vini(std::vector<uint8_t>({'N', 'V', 'M', 'e'}),
          BasicNVMeDrive::extractSerial(metadata)),
