@@ -7,6 +7,7 @@
 #include <functional>
 #include <list>
 #include <map>
+#include <optional>
 #include <set>
 #include <string>
 #include <variant>
@@ -47,6 +48,11 @@ namespace interfaces
 class Interface
 {
   public:
+    Interface(const std::string& interface,
+              const InterfaceType&& removeProperties) :
+        interface(interface),
+        addProperties(std::nullopt), removeProperties(removeProperties)
+    {}
     Interface(const std::string& interface, const InterfaceType&& addProperties,
               const InterfaceType&& removeProperties) :
         interface(interface),
@@ -57,7 +63,7 @@ class Interface
 
     void populateObject(ObjectType& object) const
     {
-        updateObject(object, addProperties);
+        updateObject(object, addProperties.value());
     }
 
     void depopulateObject(ObjectType& object) const
@@ -81,13 +87,18 @@ class Interface
     }
 
     const std::string interface;
-    const InterfaceType addProperties;
+    std::optional<const InterfaceType> addProperties;
     const InterfaceType removeProperties;
 };
 
 class I2CDevice : public Interface
 {
   public:
+    I2CDevice() :
+        Interface(INVENTORY_DECORATOR_I2CDEVICE_IFACE,
+                  {{"Bus", static_cast<size_t>(INT_MAX)},
+                   {"Address", static_cast<size_t>(0)}})
+    {}
     explicit I2CDevice(int bus, int address) :
         Interface(INVENTORY_DECORATOR_I2CDEVICE_IFACE,
                   {{"Bus", static_cast<size_t>(bus)},
@@ -101,6 +112,12 @@ class I2CDevice : public Interface
 class VINI : public Interface
 {
   public:
+    VINI() :
+        Interface(INVENTORY_IPZVPD_VINI_IFACE,
+                  {{"RT", std::vector<uint8_t>({'V', 'I', 'N', 'I'})},
+                   {"CC", std::vector<uint8_t>(0)},
+                   {"SN", std::vector<uint8_t>(0)}})
+    {}
     explicit VINI(const std::vector<uint8_t>&& model,
                   const std::vector<uint8_t>&& serial) :
         Interface(INVENTORY_IPZVPD_VINI_IFACE,
