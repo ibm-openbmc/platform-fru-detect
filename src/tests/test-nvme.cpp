@@ -11,7 +11,7 @@ class TestNVMeDrive : public BasicNVMeDrive, public Device
     TestNVMeDrive(const SysfsI2CBus& bus, Inventory* inventory, int index,
                   const std::vector<uint8_t>&& metadata) :
         // NOLINTNEXTLINE(performance-move-const-arg)
-        BasicNVMeDrive(bus, inventory, index, std::move(metadata))
+        BasicNVMeDrive(bus, inventory, index, std::nullopt, std::move(metadata))
     {}
 
     /* Device */

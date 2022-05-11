@@ -72,15 +72,16 @@ std::vector<uint8_t>
 }
 
 BasicNVMeDrive::BasicNVMeDrive(const SysfsI2CBus& bus, Inventory* inventory,
-                               int index) :
-    BasicNVMeDrive(bus, inventory, index, BasicNVMeDrive::fetchMetadata(bus))
+                               int index, std::optional<std::string> path) :
+    BasicNVMeDrive(bus, inventory, index, std::move(path),
+                   BasicNVMeDrive::fetchMetadata(bus))
 {}
 
 BasicNVMeDrive::BasicNVMeDrive(const SysfsI2CBus& bus, Inventory* inventory,
-                               int index,
+                               int index, std::optional<std::string> path,
                                const std::vector<uint8_t>&& metadata) :
     NVMeDrive(inventory, index),
-    basic(bus.getAddress(), eepromAddress),
+    inventoryPath(std::move(path)), basic(bus.getAddress(), eepromAddress),
     vini(std::vector<uint8_t>({'N', 'V', 'M', 'e'}),
          BasicNVMeDrive::extractSerial(metadata)),
     manufacturer(BasicNVMeDrive::extractManufacturer(metadata)),
@@ -99,6 +100,13 @@ BasicNVMeDrive::BasicNVMeDrive(const SysfsI2CBus& bus, Inventory* inventory,
         "Instantiated drive for device on bus {I2C_BUS} with manufacturer [{DRIVE_MANUFACTURER_ID}] and serial [{DRIVE_SERIAL}]",
         "I2C_BUS", bus.getAddress(), "DRIVE_MANUFACTURER_ID", ms.str(),
         "DRIVE_SERIAL", prettySerial);
+}
+
+std::string BasicNVMeDrive::getInventoryPath() const
+{
+    /* Overridden by descendents */
+    assert(!inventoryPath);
+    throw std::logic_error("Can't touch this");
 }
 
 void BasicNVMeDrive::addToInventory(Inventory* inventory)

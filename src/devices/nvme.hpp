@@ -7,6 +7,7 @@
 #include "sysfs/i2c.hpp"
 
 #include <array>
+#include <optional>
 #include <stdexcept>
 #include <vector>
 
@@ -33,12 +34,15 @@ class BasicNVMeDrive : public NVMeDrive, FRU
   public:
     static bool isBasicEndpointPresent(const SysfsI2CBus& bus);
 
-    BasicNVMeDrive(const SysfsI2CBus& bus, Inventory* inventory, int index);
     BasicNVMeDrive(const SysfsI2CBus& bus, Inventory* inventory, int index,
+                   std::optional<std::string> path = std::nullopt);
+    BasicNVMeDrive(const SysfsI2CBus& bus, Inventory* inventory, int index,
+                   std::optional<std::string> path,
                    const std::vector<uint8_t>&& metadata);
     ~BasicNVMeDrive() override = default;
 
     /* FRU */
+    std::string getInventoryPath() const override;
     void addToInventory(Inventory* inventory) override;
     void removeFromInventory(Inventory* inventory) override;
 
@@ -56,6 +60,7 @@ class BasicNVMeDrive : public NVMeDrive, FRU
     static constexpr int endpointAddress = 0x6a;
     static constexpr int vendorMetadataOffset = 0x08;
 
+    const std::optional<std::string> inventoryPath;
     const inventory::interfaces::I2CDevice basic;
     const inventory::interfaces::VINI vini;
 
