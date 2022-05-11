@@ -45,10 +45,6 @@ class FlettNVMeDrive : public BasicNVMeDrive
     std::string getInventoryPath() const override;
 
   private:
-    void decorateWithI2CDevice(const std::string& path,
-                               Inventory* inventory) const;
-    void decorateWithVINI(const std::string& path, Inventory* inventory) const;
-
     const Nisqually* nisqually;
     const Flett* flett;
 };
