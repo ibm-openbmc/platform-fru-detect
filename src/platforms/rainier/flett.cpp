@@ -19,7 +19,8 @@ PHOSPHOR_LOG2_USING;
 
 FlettNVMeDrive::FlettNVMeDrive(Inventory* inventory, const Nisqually* nisqually,
                                const Flett* flett, int index) :
-    BasicNVMeDrive(flett->getDriveBus(index), inventory, index),
+    BasicNVMeDrive(flett->getDriveBus(index), inventory, index,
+                   getInventoryPathFor(nisqually, flett, index)),
     nisqually(nisqually), flett(flett)
 {}
 
@@ -41,12 +42,18 @@ void FlettNVMeDrive::unplug([[maybe_unused]] Notifier& notifier, int mode)
           index, "WILLIWAKAS_ID", flett->getIndex());
 }
 
-std::string FlettNVMeDrive::getInventoryPath() const
+std::string FlettNVMeDrive::getInventoryPathFor(const Nisqually* nisqually,
+                                                const Flett* flett, int index)
 {
     std::string williwakasPath =
         Williwakas::getInventoryPathFor(nisqually, flett->getIndex());
 
     return williwakasPath + "/" + "nvme" + std::to_string(index);
+}
+
+std::string FlettNVMeDrive::getInventoryPath() const
+{
+    return getInventoryPathFor(nisqually, flett, index);
 }
 
 bool FlettNVMeDrive::isPresent(SysfsI2CBus bus)

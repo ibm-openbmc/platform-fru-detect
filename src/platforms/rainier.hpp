@@ -26,6 +26,8 @@ class FlettNVMeDrive : public BasicNVMeDrive, public Device
 {
   public:
     static bool isPresent(SysfsI2CBus bus);
+    static std::string getInventoryPathFor(const Nisqually* nisqually,
+                                           const Flett* flett, int index);
 
     explicit FlettNVMeDrive(Inventory* inventory, const Nisqually* nisqually,
                             const Flett* flett, int index);
