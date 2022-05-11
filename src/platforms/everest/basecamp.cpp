@@ -11,13 +11,20 @@ PHOSPHOR_LOG2_USING;
 
 BasecampNVMeDrive::BasecampNVMeDrive(Inventory* inventory,
                                      const Basecamp* basecamp, int index) :
-    BasicNVMeDrive(basecamp->getDriveBus(index), inventory, index),
+    BasicNVMeDrive(basecamp->getDriveBus(index), inventory, index,
+                   getInventoryPathFor(basecamp, index)),
     basecamp(basecamp)
 {}
 
-std::string BasecampNVMeDrive::getInventoryPath() const
+std::string BasecampNVMeDrive::getInventoryPathFor(const Basecamp* basecamp,
+                                                   int index)
 {
     return basecamp->getInventoryPath() + "/" + "nvme" + std::to_string(index);
+}
+
+std::string BasecampNVMeDrive::getInventoryPath() const
+{
+    return getInventoryPathFor(basecamp, index);
 }
 
 void BasecampNVMeDrive::plug([[maybe_unused]] Notifier& notifier)

@@ -12,6 +12,8 @@ class Bellavista;
 class BasecampNVMeDrive : public BasicNVMeDrive, public Device
 {
   public:
+    static std::string getInventoryPathFor(const Basecamp* basecamp, int index);
+
     BasecampNVMeDrive(Inventory* inventory, const Basecamp* basecamp,
                       int index);
     ~BasecampNVMeDrive() override = default;
