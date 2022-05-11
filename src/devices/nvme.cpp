@@ -71,6 +71,9 @@ std::vector<uint8_t>
     return serial;
 }
 
+BasicNVMeDrive::BasicNVMeDrive(std::string&& path) : inventoryPath(path)
+{}
+
 BasicNVMeDrive::BasicNVMeDrive(const SysfsI2CBus& bus, std::string&& path) :
     BasicNVMeDrive(bus, std::move(path), BasicNVMeDrive::fetchMetadata(bus))
 {}
@@ -86,12 +89,12 @@ BasicNVMeDrive::BasicNVMeDrive(const SysfsI2CBus& bus, std::string&& path,
 {
     std::stringstream ms;
     ms << std::noskipws << " ";
-    for (auto v : manufacturer)
+    for (auto v : manufacturer.value())
     {
         ms << std::hex << (unsigned int)v << " ";
     }
 
-    std::string prettySerial(serial.begin(), serial.end());
+    std::string prettySerial(serial.value().begin(), serial.value().end());
 
     info(
         "Instantiated drive for device on bus {I2C_BUS} with manufacturer [{DRIVE_MANUFACTURER_ID}] and serial [{DRIVE_SERIAL}]",
@@ -122,10 +125,10 @@ void BasicNVMeDrive::removeFromInventory(Inventory* inventory)
 
 const std::vector<uint8_t>& BasicNVMeDrive::getManufacturer() const
 {
-    return manufacturer;
+    return manufacturer.value();
 }
 
 const std::vector<uint8_t>& BasicNVMeDrive::getSerial() const
 {
-    return serial;
+    return serial.value();
 }

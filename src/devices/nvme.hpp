@@ -29,6 +29,7 @@ class BasicNVMeDrive : public NVMeDrive, FRU
   public:
     static bool isBasicEndpointPresent(const SysfsI2CBus& bus);
 
+    BasicNVMeDrive(std::string&& path);
     BasicNVMeDrive(const SysfsI2CBus& bus, std::string&& path);
     BasicNVMeDrive(const SysfsI2CBus& bus, std::string&& path,
                    const std::vector<uint8_t>&& metadata);
@@ -57,6 +58,6 @@ class BasicNVMeDrive : public NVMeDrive, FRU
     const inventory::interfaces::I2CDevice basic;
     const inventory::interfaces::VINI vini;
 
-    std::vector<uint8_t> manufacturer;
-    std::vector<uint8_t> serial;
+    std::optional<std::vector<uint8_t>> manufacturer;
+    std::optional<std::vector<uint8_t>> serial;
 };
