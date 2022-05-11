@@ -22,12 +22,10 @@ class Inventory;
 class Nisqually;
 class Williwakas;
 
-class FlettNVMeDrive : public BasicNVMeDrive, public Device
+class FlettNVMeDrive : public NVMeDrive, public Device, public FRU
 {
   public:
     static bool isPresent(SysfsI2CBus bus);
-    static std::string getInventoryPathFor(const Nisqually* nisqually,
-                                           const Flett* flett, int index);
 
     explicit FlettNVMeDrive(Inventory* inventory, const Nisqually* nisqually,
                             const Flett* flett, int index);
@@ -43,11 +41,17 @@ class FlettNVMeDrive : public BasicNVMeDrive, public Device
     void unplug(Notifier& notifier,
                 int mode = UNPLUG_REMOVES_INVENTORY) override;
 
+    /* FRU */
+    std::string getInventoryPath() const override;
+    void addToInventory(Inventory* inventory) override;
+    void removeFromInventory(Inventory* inventory) override;
+
   private:
     Inventory* inventory;
     const Nisqually* nisqually;
     const Flett* flett;
     int index;
+    std::optional<BasicNVMeDrive> drive;
 };
 
 class Flett : public Device

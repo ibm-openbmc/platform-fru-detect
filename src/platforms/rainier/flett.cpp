@@ -19,36 +19,51 @@ PHOSPHOR_LOG2_USING;
 
 FlettNVMeDrive::FlettNVMeDrive(Inventory* inventory, const Nisqually* nisqually,
                                const Flett* flett, int index) :
-    BasicNVMeDrive(flett->getDriveBus(index),
-                   getInventoryPathFor(nisqually, flett, index)),
-    inventory(inventory), nisqually(nisqually), flett(flett), index(index)
+    inventory(inventory),
+    nisqually(nisqually), flett(flett), index(index)
 {}
 
 void FlettNVMeDrive::plug([[maybe_unused]] Notifier& notifier)
 {
     /* TODO: Probe NVMe MI endpoints on I2C? */
+    drive.emplace(flett->getDriveBus(index), getInventoryPath());
+    addToInventory(inventory);
     debug("Drive {NVME_ID} plugged on Flett {FLETT_ID}", "NVME_ID", index,
           "FLETT_ID", flett->getIndex());
-    addToInventory(inventory);
 }
 
 void FlettNVMeDrive::unplug([[maybe_unused]] Notifier& notifier, int mode)
 {
+    if (!drive)
+    {
+        /* Cold-unplug, no drive is present */
+        drive.emplace(getInventoryPath());
+    }
     if (mode == UNPLUG_REMOVES_INVENTORY)
     {
         removeFromInventory(inventory);
     }
+    drive.reset();
     debug("Drive {NVME_ID} unplugged on Williwakas {WILLIWAKAS_ID}", "NVME_ID",
           index, "WILLIWAKAS_ID", flett->getIndex());
 }
 
-std::string FlettNVMeDrive::getInventoryPathFor(const Nisqually* nisqually,
-                                                const Flett* flett, int index)
+std::string FlettNVMeDrive::getInventoryPath() const
 {
     std::string williwakasPath =
         Williwakas::getInventoryPathFor(nisqually, flett->getIndex());
 
     return williwakasPath + "/" + "nvme" + std::to_string(index);
+}
+
+void FlettNVMeDrive::addToInventory(Inventory* inventory)
+{
+    drive->addToInventory(inventory);
+}
+
+void FlettNVMeDrive::removeFromInventory(Inventory* inventory)
+{
+    drive->removeFromInventory(inventory);
 }
 
 bool FlettNVMeDrive::isPresent(SysfsI2CBus bus)
