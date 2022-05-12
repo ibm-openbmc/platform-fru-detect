@@ -67,28 +67,7 @@ Basecamp::Basecamp(Inventory* inventory, const Bellavista* bellavista) :
         PolledConnector<BasecampNVMeDrive>(8, inventory, this, 8),
         PolledConnector<BasecampNVMeDrive>(9, inventory, this, 9),
     }}
-{
-    SysfsI2CBus root(driveMetadataBus);
-    SysfsI2CMux mux(root, driveMetadataMuxAddress);
-    SysfsI2CBus bus(mux, driveMetadataMuxChannel);
-
-    SysfsI2CDevice dev = bus.probeDevice("pca9552", drivePresenceDeviceAddress);
-
-    std::string chipName = SysfsGPIOChip(dev).getName().string();
-    gpiod::chip chip(chipName, gpiod::chip::OPEN_BY_NAME);
-
-    std::vector<unsigned int> offsets(drivePresenceMap.begin(),
-                                      drivePresenceMap.end());
-
-    assert(drivePresenceMap.size() == lines.size());
-    for (std::size_t i = 0; i < lines.size(); i++)
-    {
-        auto line = chip.get_line(drivePresenceMap[i]);
-        line.request({program_invocation_short_name,
-                      gpiod::line::DIRECTION_INPUT, gpiod::line::ACTIVE_LOW});
-        lines[i] = line;
-    }
-}
+{}
 
 SysfsI2CBus Basecamp::getDriveBus(int index) const
 {
@@ -102,7 +81,7 @@ class BasecampNVMeDrivePresence
 {
   public:
     BasecampNVMeDrivePresence() = delete;
-    BasecampNVMeDrivePresence(gpiod::line* line, SysfsI2CBus bus) :
+    BasecampNVMeDrivePresence(gpiod::line&& line, SysfsI2CBus bus) :
         line(line), bus(std::move(bus)), haveEndpoint(false)
     {}
 
@@ -111,7 +90,7 @@ class BasecampNVMeDrivePresence
         // Once we've observed both GPIO presence and the basic I2C endpoint,
         // only unplug() the drive if the GPIO indicates the drive is unplugged.
         // The I2C endpoint will come and go as the host power state changes.
-        if (!line->get_value())
+        if (!line.get_value())
         {
             haveEndpoint = false;
             return false;
@@ -126,18 +105,30 @@ class BasecampNVMeDrivePresence
     }
 
   private:
-    gpiod::line* line;
+    gpiod::line line;
     SysfsI2CBus bus;
     bool haveEndpoint;
 };
 
 void Basecamp::plug(Notifier& notifier)
 {
+    SysfsI2CBus root(driveMetadataBus);
+    SysfsI2CMux mux(root, driveMetadataMuxAddress);
+    SysfsI2CBus bus(mux, driveMetadataMuxChannel);
+
+    SysfsI2CDevice dev = bus.probeDevice("pca9552", drivePresenceDeviceAddress);
+
+    std::string chipName = SysfsGPIOChip(dev).getName().string();
+    gpiod::chip chip(chipName, gpiod::chip::OPEN_BY_NAME);
+
     for (auto& poller : polledDriveConnectors)
     {
-        auto index = poller.index();
+        int index = poller.index();
+        auto line = chip.get_line(drivePresenceMap[index]);
+        line.request({program_invocation_short_name,
+                      gpiod::line::DIRECTION_INPUT, gpiod::line::ACTIVE_LOW});
         auto presence =
-            BasecampNVMeDrivePresence(&lines.at(index), getDriveBus(index));
+            BasecampNVMeDrivePresence(std::move(line), getDriveBus(index));
         poller.start(notifier, std::move(presence));
     }
 }
@@ -148,6 +139,22 @@ void Basecamp::unplug([[maybe_unused]] Notifier& notifier,
     for (auto& poller : polledDriveConnectors)
     {
         poller.stop(notifier, mode);
+    }
+
+    try
+    {
+        SysfsI2CBus root(driveMetadataBus);
+        SysfsI2CMux mux(root, driveMetadataMuxAddress);
+        SysfsI2CBus bus(mux, driveMetadataMuxChannel);
+
+        bus.removeDevice(drivePresenceDeviceAddress);
+    }
+    catch (const std::error_condition& err)
+    {
+        if (err.value() != ENOENT)
+        {
+            throw err;
+        }
     }
 }
 

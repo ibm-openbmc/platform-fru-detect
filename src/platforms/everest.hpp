@@ -74,7 +74,6 @@ class Basecamp : public Device, public FRU
 
     Inventory* inventory;
     const Bellavista* bellavista;
-    std::array<gpiod::line, 10> lines;
     std::array<PolledConnector<BasecampNVMeDrive>, 10> polledDriveConnectors;
 };
 
