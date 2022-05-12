@@ -44,8 +44,8 @@ void FlettNVMeDrive::unplug([[maybe_unused]] Notifier& notifier, int mode)
         removeFromInventory(inventory);
     }
     drive.reset();
-    debug("Drive {NVME_ID} unplugged on Williwakas {WILLIWAKAS_ID}", "NVME_ID",
-          index, "WILLIWAKAS_ID", flett->getIndex());
+    debug("Drive {NVME_ID} unplugged on Flett {FLETT_ID}", "NVME_ID", index,
+          "FLETT_ID", flett->getIndex());
 }
 
 std::string FlettNVMeDrive::getInventoryPath() const
