@@ -6,6 +6,7 @@
 
 #include <filesystem>
 #include <iostream>
+#include <system_error>
 
 class SysfsEntry
 {
@@ -19,7 +20,7 @@ class SysfsEntry
             lg2::error("sysfs path '{SYSFS_PATH}' does not exist", "SYSFS_PATH",
                        path.string());
 
-            throw -1;
+            throw std::system_category().default_error_condition(ENOENT);
         }
 
         lg2::debug("Instantiated SysfsEntry for '{SYSFS_PATH}'", "SYSFS_PATH",
