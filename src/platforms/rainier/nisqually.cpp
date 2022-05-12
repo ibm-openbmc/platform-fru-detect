@@ -134,17 +134,18 @@ void Nisqually::detectFlettCards(Notifier& notifier)
     /* FIXME: do something more ergonomic */
     for (auto& [connector, slot] : flettConnectorSlotMap)
     {
-        if (!isFlettPresentAt(slot))
-        {
-            debug("No Flett in slot {PCIE_SLOT}", "PCIE_SLOT", slot);
-            continue;
-        }
-
         try
         {
-            flettConnectors[connector].populate(notifier);
-            debug("Initialised Flett {FLETT_ID} in slot {PCIE_SLOT}",
-                  "FLETT_ID", getFlettIndex(slot), "PCIE_SLOT", slot);
+            if (isFlettPresentAt(slot))
+            {
+                flettConnectors[connector].populate(notifier);
+                debug("Initialised Flett {FLETT_ID} in slot {PCIE_SLOT}",
+                      "FLETT_ID", getFlettIndex(slot), "PCIE_SLOT", slot);
+            }
+            else
+            {
+                flettConnectors[connector].depopulate(notifier);
+            }
         }
         catch (const SysfsI2CDeviceDriverBindException& ex)
         {
@@ -184,16 +185,18 @@ void Nisqually::detectWilliwakasCards(Notifier& notifier)
             "Williwakas presence at index {WILLIWAKAS_ID}: {WILLIWAKAS_PRESENT}",
             "WILLIWAKAS_ID", index, "WILLIWAKAS_PRESENT", present);
 
-        if (!present)
-        {
-            continue;
-        }
-
         try
         {
-            williwakasConnectors[index].populate(notifier);
-            info("Initialised Williwakas {WILLIWAKAS_ID}", "WILLIWAKAS_ID",
-                 index);
+            if (present)
+            {
+                williwakasConnectors[index].populate(notifier);
+                info("Initialised Williwakas {WILLIWAKAS_ID}", "WILLIWAKAS_ID",
+                     index);
+            }
+            else
+            {
+                williwakasConnectors[index].depopulate(notifier);
+            }
         }
         catch (const SysfsI2CDeviceDriverBindException& ex)
         {
