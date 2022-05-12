@@ -127,16 +127,7 @@ Flett::Flett(Inventory* inventory, const Nisqually* nisqually, int slot) :
         PolledConnector<FlettNVMeDrive>(7, inventory, this->nisqually, this,
                                         flettChannelDriveMap.at(7)),
     }}
-{
-    SysfsI2CBus bus = nisqually->getFlettSlotI2CBus(slot);
-
-#if 0 /* FIXME: Well, fix qemu */
-    bus.probeDevice("24c02", flettSlotEepromMap.at(slot));
-#endif
-    bus.probeDevice("pca9548", flettSlotMuxMap.at(slot));
-
-    debug("Instantiated Flett in slot {PCIE_SLOT}", "PCIE_SLOT", slot);
-}
+{}
 
 int Flett::getIndex() const
 {
@@ -153,6 +144,13 @@ SysfsI2CBus Flett::getDriveBus(int index) const
 
 void Flett::plug(Notifier& notifier)
 {
+    SysfsI2CBus bus = nisqually->getFlettSlotI2CBus(slot);
+
+#if 0 /* FIXME: Well, fix qemu */
+    bus.probeDevice("24c02", flettSlotEepromMap.at(slot));
+#endif
+    bus.probeDevice("pca9548", flettSlotMuxMap.at(slot));
+
     for (auto& poller : polledDriveConnectors)
     {
         const auto bus = getDriveBus(flettChannelDriveMap.at(poller.index()));
@@ -160,6 +158,8 @@ void Flett::plug(Notifier& notifier)
             return BasicNVMeDrive::isBasicEndpointPresent(bus);
         });
     }
+
+    debug("Plugged Flett in slot {PCIE_SLOT}", "PCIE_SLOT", slot);
 }
 
 void Flett::unplug(Notifier& notifier, int mode)
@@ -168,4 +168,20 @@ void Flett::unplug(Notifier& notifier, int mode)
     {
         poller.stop(notifier, mode);
     }
+
+    try
+    {
+        SysfsI2CBus bus = nisqually->getFlettSlotI2CBus(slot);
+
+        bus.removeDevice(flettSlotMuxMap.at(slot));
+    }
+    catch (const std::error_condition& err)
+    {
+        if (err.value() != ENOENT)
+        {
+            throw err;
+        }
+    }
+
+    debug("Unplugged Flett in slot {PCIE_SLOT}", "PCIE_SLOT", slot);
 }
