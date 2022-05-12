@@ -1,7 +1,8 @@
 /* SPDX-License-Identifier: Apache-2.0 */
 /* Copyright IBM Corp. 2021 */
-#include "descriptor.hpp"
 #include "i2c.hpp"
+
+#include "descriptor.hpp"
 
 #include <phosphor-logging/lg2.hpp>
 

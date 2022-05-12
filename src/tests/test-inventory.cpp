@@ -47,12 +47,11 @@ static void accumulate(std::map<std::string, ObjectType>& store,
 
 struct MockInventory : public Inventory
 {
-    std::weak_ptr<dbus::PropertiesChangedListener>
-        addPropertiesChangedListener(
-            [[maybe_unused]] const std::string& path,
-            [[maybe_unused]] const std::string& interface,
-            [[maybe_unused]] std::function<void(dbus::PropertiesChanged&&)>
-                callback) override
+    std::weak_ptr<dbus::PropertiesChangedListener> addPropertiesChangedListener(
+        [[maybe_unused]] const std::string& path,
+        [[maybe_unused]] const std::string& interface,
+        [[maybe_unused]] std::function<void(dbus::PropertiesChanged&&)>
+            callback) override
     {
         throw std::logic_error("Unimplemented");
     }
@@ -98,7 +97,7 @@ struct MockInventory : public Inventory
     }
 
     bool isModel([[maybe_unused]] const std::string& path,
-                         [[maybe_unused]] const std::string& model) override
+                 [[maybe_unused]] const std::string& model) override
     {
         throw std::logic_error("Unimplemented");
     }

@@ -71,8 +71,7 @@ Nisqually::Nisqually(Inventory* inventory) :
         Connector<Williwakas>(this->inventory, this, 2),
     }}
 {
-    for (int i :
-         std::views::iota(0UL, Nisqually::williwakasPresenceMap.size()))
+    for (int i : std::views::iota(0UL, Nisqually::williwakasPresenceMap.size()))
     {
         int offset = Nisqually::williwakasPresenceMap.at(i);
         gpiod::line line = williwakasPresenceChip.get_line(offset);

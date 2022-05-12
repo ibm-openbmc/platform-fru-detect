@@ -38,7 +38,8 @@ class FlettNVMeDrive : public BasicNVMeDrive
 
     /* Device */
     void plug(Notifier& notifier) override;
-    void unplug(Notifier& notifier, int mode = UNPLUG_REMOVES_INVENTORY) override;
+    void unplug(Notifier& notifier,
+                int mode = UNPLUG_REMOVES_INVENTORY) override;
 
     /* FRU */
     std::string getInventoryPath() const override;
@@ -71,7 +72,8 @@ class Flett : public Device
 
     /* Device */
     void plug(Notifier& notifier) override;
-    void unplug(Notifier& notifier, int mode = Device::UNPLUG_REMOVES_INVENTORY) override;
+    void unplug(Notifier& notifier,
+                int mode = Device::UNPLUG_REMOVES_INVENTORY) override;
 
   private:
     Inventory* inventory;
@@ -95,7 +97,8 @@ class WilliwakasNVMeDrive : public NVMeDrive
 
     /* Device */
     void plug(Notifier& notifier) override;
-    void unplug(Notifier& notifier, int mode = UNPLUG_REMOVES_INVENTORY) override;
+    void unplug(Notifier& notifier,
+                int mode = UNPLUG_REMOVES_INVENTORY) override;
 
     /* FRU */
     std::string getInventoryPath() const override;
@@ -125,7 +128,8 @@ class Williwakas : public Device, FRU
 
     /* Device */
     void plug(Notifier& notifier) override;
-    void unplug(Notifier& notifier, int mode = Device::UNPLUG_REMOVES_INVENTORY) override;
+    void unplug(Notifier& notifier,
+                int mode = Device::UNPLUG_REMOVES_INVENTORY) override;
 
     /* FRU */
     std::string getInventoryPath() const override;
@@ -176,7 +180,8 @@ class Nisqually : public Device, FRU
 
     /* Device */
     void plug(Notifier& notifier) override;
-    void unplug(Notifier& notifier, int mode = Device::UNPLUG_REMOVES_INVENTORY) override;
+    void unplug(Notifier& notifier,
+                int mode = Device::UNPLUG_REMOVES_INVENTORY) override;
 
     /* FRU */
     std::string getInventoryPath() const override;
@@ -254,7 +259,8 @@ class Ingraham : public Device
 
     /* Device */
     void plug(Notifier& notifier) override;
-    void unplug(Notifier& notifier, int mode = Device::UNPLUG_REMOVES_INVENTORY) override;
+    void unplug(Notifier& notifier,
+                int mode = Device::UNPLUG_REMOVES_INVENTORY) override;
 
   private:
     static constexpr std::array<const char*, 12> pcieSlotBusMap = {

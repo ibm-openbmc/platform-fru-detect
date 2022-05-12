@@ -7,7 +7,8 @@
 
 namespace fs = std::filesystem;
 
-std::string SysfsI2CDevice::generateI2CDeviceID(const SysfsI2CBus& bus, int address)
+std::string SysfsI2CDevice::generateI2CDeviceID(const SysfsI2CBus& bus,
+                                                int address)
 {
     std::ostringstream oss;
 

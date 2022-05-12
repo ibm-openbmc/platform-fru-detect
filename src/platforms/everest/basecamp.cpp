@@ -65,8 +65,7 @@ Basecamp::Basecamp(Inventory* inventory, const Bellavista* bellavista) :
     SysfsI2CMux mux(root, driveMetadataMuxAddress);
     SysfsI2CBus bus(mux, driveMetadataMuxChannel);
 
-    SysfsI2CDevice dev =
-        bus.probeDevice("pca9552", drivePresenceDeviceAddress);
+    SysfsI2CDevice dev = bus.probeDevice("pca9552", drivePresenceDeviceAddress);
 
     std::string chipName = SysfsGPIOChip(dev).getName().string();
     gpiod::chip chip(chipName, gpiod::chip::OPEN_BY_NAME);

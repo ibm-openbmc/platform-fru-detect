@@ -8,7 +8,7 @@
 #include <stdexcept>
 
 FileDescriptor::FileDescriptor(const std::filesystem::path& name,
-                       std::ios_base::openmode mode) :
+                               std::ios_base::openmode mode) :
     // NOLINTNEXTLINE(cppcoreguidelines-pro-type-vararg)
     fd(open(name.c_str(), mode))
 {
