@@ -196,16 +196,10 @@ class Nisqually : public Device, FRU
     static constexpr std::array<int, 3> williwakasPresenceMap = {7, 6, 5};
 
     void detectFlettCards(Notifier& notifier);
-
-    bool isWilliwakasPresent(int index);
     void detectWilliwakasCards(Notifier& notifier);
 
     std::array<Connector<Flett>, 4> flettConnectors;
-
-    gpiod::chip williwakasPresenceChip;
     std::array<Connector<Williwakas>, 3> williwakasConnectors;
-
-    std::array<gpiod::line, 3> williwakasPresenceLines;
 };
 
 class Nisqually0z : public Nisqually
@@ -236,6 +230,11 @@ class Nisqually1z : public Nisqually
 
     /* Nisqually */
     SysfsI2CBus getFlettSlotI2CBus(int slot) const override;
+
+    /* Device */
+    void plug(Notifier& notifier) override;
+    void unplug(Notifier& notifier,
+                int mode = UNPLUG_REMOVES_INVENTORY) override;
 
   private:
     static constexpr int slotMuxAddress = 0x70;
