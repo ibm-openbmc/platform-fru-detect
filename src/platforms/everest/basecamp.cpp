@@ -88,7 +88,7 @@ SysfsI2CBus Basecamp::getDriveBus(int index) const
     SysfsI2CBus root(driveManagementBus);
     SysfsI2CMux driveMux(root, driveMuxMap.at(index));
 
-    return SysfsI2CBus(driveMux, driveChannelMap.at(index));
+    return {driveMux, driveChannelMap.at(index)};
 }
 
 void Basecamp::plug(Notifier& notifier)
