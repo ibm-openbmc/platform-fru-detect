@@ -105,8 +105,6 @@ class Bellavista : public Device, public FRU
     static constexpr int basecampPresenceOffset = 12;
 
     Inventory* inventory;
-    gpiod::chip basecampPresenceChip;
-    gpiod::line basecampPresenceLine;
     PolledConnector<Basecamp> polledBasecampConnector;
 };
 
