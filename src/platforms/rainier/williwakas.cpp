@@ -9,6 +9,7 @@
 #include <phosphor-logging/lg2.hpp>
 
 #include <cassert>
+#include <cerrno>
 #include <iostream>
 #include <stdexcept>
 
@@ -84,31 +85,7 @@ Williwakas::Williwakas(Inventory* inventory, const Nisqually* nisqually,
         PolledConnector<WilliwakasNVMeDrive>(6, inventory, this, 6),
         PolledConnector<WilliwakasNVMeDrive>(7, inventory, this, 7),
     }}
-{
-    SysfsI2CBus bus(Williwakas::driveBackplaneBus.at(index));
-
-    SysfsI2CDevice dev =
-        bus.probeDevice("pca9552", Williwakas::drivePresenceDeviceAddress);
-
-    std::string chipName = SysfsGPIOChip(dev).getName().string();
-
-    gpiod::chip chip(chipName, gpiod::chip::OPEN_BY_NAME);
-
-    std::vector<unsigned int> offsets(Williwakas::drivePresenceMap.begin(),
-                                      Williwakas::drivePresenceMap.end());
-
-    assert(Williwakas::drive_presence_map.size() == lines.size());
-    for (std::size_t i = 0; i < lines.size(); i++)
-    {
-        auto line = chip.get_line(Williwakas::drivePresenceMap[i]);
-        line.request({program_invocation_short_name,
-                      gpiod::line::DIRECTION_INPUT, gpiod::line::ACTIVE_LOW});
-        lines[i] = line;
-    }
-
-    debug("Constructed drive backplane for index {WILLIWAKAS_ID}",
-          "WILLIWAKAS_ID", index);
-}
+{}
 
 int Williwakas::getIndex() const
 {
@@ -132,11 +109,26 @@ void Williwakas::removeFromInventory([[maybe_unused]] Inventory* inventory)
 
 void Williwakas::plug(Notifier& notifier)
 {
+    SysfsI2CBus bus(Williwakas::driveBackplaneBus.at(index));
+
+    SysfsI2CDevice dev =
+        bus.probeDevice("pca9552", Williwakas::drivePresenceDeviceAddress);
+
+    std::string chipName = SysfsGPIOChip(dev).getName().string();
+
+    gpiod::chip chip(chipName, gpiod::chip::OPEN_BY_NAME);
+
     for (auto& poller : polledDriveConnectors)
     {
-        auto line = &lines.at(poller.index());
-        poller.start(notifier, [line]() { return line->get_value(); });
+        auto line = chip.get_line(Williwakas::drivePresenceMap[poller.index()]);
+        line.request({program_invocation_short_name,
+                      gpiod::line::DIRECTION_INPUT, gpiod::line::ACTIVE_LOW});
+        poller.start(notifier,
+                     [line = std::move(line)]() { return line.get_value(); });
     }
+
+    debug("Plugged drive backplane for index {WILLIWAKAS_ID}", "WILLIWAKAS_ID",
+          index);
 }
 
 void Williwakas::unplug(Notifier& notifier, int mode)
@@ -145,4 +137,21 @@ void Williwakas::unplug(Notifier& notifier, int mode)
     {
         poller.stop(notifier, mode);
     }
+
+    try
+    {
+        SysfsI2CBus bus(Williwakas::driveBackplaneBus.at(index));
+
+        bus.removeDevice(Williwakas::drivePresenceDeviceAddress);
+    }
+    catch (const std::error_condition& err)
+    {
+        if (err.value() != ENOENT)
+        {
+            throw err;
+        }
+    }
+
+    debug("Unplugged drive backplane for index {WILLIWAKAS_ID}",
+          "WILLIWAKAS_ID", index);
 }

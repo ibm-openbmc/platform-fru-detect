@@ -154,10 +154,6 @@ class Williwakas : public Device, public FRU
     Inventory* inventory;
     const Nisqually* nisqually;
     int index;
-    gpiod::chip chip;
-    /* There's a bug in the gpiod::line_bulk iterator that prevents us using it
-     * effectively */
-    std::array<gpiod::line, 8> lines;
     std::array<PolledConnector<WilliwakasNVMeDrive>, 8> polledDriveConnectors;
 
     bool isDrivePresent(int index);
