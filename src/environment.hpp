@@ -43,7 +43,8 @@ class SimicsExecutionEnvironment : public ExecutionEnvironment
 
     /* ExecutionEnvironment */
     bool probe() override;
-    void run(PlatformManager& pm, Notifier& notifier, Inventory* inventory) override;
+    void run(PlatformManager& pm, Notifier& notifier,
+             Inventory* inventory) override;
 };
 
 class HardwareExecutionEnvironment : public ExecutionEnvironment
@@ -54,5 +55,6 @@ class HardwareExecutionEnvironment : public ExecutionEnvironment
 
     /* ExecutionEnvironment */
     bool probe() override;
-    void run(PlatformManager& pm, Notifier& notifier, Inventory* inventory) override;
+    void run(PlatformManager& pm, Notifier& notifier,
+             Inventory* inventory) override;
 };

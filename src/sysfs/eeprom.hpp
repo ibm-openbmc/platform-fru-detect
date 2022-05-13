@@ -16,7 +16,8 @@ class SysfsEEPROM : public SysfsEntry
     {}
     SysfsEEPROM(const std::filesystem::path& path) : SysfsEntry(path)
     {}
-    SysfsEEPROM(const SysfsI2CDevice& device) : SysfsEntry(device.getPath() / "eeprom")
+    SysfsEEPROM(const SysfsI2CDevice& device) :
+        SysfsEntry(device.getPath() / "eeprom")
     {}
 
     SysfsEEPROM(SysfsEEPROM& other) = default;

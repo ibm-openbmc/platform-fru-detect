@@ -25,5 +25,6 @@ class TestNVMeDrive : public BasicNVMeDrive
 TEST(DriveMetadata, smallMetadata)
 {
     SysfsI2CBus bus("/sys/bus/i2c/devices/i2c-0", false);
-    auto drive = TestNVMeDrive(bus, nullptr, 0, std::vector<uint8_t>{0, 1, 0x44});
+    auto drive =
+        TestNVMeDrive(bus, nullptr, 0, std::vector<uint8_t>{0, 1, 0x44});
 }

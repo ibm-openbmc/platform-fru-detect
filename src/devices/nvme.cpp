@@ -22,33 +22,6 @@ bool BasicNVMeDrive::isBasicEndpointPresent(const SysfsI2CBus& bus)
     return i2c::isDeviceResponsive(bus, BasicNVMeDrive::endpointAddress);
 }
 
-bool BasicNVMeDrive::isDriveReady(const SysfsI2CBus& bus)
-{
-    try
-    {
-        std::vector<uint8_t> status;
-
-        i2c::oneshotSMBusBlockRead(bus, BasicNVMeDrive::endpointAddress, 0,
-                                   status);
-
-        if (status.empty())
-        {
-            return false;
-        }
-
-        return !(status[0] & NVME_BASIC_SFLGS_NOT_READY);
-    }
-    catch (const std::error_condition& ex)
-    {
-        if (ex.value() != ENODEV)
-        {
-            throw ex;
-        }
-    }
-
-    return false;
-}
-
 std::vector<uint8_t> BasicNVMeDrive::fetchMetadata(const SysfsI2CBus& bus)
 {
     std::vector<uint8_t> data;
@@ -68,11 +41,15 @@ std::vector<uint8_t>
     BasicNVMeDrive::extractManufacturer(const std::vector<uint8_t>& metadata)
 {
     std::vector<uint8_t> manufacturer;
-    if (metadata.size() >= 2) {
+    if (metadata.size() >= 2)
+    {
         manufacturer.insert(manufacturer.begin(), metadata.begin(),
                             metadata.begin() + 2);
-    } else {
-        warning("Invalid metadata length: {METADATA_LENGTH}", "METADATA_LENGTH", metadata.size());
+    }
+    else
+    {
+        warning("Invalid metadata length: {METADATA_LENGTH}", "METADATA_LENGTH",
+                metadata.size());
     }
     return manufacturer;
 }
@@ -81,11 +58,15 @@ std::vector<uint8_t>
     BasicNVMeDrive::extractSerial(const std::vector<uint8_t>& metadata)
 {
     std::vector<uint8_t> serial;
-    if (metadata.size() >= 2) {
+    if (metadata.size() >= 2)
+    {
         serial.insert(serial.begin(), metadata.begin() + 2, metadata.end());
-    } else {
-        warning("No drive serial data present. Invalid metadata of length: {METADATA_LENGTH}",
-                "METADATA_LENGTH", metadata.size());
+    }
+    else
+    {
+        warning(
+            "No drive serial data present. Invalid metadata of length: {METADATA_LENGTH}",
+            "METADATA_LENGTH", metadata.size());
     }
     return serial;
 }

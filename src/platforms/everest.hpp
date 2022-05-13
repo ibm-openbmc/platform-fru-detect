@@ -18,7 +18,8 @@ class BasecampNVMeDrive : public BasicNVMeDrive
 
     /* Device */
     void plug(Notifier& notifier) override;
-    void unplug(Notifier& notifier, int mode = UNPLUG_REMOVES_INVENTORY) override;
+    void unplug(Notifier& notifier,
+                int mode = UNPLUG_REMOVES_INVENTORY) override;
 
     /* FRU */
     std::string getInventoryPath() const override;
@@ -44,7 +45,8 @@ class Basecamp : public Device, FRU
 
     /* Device */
     void plug(Notifier& notifier) override;
-    void unplug(Notifier& notifier, int mode = Device::UNPLUG_REMOVES_INVENTORY) override;
+    void unplug(Notifier& notifier,
+                int mode = Device::UNPLUG_REMOVES_INVENTORY) override;
 
     /* FRU */
     std::string getInventoryPath() const override;
@@ -58,14 +60,14 @@ class Basecamp : public Device, FRU
     static constexpr int driveMetadataMuxChannel = 3;
     static constexpr int drivePresenceDeviceAddress = 0x61;
     static constexpr std::array<int, 10> drivePresenceMap = {0, 1, 2, 3, 4,
-                                                               5, 6, 7, 8, 9};
+                                                             5, 6, 7, 8, 9};
 
     static constexpr const char* driveManagementBus =
         "/sys/bus/i2c/devices/i2c-15";
     static constexpr std::array<int, 10> driveMuxMap = {
         0x70, 0x70, 0x70, 0x70, 0x71, 0x71, 0x71, 0x71, 0x72, 0x72};
     static constexpr std::array<int, 10> driveChannelMap = {0, 1, 2, 3, 0,
-                                                              1, 2, 3, 0, 1};
+                                                            1, 2, 3, 0, 1};
 
     Inventory* inventory;
     const Bellavista* bellavista;
@@ -87,7 +89,8 @@ class Bellavista : public Device, FRU
 
     /* Device */
     void plug(Notifier& notifier) override;
-    void unplug(Notifier& notifier, int mode = Device::UNPLUG_REMOVES_INVENTORY) override;
+    void unplug(Notifier& notifier,
+                int mode = Device::UNPLUG_REMOVES_INVENTORY) override;
 
     /* FRU */
     std::string getInventoryPath() const override;
@@ -119,7 +122,8 @@ class Tola : public Device
 
     /* Device */
     void plug(Notifier& notifier) override;
-    void unplug(Notifier& notifier, int mode = Device::UNPLUG_REMOVES_INVENTORY) override;
+    void unplug(Notifier& notifier,
+                int mode = Device::UNPLUG_REMOVES_INVENTORY) override;
 
   private:
     Inventory* inventory;

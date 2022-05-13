@@ -84,7 +84,8 @@ class SysfsI2CMux : public SysfsI2CDevice
     {}
     SysfsI2CMux(const std::filesystem::path& path) : SysfsI2CDevice(path)
     {}
-    SysfsI2CMux(const SysfsI2CBus& bus, int address) : SysfsI2CDevice(bus, address)
+    SysfsI2CMux(const SysfsI2CBus& bus, int address) :
+        SysfsI2CDevice(bus, address)
     {}
 
     ~SysfsI2CMux() override = default;

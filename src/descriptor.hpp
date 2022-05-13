@@ -18,8 +18,8 @@ class FileDescriptor
     FileDescriptor& operator=(FileDescriptor&&) noexcept;
 
     explicit FileDescriptor(const std::filesystem::path& name,
-                        std::ios_base::openmode mode = std::ios_base::in |
-                                                       std::ios_base::out);
+                            std::ios_base::openmode mode = std::ios_base::in |
+                                                           std::ios_base::out);
 
     explicit FileDescriptor(int fd);
 

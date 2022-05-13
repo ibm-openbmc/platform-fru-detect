@@ -131,8 +131,23 @@ void Notifier::run()
     struct epoll_event event;
     int rc = 0;
 
-    while ((rc = ::epoll_wait(epollfd, &event, 1, -1)) > 0)
+    for (;;)
     {
+        rc = ::epoll_wait(epollfd, &event, 1, -1);
+        if (rc == -1 && errno == EINTR)
+        {
+            continue;
+        }
+
+        if (rc == -1)
+        {
+            error(
+                "epoll wait operation failed on epoll descriptor {EPOLL_FD}: {ERRNO_DESCRIPTION}",
+                "EPOLL_FD", epollfd, "ERRNO_DESCRIPTION", ::strerror(errno),
+                "ERRNO", errno);
+            break;
+        }
+
         NotifySink* sink = static_cast<NotifySink*>(event.data.ptr);
 
         /* Is it the exitfd sentinel? */
@@ -180,14 +195,6 @@ void Notifier::run()
                 "ERROR", err.value());
             remove(sink);
         }
-    }
-
-    if (rc < 0)
-    {
-        error(
-            "epoll wait operation failed on epoll descriptor {EPOLL_FD}: {ERRNO_DESCRIPTION}",
-            "EPOLL_FD", epollfd, "ERRNO_DESCRIPTION", ::strerror(errno),
-            "ERRNO", errno);
     }
 
     info("Exiting notify event loop");

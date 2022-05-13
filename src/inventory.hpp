@@ -147,15 +147,15 @@ class InventoryManager : public Inventory
     ~InventoryManager() override = default;
 
     /* Inventory */
-    std::weak_ptr<dbus::PropertiesChangedListener>
-        addPropertiesChangedListener(
-            const std::string& path, const std::string& interface,
-            std::function<void(dbus::PropertiesChanged&& props)> callback)
-            override;
+    std::weak_ptr<dbus::PropertiesChangedListener> addPropertiesChangedListener(
+        const std::string& path, const std::string& interface,
+        std::function<void(dbus::PropertiesChanged&& props)> callback) override;
     void removePropertiesChangedListener(
         std::weak_ptr<dbus::PropertiesChangedListener> listener) override;
-    void add(const std::string& path, const inventory::interfaces::Interface iface) override;
-    void remove(const std::string& path, const inventory::interfaces::Interface iface) override;
+    void add(const std::string& path,
+             const inventory::interfaces::Interface iface) override;
+    void remove(const std::string& path,
+                const inventory::interfaces::Interface iface) override;
     void markPresent(const std::string& path) override;
     void markAbsent(const std::string& path) override;
     bool isPresent(const std::string& path) override;
@@ -177,15 +177,15 @@ class PublishWhenPresentInventoryDecorator : public Inventory
     ~PublishWhenPresentInventoryDecorator() override = default;
 
     /* Inventory */
-    std::weak_ptr<dbus::PropertiesChangedListener>
-        addPropertiesChangedListener(
-            const std::string& path, const std::string& interface,
-            std::function<void(dbus::PropertiesChanged&& props)> callback)
-            override;
+    std::weak_ptr<dbus::PropertiesChangedListener> addPropertiesChangedListener(
+        const std::string& path, const std::string& interface,
+        std::function<void(dbus::PropertiesChanged&& props)> callback) override;
     void removePropertiesChangedListener(
         std::weak_ptr<dbus::PropertiesChangedListener> listener) override;
-    void add(const std::string& path, const inventory::interfaces::Interface iface) override;
-    void remove(const std::string& path, const inventory::interfaces::Interface iface) override;
+    void add(const std::string& path,
+             const inventory::interfaces::Interface iface) override;
+    void remove(const std::string& path,
+                const inventory::interfaces::Interface iface) override;
     void markPresent(const std::string& path) override;
     void markAbsent(const std::string& path) override;
     bool isPresent(const std::string& path) override;
