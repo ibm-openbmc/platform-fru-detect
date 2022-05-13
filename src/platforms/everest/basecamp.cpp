@@ -99,7 +99,8 @@ void Basecamp::plug(Notifier& notifier)
         SysfsI2CBus bus = getDriveBus(i);
         presenceAdaptors[i] = PolledDevicePresence<BasecampNVMeDrive>(
             &driveConnectors.at(i), [line, bus]() {
-                return line->get_value() && BasicNVMeDrive::isDriveReady(bus);
+                return line->get_value() &&
+                       BasicNVMeDrive::isBasicEndpointPresent(bus);
             });
         notifier.add(&presenceAdaptors.at(i));
     }

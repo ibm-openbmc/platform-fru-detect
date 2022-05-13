@@ -48,7 +48,6 @@ class BasicNVMeDrive : public NVMeDrive
 {
   public:
     static bool isBasicEndpointPresent(const SysfsI2CBus& bus);
-    static bool isDriveReady(const SysfsI2CBus& bus);
 
     BasicNVMeDrive(const SysfsI2CBus& bus, Inventory* inventory, int index);
     BasicNVMeDrive(const SysfsI2CBus& bus, Inventory* inventory, int index,

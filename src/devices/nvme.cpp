@@ -22,33 +22,6 @@ bool BasicNVMeDrive::isBasicEndpointPresent(const SysfsI2CBus& bus)
     return i2c::isDeviceResponsive(bus, BasicNVMeDrive::endpointAddress);
 }
 
-bool BasicNVMeDrive::isDriveReady(const SysfsI2CBus& bus)
-{
-    try
-    {
-        std::vector<uint8_t> status;
-
-        i2c::oneshotSMBusBlockRead(bus, BasicNVMeDrive::endpointAddress, 0,
-                                   status);
-
-        if (status.empty())
-        {
-            return false;
-        }
-
-        return !(status[0] & NVME_BASIC_SFLGS_NOT_READY);
-    }
-    catch (const std::error_condition& ex)
-    {
-        if (ex.value() != ENODEV)
-        {
-            throw ex;
-        }
-    }
-
-    return false;
-}
-
 std::vector<uint8_t> BasicNVMeDrive::fetchMetadata(const SysfsI2CBus& bus)
 {
     std::vector<uint8_t> data;
