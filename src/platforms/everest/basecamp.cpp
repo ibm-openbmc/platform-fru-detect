@@ -91,6 +91,39 @@ SysfsI2CBus Basecamp::getDriveBus(int index) const
     return {driveMux, driveChannelMap.at(index)};
 }
 
+class BasecampNVMeDrivePresence
+{
+  public:
+    BasecampNVMeDrivePresence() = delete;
+    BasecampNVMeDrivePresence(gpiod::line* line, SysfsI2CBus bus) :
+        line(line), bus(std::move(bus)), haveEndpoint(false)
+    {}
+
+    bool operator()()
+    {
+        // Once we've observed both GPIO presence and the basic I2C endpoint,
+        // only unplug() the drive if the GPIO indicates the drive is unplugged.
+        // The I2C endpoint will come and go as the host power state changes.
+        if (!line->get_value())
+        {
+            haveEndpoint = false;
+            return false;
+        }
+
+        if (!haveEndpoint)
+        {
+            haveEndpoint = BasicNVMeDrive::isBasicEndpointPresent(bus);
+        }
+
+        return haveEndpoint;
+    }
+
+  private:
+    gpiod::line* line;
+    SysfsI2CBus bus;
+    bool haveEndpoint;
+};
+
 void Basecamp::plug(Notifier& notifier)
 {
     for (std::size_t i = 0; i < presenceAdaptors.size(); i++)
@@ -98,10 +131,7 @@ void Basecamp::plug(Notifier& notifier)
         gpiod::line* line = &lines[i];
         SysfsI2CBus bus = getDriveBus(i);
         presenceAdaptors[i] = PolledDevicePresence<BasecampNVMeDrive>(
-            &driveConnectors.at(i), [line, bus]() {
-                return line->get_value() &&
-                       BasicNVMeDrive::isBasicEndpointPresent(bus);
-            });
+            &driveConnectors.at(i), BasecampNVMeDrivePresence(line, bus));
         notifier.add(&presenceAdaptors.at(i));
     }
 }
