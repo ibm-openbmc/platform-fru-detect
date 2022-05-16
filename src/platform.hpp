@@ -47,10 +47,10 @@ template <DerivesDevice T>
 class Connector
 {
   public:
-    template <typename... Args>
-    Connector(Args&&... args) :
-        device(), ctor([this, args...]() mutable {
-            device.emplace(std::forward<Args>(args)...);
+    template <typename... DeviceArgs>
+    Connector(int idx, DeviceArgs&&... args) :
+        idx(idx), device(), ctor([this, args...]() mutable {
+            device.emplace(std::forward<DeviceArgs>(args)...);
         })
     {}
     ~Connector() = default;
@@ -77,7 +77,13 @@ class Connector
         device.reset();
     }
 
+    int index() const
+    {
+        return idx;
+    }
+
   private:
+    const int idx;
     std::optional<T> device;
     std::function<void(void)> ctor;
 };

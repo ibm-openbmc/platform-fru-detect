@@ -54,10 +54,10 @@ int Nisqually::getFlettIndex(int slot)
 
 Nisqually::Nisqually(Inventory* inventory) :
     inventory(inventory), flettConnectors{{
-                              Connector<Flett>(this->inventory, this, 8),
-                              Connector<Flett>(this->inventory, this, 9),
-                              Connector<Flett>(this->inventory, this, 10),
-                              Connector<Flett>(this->inventory, this, 11),
+                              Connector<Flett>(8, this->inventory, this, 8),
+                              Connector<Flett>(9, this->inventory, this, 9),
+                              Connector<Flett>(10, this->inventory, this, 10),
+                              Connector<Flett>(11, this->inventory, this, 11),
                           }},
     williwakasPresenceChip(
         SysfsGPIOChip(
@@ -66,9 +66,9 @@ Nisqually::Nisqually(Inventory* inventory) :
             .string(),
         gpiod::chip::OPEN_BY_NAME),
     williwakasConnectors{{
-        Connector<Williwakas>(this->inventory, this, 0),
-        Connector<Williwakas>(this->inventory, this, 1),
-        Connector<Williwakas>(this->inventory, this, 2),
+        Connector<Williwakas>(0, this->inventory, this, 0),
+        Connector<Williwakas>(1, this->inventory, this, 1),
+        Connector<Williwakas>(2, this->inventory, this, 2),
     }}
 {
     for (int i : std::views::iota(0UL, Nisqually::williwakasPresenceMap.size()))

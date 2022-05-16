@@ -50,16 +50,16 @@ void BasecampNVMeDrive::removeFromInventory(Inventory* inventory)
 
 Basecamp::Basecamp(Inventory* inventory, const Bellavista* bellavista) :
     inventory(inventory), bellavista(bellavista),
-    driveConnectors{{Connector<BasecampNVMeDrive>(inventory, this, 0),
-                     Connector<BasecampNVMeDrive>(inventory, this, 1),
-                     Connector<BasecampNVMeDrive>(inventory, this, 2),
-                     Connector<BasecampNVMeDrive>(inventory, this, 3),
-                     Connector<BasecampNVMeDrive>(inventory, this, 4),
-                     Connector<BasecampNVMeDrive>(inventory, this, 5),
-                     Connector<BasecampNVMeDrive>(inventory, this, 6),
-                     Connector<BasecampNVMeDrive>(inventory, this, 7),
-                     Connector<BasecampNVMeDrive>(inventory, this, 8),
-                     Connector<BasecampNVMeDrive>(inventory, this, 9)}}
+    driveConnectors{{Connector<BasecampNVMeDrive>(0, inventory, this, 0),
+                     Connector<BasecampNVMeDrive>(1, inventory, this, 1),
+                     Connector<BasecampNVMeDrive>(2, inventory, this, 2),
+                     Connector<BasecampNVMeDrive>(3, inventory, this, 3),
+                     Connector<BasecampNVMeDrive>(4, inventory, this, 4),
+                     Connector<BasecampNVMeDrive>(5, inventory, this, 5),
+                     Connector<BasecampNVMeDrive>(6, inventory, this, 6),
+                     Connector<BasecampNVMeDrive>(7, inventory, this, 7),
+                     Connector<BasecampNVMeDrive>(8, inventory, this, 8),
+                     Connector<BasecampNVMeDrive>(9, inventory, this, 9)}}
 {
     SysfsI2CBus root(driveMetadataBus);
     SysfsI2CMux mux(root, driveMetadataMuxAddress);

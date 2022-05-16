@@ -75,14 +75,14 @@ Williwakas::Williwakas(Inventory* inventory, const Nisqually* nisqually,
     inventory(inventory),
     nisqually(nisqually),
     index(index), driveConnectors{{
-                      Connector<WilliwakasNVMeDrive>(inventory, this, 0),
-                      Connector<WilliwakasNVMeDrive>(inventory, this, 1),
-                      Connector<WilliwakasNVMeDrive>(inventory, this, 2),
-                      Connector<WilliwakasNVMeDrive>(inventory, this, 3),
-                      Connector<WilliwakasNVMeDrive>(inventory, this, 4),
-                      Connector<WilliwakasNVMeDrive>(inventory, this, 5),
-                      Connector<WilliwakasNVMeDrive>(inventory, this, 6),
-                      Connector<WilliwakasNVMeDrive>(inventory, this, 7),
+                      Connector<WilliwakasNVMeDrive>(0, inventory, this, 0),
+                      Connector<WilliwakasNVMeDrive>(1, inventory, this, 1),
+                      Connector<WilliwakasNVMeDrive>(2, inventory, this, 2),
+                      Connector<WilliwakasNVMeDrive>(3, inventory, this, 3),
+                      Connector<WilliwakasNVMeDrive>(4, inventory, this, 4),
+                      Connector<WilliwakasNVMeDrive>(5, inventory, this, 5),
+                      Connector<WilliwakasNVMeDrive>(6, inventory, this, 6),
+                      Connector<WilliwakasNVMeDrive>(7, inventory, this, 7),
                   }}
 {
     SysfsI2CBus bus(Williwakas::driveBackplaneBus.at(index));

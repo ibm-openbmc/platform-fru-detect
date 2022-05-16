@@ -14,7 +14,7 @@ Bellavista::Bellavista(Inventory* inventory) :
             .getName()
             .string(),
         gpiod::chip::OPEN_BY_NAME),
-    basecampConnector(this->inventory, this)
+    basecampConnector(0, this->inventory, this)
 {
     basecampPresenceLine =
         basecampPresenceChip.get_line(Bellavista::basecampPresenceOffset);
