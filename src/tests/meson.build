@@ -10,13 +10,36 @@ if not gtest_dep.found()
 endif
 
 test('test-inventory',
-     executable('test-inventory', 'test-inventory.cpp',
+     executable('test-inventory',
+	        sources: [ 'test-inventory.cpp',
+			   'mock-inventory.cpp' ],
 		dependencies: [ inventory_dep, inventory_test_dep, gtest_dep ]))
 test('test-nvme',
      executable('test-nvme', 'test-nvme.cpp',
 	        dependencies: [ headers_dep,
 			        devices_dep,
 				sysfs_dep,
+				libgpiodcxx_dep,
+				phosphor_logging_dep,
+				gtest_dep ]))
+
+test('test-platform',
+     executable('test-platform',
+	        sources: [ 'test-platform.cpp',
+			   '../notify.cpp' ],
+	        dependencies: [ headers_dep,
+			        libgpiodcxx_dep,
+			        phosphor_logging_dep,
+			        gtest_dep ]))
+
+test('test-lights-out',
+     executable('test-lights-out',
+	        sources: ['test-lights-out.cpp',
+			  'mock-inventory.cpp',
+			  '../notify.cpp' ],
+	        dependencies: [ headers_dep,
+			        devices_dep,
+				inventory_dep,
 				libgpiodcxx_dep,
 				phosphor_logging_dep,
 				gtest_dep ]))

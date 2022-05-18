@@ -54,32 +54,17 @@ int Nisqually::getFlettIndex(int slot)
 
 Nisqually::Nisqually(Inventory* inventory) :
     inventory(inventory), flettConnectors{{
-                              Connector<Flett>(this->inventory, this, 8),
-                              Connector<Flett>(this->inventory, this, 9),
-                              Connector<Flett>(this->inventory, this, 10),
-                              Connector<Flett>(this->inventory, this, 11),
+                              Connector<Flett>(8, this->inventory, this, 8),
+                              Connector<Flett>(9, this->inventory, this, 9),
+                              Connector<Flett>(10, this->inventory, this, 10),
+                              Connector<Flett>(11, this->inventory, this, 11),
                           }},
-    williwakasPresenceChip(
-        SysfsGPIOChip(
-            std::filesystem::path(Nisqually::williwakasPresenceDevicePath))
-            .getName()
-            .string(),
-        gpiod::chip::OPEN_BY_NAME),
     williwakasConnectors{{
-        Connector<Williwakas>(this->inventory, this, 0),
-        Connector<Williwakas>(this->inventory, this, 1),
-        Connector<Williwakas>(this->inventory, this, 2),
+        Connector<Williwakas>(0, this->inventory, this, 0),
+        Connector<Williwakas>(1, this->inventory, this, 1),
+        Connector<Williwakas>(2, this->inventory, this, 2),
     }}
-{
-    for (int i : std::views::iota(0UL, Nisqually::williwakasPresenceMap.size()))
-    {
-        int offset = Nisqually::williwakasPresenceMap.at(i);
-        gpiod::line line = williwakasPresenceChip.get_line(offset);
-        line.request({program_invocation_short_name,
-                      gpiod::line::DIRECTION_INPUT, gpiod::line::ACTIVE_LOW});
-        williwakasPresenceLines[i] = line;
-    }
-}
+{}
 
 void Nisqually::plug(Notifier& notifier)
 {
@@ -91,56 +76,12 @@ void Nisqually::unplug(Notifier& notifier, int mode)
 {
     for (auto& connector : williwakasConnectors)
     {
-        if (connector.isPopulated())
-        {
-            connector.getDevice().unplug(notifier, mode);
-            connector.depopulate();
-        }
+        connector.depopulate(notifier, mode);
     }
 
     for (auto& connector : flettConnectors)
     {
-        if (connector.isPopulated())
-        {
-            connector.getDevice().unplug(notifier, mode);
-            connector.depopulate();
-        }
-    }
-}
-
-void Nisqually::detectWilliwakasCards(Notifier& notifier)
-{
-    debug("Locating Williwakas cards");
-
-    for (std::size_t index = 0; index < williwakasConnectors.size(); index++)
-    {
-        debug("Testing for Williwakas presence at index {WILLIWAKAS_ID}",
-              "WILLIWAKAS_ID", index);
-
-        if (!isWilliwakasPresent(index))
-        {
-            info("Williwakas {WILLIWAKAS_ID} is not present", "WILLIWAKAS_ID",
-                 index);
-            continue;
-        }
-
-        try
-        {
-            williwakasConnectors[index].populate();
-            williwakasConnectors[index].getDevice().plug(notifier);
-            debug("Initialised Williwakas {WILLIWAKAS_ID}", "WILLIWAKAS_ID",
-                  index);
-        }
-        catch (const SysfsI2CDeviceDriverBindException& ex)
-        {
-            std::string what(ex.what());
-            error(
-                "Required drivers failed to bind for devices on Williwakas {WILLIWAKAS_ID}: {EXCEPTION_DESCRIPTION}",
-                "WILLIWAKAS_ID", index, "EXCEPTION_DESCRIPTION", what);
-            warning("Skipping FRU detection on Williwakas {WILLIWAKAS_ID}",
-                    "WILLIWAKAS_ID", index);
-            continue;
-        }
+        connector.depopulate(notifier, mode);
     }
 }
 
@@ -186,16 +127,6 @@ bool Nisqually::isFlettPresentAt(int slot)
     return true;
 }
 
-bool Nisqually::isWilliwakasPresent(int index)
-{
-    bool present = williwakasPresenceLines.at(index).get_value();
-
-    debug("Williwakas presence at index {WILLIWAKAS_ID}: {WILLIWAKAS_PRESENT}",
-          "WILLIWAKAS_ID", index, "WILLIWAKAS_PRESENT", present);
-
-    return present;
-}
-
 void Nisqually::detectFlettCards(Notifier& notifier)
 {
     debug("Locating Flett cards");
@@ -203,18 +134,18 @@ void Nisqually::detectFlettCards(Notifier& notifier)
     /* FIXME: do something more ergonomic */
     for (auto& [connector, slot] : flettConnectorSlotMap)
     {
-        if (!isFlettPresentAt(slot))
-        {
-            debug("No Flett in slot {PCIE_SLOT}", "PCIE_SLOT", slot);
-            continue;
-        }
-
         try
         {
-            flettConnectors[connector].populate();
-            flettConnectors[connector].getDevice().plug(notifier);
-            debug("Initialised Flett {FLETT_ID} in slot {PCIE_SLOT}",
-                  "FLETT_ID", getFlettIndex(slot), "PCIE_SLOT", slot);
+            if (isFlettPresentAt(slot))
+            {
+                flettConnectors[connector].populate(notifier);
+                debug("Initialised Flett {FLETT_ID} in slot {PCIE_SLOT}",
+                      "FLETT_ID", getFlettIndex(slot), "PCIE_SLOT", slot);
+            }
+            else
+            {
+                flettConnectors[connector].depopulate(notifier);
+            }
         }
         catch (const SysfsI2CDeviceDriverBindException& ex)
         {
@@ -225,6 +156,56 @@ void Nisqually::detectFlettCards(Notifier& notifier)
             warning("Failed to detect Flett in slot {PCIE_SLOT}", "PCIE_SLOT",
                     slot);
             continue;
+        }
+    }
+}
+
+void Nisqually::detectWilliwakasCards(Notifier& notifier)
+{
+    debug("Locating Williwakas cards");
+
+    std::filesystem::path path(Nisqually::williwakasPresenceDevicePath);
+    SysfsGPIOChip sysfsChip(path);
+    gpiod::chip williwakasPresenceChip(sysfsChip.getName().string(),
+                                       gpiod::chip::OPEN_BY_NAME);
+
+    for (int index :
+         std::views::iota(0UL, Nisqually::williwakasPresenceMap.size()))
+    {
+        int offset = Nisqually::williwakasPresenceMap.at(index);
+        gpiod::line line = williwakasPresenceChip.get_line(offset);
+        line.request({program_invocation_short_name,
+                      gpiod::line::DIRECTION_INPUT, gpiod::line::ACTIVE_LOW});
+
+        bool present = line.get_value();
+
+        line.release();
+
+        debug(
+            "Williwakas presence at index {WILLIWAKAS_ID}: {WILLIWAKAS_PRESENT}",
+            "WILLIWAKAS_ID", index, "WILLIWAKAS_PRESENT", present);
+
+        try
+        {
+            if (present)
+            {
+                williwakasConnectors[index].populate(notifier);
+                info("Initialised Williwakas {WILLIWAKAS_ID}", "WILLIWAKAS_ID",
+                     index);
+            }
+            else
+            {
+                williwakasConnectors[index].depopulate(notifier);
+            }
+        }
+        catch (const SysfsI2CDeviceDriverBindException& ex)
+        {
+            std::string what(ex.what());
+            error(
+                "Required drivers failed to bind for devices on Williwakas {WILLIWAKAS_ID}: {EXCEPTION_DESCRIPTION}",
+                "WILLIWAKAS_ID", index, "EXCEPTION_DESCRIPTION", what);
+            warning("Skipping FRU detection on Williwakas {WILLIWAKAS_ID}",
+                    "WILLIWAKAS_ID", index);
         }
     }
 }
@@ -242,14 +223,7 @@ SysfsI2CBus Nisqually0z::getFlettSlotI2CBus(int slot) const
 /* Nisqually1z */
 
 Nisqually1z::Nisqually1z(Inventory* inventory) : Nisqually(inventory)
-{
-    /* Slot 9 is on the same mux as slot 8 */
-    Ingraham::getPCIeSlotI2CBus(8).probeDevice("pca9546",
-                                               Nisqually1z::slotMuxAddress);
-    /* Slot 11 is on the same mux as slot 10 */
-    Ingraham::getPCIeSlotI2CBus(10).probeDevice("pca9546",
-                                                Nisqually1z::slotMuxAddress);
-}
+{}
 
 SysfsI2CBus Nisqually1z::getFlettSlotI2CBus(int slot) const
 {
@@ -262,4 +236,47 @@ SysfsI2CBus Nisqually1z::getFlettSlotI2CBus(int slot) const
     int channel = flettMuxChannelMap.at(slot);
 
     return {mux, channel};
+}
+
+void Nisqually1z::plug(Notifier& notifier)
+{
+    /* Slot 9 is on the same mux as slot 8 */
+    Ingraham::getPCIeSlotI2CBus(8).probeDevice("pca9546",
+                                               Nisqually1z::slotMuxAddress);
+    /* Slot 11 is on the same mux as slot 10 */
+    Ingraham::getPCIeSlotI2CBus(10).probeDevice("pca9546",
+                                                Nisqually1z::slotMuxAddress);
+
+    Nisqually::plug(notifier);
+}
+
+void Nisqually1z::unplug(Notifier& notifier, int mode)
+{
+    Nisqually::unplug(notifier, mode);
+
+    try
+    {
+        Ingraham::getPCIeSlotI2CBus(8).removeDevice(
+            Nisqually1z::slotMuxAddress);
+    }
+    catch (const std::error_condition& err)
+    {
+        if (err.value() != ENOENT)
+        {
+            throw err;
+        }
+    }
+
+    try
+    {
+        Ingraham::getPCIeSlotI2CBus(10).removeDevice(
+            Nisqually1z::slotMuxAddress);
+    }
+    catch (const std::error_condition& err)
+    {
+        if (err.value() != ENOENT)
+        {
+            throw err;
+        }
+    }
 }

@@ -9,7 +9,7 @@
 class Basecamp;
 class Bellavista;
 
-class BasecampNVMeDrive : public BasicNVMeDrive
+class BasecampNVMeDrive : public NVMeDrive, public Device, public FRU
 {
   public:
     BasecampNVMeDrive(Inventory* inventory, const Basecamp* basecamp,
@@ -27,10 +27,13 @@ class BasecampNVMeDrive : public BasicNVMeDrive
     void removeFromInventory(Inventory* inventory) override;
 
   private:
+    Inventory* inventory;
     const Basecamp* basecamp;
+    int index;
+    std::optional<BasicNVMeDrive> drive;
 };
 
-class Basecamp : public Device, FRU
+class Basecamp : public Device, public FRU
 {
   public:
     explicit Basecamp(Inventory* inventory, const Bellavista* bellavista);
@@ -71,12 +74,10 @@ class Basecamp : public Device, FRU
 
     Inventory* inventory;
     const Bellavista* bellavista;
-    std::array<gpiod::line, 10> lines;
-    std::array<Connector<BasecampNVMeDrive>, 10> driveConnectors;
-    std::array<PolledDevicePresence<BasecampNVMeDrive>, 10> presenceAdaptors;
+    std::array<PolledConnector<BasecampNVMeDrive>, 10> polledDriveConnectors;
 };
 
-class Bellavista : public Device, FRU
+class Bellavista : public Device, public FRU
 {
   public:
     explicit Bellavista(Inventory* inventory);
@@ -103,10 +104,7 @@ class Bellavista : public Device, FRU
     static constexpr int basecampPresenceOffset = 12;
 
     Inventory* inventory;
-    gpiod::chip basecampPresenceChip;
-    gpiod::line basecampPresenceLine;
-    Connector<Basecamp> basecampConnector;
-    PolledDevicePresence<Basecamp> presenceAdaptor;
+    PolledConnector<Basecamp> polledBasecampConnector;
 };
 
 class Tola : public Device

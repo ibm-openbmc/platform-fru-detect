@@ -5,13 +5,13 @@
 
 #include "gtest/gtest.h"
 
-class TestNVMeDrive : public BasicNVMeDrive
+class TestNVMeDrive : public BasicNVMeDrive, public Device
 {
   public:
-    TestNVMeDrive(const SysfsI2CBus& bus, Inventory* inventory, int index,
+    TestNVMeDrive(const SysfsI2CBus& bus,
                   const std::vector<uint8_t>&& metadata) :
         // NOLINTNEXTLINE(performance-move-const-arg)
-        BasicNVMeDrive(bus, inventory, index, std::move(metadata))
+        BasicNVMeDrive(bus, "", std::move(metadata))
     {}
 
     /* Device */
@@ -25,6 +25,5 @@ class TestNVMeDrive : public BasicNVMeDrive
 TEST(DriveMetadata, smallMetadata)
 {
     SysfsI2CBus bus("/sys/bus/i2c/devices/i2c-0", false);
-    auto drive =
-        TestNVMeDrive(bus, nullptr, 0, std::vector<uint8_t>{0, 1, 0x44});
+    auto drive = TestNVMeDrive(bus, std::vector<uint8_t>{0, 1, 0x44});
 }

@@ -24,54 +24,6 @@ extern "C"
 
 class Inventory;
 
-template <class T>
-class Connector
-{
-  public:
-    template <typename... Args>
-    Connector(Args&&... args) :
-        device(), ctor([this, args...]() mutable {
-            device.emplace(std::forward<Args>(args)...);
-        })
-    {}
-    ~Connector() = default;
-
-    void populate()
-    {
-        ctor();
-    }
-
-    void depopulate()
-    {
-        device.reset();
-    }
-
-    bool isPopulated()
-    {
-        return device.has_value();
-    }
-
-    T& getDevice()
-    {
-        return device.value();
-    }
-
-  private:
-    std::optional<T> device;
-    std::function<void(void)> ctor;
-};
-
-class FRU
-{
-  public:
-    FRU() = default;
-    virtual ~FRU() = default;
-
-    virtual std::string getInventoryPath() const = 0;
-    virtual void addToInventory(Inventory* inventory) = 0;
-    virtual void removeFromInventory(Inventory* inventory) = 0;
-};
-
 class Device
 {
   public:
@@ -91,6 +43,86 @@ class Device
 template <typename T>
 concept DerivesDevice = std::is_base_of<Device, T>::value;
 
+template <DerivesDevice T>
+class Connector
+{
+  public:
+    template <typename... DeviceArgs>
+    Connector(int idx, DeviceArgs&&... args) :
+        state(CONNECTOR_UNINITIALISED), idx(idx), device(),
+        ctor([this, args...]() mutable {
+            device.emplace(std::forward<DeviceArgs>(args)...);
+        })
+    {}
+    ~Connector() = default;
+
+    void populate(Notifier& notifier)
+    {
+        switch (state)
+        {
+            case CONNECTOR_UNINITIALISED:
+            case CONNECTOR_DEPOPULATED:
+                lg2::debug("Populating connector");
+                ctor();
+                device->plug(notifier);
+                state = CONNECTOR_POPULATED;
+                return;
+            case CONNECTOR_POPULATED:
+                return;
+        }
+    }
+
+    void depopulate(Notifier& notifier, int mode = T::UNPLUG_REMOVES_INVENTORY)
+    {
+        switch (state)
+        {
+            case CONNECTOR_DEPOPULATED:
+                return;
+            case CONNECTOR_UNINITIALISED:
+                // Construct the device so we can explicitly unplug() it. This
+                // is used to e.g. remove the device from the inventory when it
+                // has been removed from the system while AC power is unplugged.
+                ctor();
+                [[fallthrough]];
+            case CONNECTOR_POPULATED:
+                lg2::debug("Depopulating connector");
+                device->unplug(notifier, mode);
+                device.reset();
+                state = CONNECTOR_DEPOPULATED;
+                return;
+        }
+    }
+
+    int index() const
+    {
+        return idx;
+    }
+
+  private:
+    enum ConnectorState
+    {
+        CONNECTOR_UNINITIALISED,
+        CONNECTOR_DEPOPULATED,
+        CONNECTOR_POPULATED
+    };
+
+    ConnectorState state;
+    const int idx;
+    std::optional<T> device;
+    std::function<void(void)> ctor;
+};
+
+class FRU
+{
+  public:
+    FRU() = default;
+    virtual ~FRU() = default;
+
+    virtual std::string getInventoryPath() const = 0;
+    virtual void addToInventory(Inventory* inventory) = 0;
+    virtual void removeFromInventory(Inventory* inventory) = 0;
+};
+
 /*
  * TODO: Add multiple instances to a single timerfd to make it more efficient
  *
@@ -101,7 +133,7 @@ template <DerivesDevice T>
 class PolledDevicePresence : public NotifySink
 {
   public:
-    PolledDevicePresence() = default;
+    PolledDevicePresence() = delete;
     PolledDevicePresence(Connector<T>* connector,
                          const std::function<bool()>& poll) :
         connector(connector),
@@ -156,31 +188,21 @@ class PolledDevicePresence : public NotifySink
 
         if (poll())
         {
-            if (!connector->isPopulated())
+            try
             {
-                lg2::debug("Presence asserted with unpopulated connector");
-                try
-                {
-                    connector->populate();
-                    connector->getDevice().plug(notifier);
-                }
-                catch (const SysfsI2CDeviceDriverBindException& ex)
-                {
-                    lg2::error(
-                        "Failed to bind driver for device reporting present, disabling notifier: {EXCEPTION}",
-                        "EXCEPTION", ex);
-                    notifier.remove(this);
-                }
+                connector->populate(notifier);
+            }
+            catch (const SysfsI2CDeviceDriverBindException& ex)
+            {
+                lg2::error(
+                    "Failed to bind driver for device reporting present, disabling notifier: {EXCEPTION}",
+                    "EXCEPTION", ex);
+                notifier.remove(this);
             }
         }
         else
         {
-            if (connector->isPopulated())
-            {
-                lg2::debug("Presence deasserted with populated connector");
-                connector->getDevice().unplug(notifier);
-                connector->depopulate();
-            }
+            connector->depopulate(notifier);
         }
     }
 
@@ -221,6 +243,42 @@ class PolledDevicePresence : public NotifySink
     Connector<T>* connector;
     std::function<bool()> poll;
     int timerfd;
+};
+
+template <DerivesDevice T>
+class PolledConnector
+{
+  public:
+    PolledConnector() = delete;
+    template <typename... DeviceArgs>
+    PolledConnector(int index, DeviceArgs&&... args) : connector(index, args...)
+    {}
+    ~PolledConnector() = default;
+
+    void start(Notifier& notifier, std::function<bool()>&& probe)
+    {
+        poller.emplace(&connector, probe);
+        notifier.add(&poller.value());
+    }
+
+    void stop(Notifier& notifier, int mode)
+    {
+        if (poller)
+        {
+            notifier.remove(&poller.value());
+            poller.reset();
+        }
+        connector.depopulate(notifier, mode);
+    }
+
+    int index() const
+    {
+        return connector.index();
+    }
+
+  private:
+    Connector<T> connector;
+    std::optional<PolledDevicePresence<T>> poller;
 };
 
 class Platform;

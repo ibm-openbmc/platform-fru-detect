@@ -7,54 +7,36 @@
 #include "sysfs/i2c.hpp"
 
 #include <array>
+#include <optional>
 #include <stdexcept>
 #include <vector>
 
 class Inventory;
 
-class NVMeDrive : public Device, FRU
+class NVMeDrive
 {
   public:
-    NVMeDrive(Inventory* inventory, int index) :
-        inventory(inventory), index(index)
-    {}
-    ~NVMeDrive() override = default;
-
-    /* FRU */
-    std::string getInventoryPath() const override
-    {
-        throw std::logic_error("Not implemented");
-    }
-
-    void addToInventory([[maybe_unused]] Inventory* inventory) override
-    {
-        throw std::logic_error("Not implemented");
-    }
-
-    void removeFromInventory([[maybe_unused]] Inventory* inventory) override
-    {
-        throw std::logic_error("Not implemented");
-    }
+    NVMeDrive() = default;
+    virtual ~NVMeDrive() = default;
 
   protected:
     /* FRU Information Device, NVMe Storage Device (non-Carrier) */
     static constexpr int eepromAddress = 0x53;
-
-    Inventory* inventory;
-    int index;
 };
 
-class BasicNVMeDrive : public NVMeDrive
+class BasicNVMeDrive : public NVMeDrive, FRU
 {
   public:
     static bool isBasicEndpointPresent(const SysfsI2CBus& bus);
 
-    BasicNVMeDrive(const SysfsI2CBus& bus, Inventory* inventory, int index);
-    BasicNVMeDrive(const SysfsI2CBus& bus, Inventory* inventory, int index,
+    BasicNVMeDrive(std::string&& path);
+    BasicNVMeDrive(const SysfsI2CBus& bus, std::string&& path);
+    BasicNVMeDrive(const SysfsI2CBus& bus, std::string&& path,
                    const std::vector<uint8_t>&& metadata);
     ~BasicNVMeDrive() override = default;
 
     /* FRU */
+    std::string getInventoryPath() const override;
     void addToInventory(Inventory* inventory) override;
     void removeFromInventory(Inventory* inventory) override;
 
@@ -72,9 +54,10 @@ class BasicNVMeDrive : public NVMeDrive
     static constexpr int endpointAddress = 0x6a;
     static constexpr int vendorMetadataOffset = 0x08;
 
+    const std::string inventoryPath;
     const inventory::interfaces::I2CDevice basic;
     const inventory::interfaces::VINI vini;
 
-    std::vector<uint8_t> manufacturer;
-    std::vector<uint8_t> serial;
+    std::optional<std::vector<uint8_t>> manufacturer;
+    std::optional<std::vector<uint8_t>> serial;
 };

@@ -1,6 +1,6 @@
 /* SPDX-License-Identifier: Apache-2.0 */
 /* Copyright IBM Corp. 2021 */
-#include "inventory.hpp"
+#include "mock-inventory.hpp"
 
 #include "gtest/gtest.h"
 
@@ -14,97 +14,6 @@ static constexpr auto TEST_PATH_1 = "/path/test/1";
 static constexpr auto TEST_PATH_2 = "/path/test/2";
 
 using namespace inventory;
-
-static void accumulate(std::map<std::string, ObjectType>& store,
-                       const std::string& path, const ObjectType& updates)
-{
-    if (store.contains(path))
-    {
-        auto& object = store[path];
-
-        for (const auto& [ikey, ival] : updates)
-        {
-            if (object.contains(ikey))
-            {
-                auto& interface = object[ikey];
-
-                for (const auto& [pkey, pval] : ival)
-                {
-                    interface[pkey] = pval;
-                }
-            }
-            else
-            {
-                object[ikey] = ival;
-            }
-        }
-    }
-    else
-    {
-        store[path] = updates;
-    }
-}
-
-struct MockInventory : public Inventory
-{
-    std::weak_ptr<dbus::PropertiesChangedListener> addPropertiesChangedListener(
-        [[maybe_unused]] const std::string& path,
-        [[maybe_unused]] const std::string& interface,
-        [[maybe_unused]] std::function<void(dbus::PropertiesChanged&&)>
-            callback) override
-    {
-        throw std::logic_error("Unimplemented");
-    }
-
-    void removePropertiesChangedListener(
-        [[maybe_unused]] std::weak_ptr<dbus::PropertiesChangedListener>
-            listener) override
-    {
-        throw std::logic_error("Unimplemented");
-    }
-
-    void add(const std::string& path, interfaces::Interface iface) override
-    {
-        ObjectType update;
-
-        iface.populateObject(update);
-
-        accumulate(store, path, update);
-    }
-
-    void remove(const std::string& path, interfaces::Interface iface) override
-    {
-        ObjectType update;
-
-        iface.depopulateObject(update);
-
-        accumulate(store, path, update);
-    }
-
-    void markPresent(const std::string& path) override
-    {
-        present.insert_or_assign(path, true);
-    }
-
-    void markAbsent(const std::string& path) override
-    {
-        present.insert_or_assign(path, false);
-    }
-
-    bool isPresent(const std::string& path) override
-    {
-        return present.at(path);
-    }
-
-    bool isModel([[maybe_unused]] const std::string& path,
-                 [[maybe_unused]] const std::string& model) override
-    {
-        throw std::logic_error("Unimplemented");
-    }
-
-    std::map<std::string, ObjectType> store;
-    std::map<std::string, bool> present;
-};
 
 TEST(MockInventory, addI2CDevice)
 {

@@ -22,7 +22,7 @@ class Inventory;
 class Nisqually;
 class Williwakas;
 
-class FlettNVMeDrive : public BasicNVMeDrive
+class FlettNVMeDrive : public NVMeDrive, public Device, public FRU
 {
   public:
     static bool isPresent(SysfsI2CBus bus);
@@ -43,14 +43,15 @@ class FlettNVMeDrive : public BasicNVMeDrive
 
     /* FRU */
     std::string getInventoryPath() const override;
+    void addToInventory(Inventory* inventory) override;
+    void removeFromInventory(Inventory* inventory) override;
 
   private:
-    void decorateWithI2CDevice(const std::string& path,
-                               Inventory* inventory) const;
-    void decorateWithVINI(const std::string& path, Inventory* inventory) const;
-
+    Inventory* inventory;
     const Nisqually* nisqually;
     const Flett* flett;
+    int index;
+    std::optional<BasicNVMeDrive> drive;
 };
 
 class Flett : public Device
@@ -79,11 +80,10 @@ class Flett : public Device
     Inventory* inventory;
     const Nisqually* nisqually;
     int slot;
-    std::array<Connector<FlettNVMeDrive>, 8> driveConnectors;
-    std::array<PolledDevicePresence<FlettNVMeDrive>, 8> presenceAdaptors;
+    std::array<PolledConnector<FlettNVMeDrive>, 8> polledDriveConnectors;
 };
 
-class WilliwakasNVMeDrive : public NVMeDrive
+class WilliwakasNVMeDrive : public NVMeDrive, public Device, public FRU
 {
   public:
     explicit WilliwakasNVMeDrive(Inventory* inventory,
@@ -106,10 +106,12 @@ class WilliwakasNVMeDrive : public NVMeDrive
     void removeFromInventory(Inventory* inventory) override;
 
   private:
+    Inventory* inventory;
     const Williwakas* williwakas;
+    int index;
 };
 
-class Williwakas : public Device, FRU
+class Williwakas : public Device, public FRU
 {
   public:
     static std::string getInventoryPathFor(const Nisqually* nisqually,
@@ -152,12 +154,7 @@ class Williwakas : public Device, FRU
     Inventory* inventory;
     const Nisqually* nisqually;
     int index;
-    gpiod::chip chip;
-    /* There's a bug in the gpiod::line_bulk iterator that prevents us using it
-     * effectively */
-    std::array<gpiod::line, 8> lines;
-    std::array<Connector<WilliwakasNVMeDrive>, 8> driveConnectors;
-    std::array<PolledDevicePresence<WilliwakasNVMeDrive>, 8> presenceAdaptors;
+    std::array<PolledConnector<WilliwakasNVMeDrive>, 8> polledDriveConnectors;
 
     bool isDrivePresent(int index);
     void detectDrives(Notifier& notifier);
@@ -199,16 +196,10 @@ class Nisqually : public Device, FRU
     static constexpr std::array<int, 3> williwakasPresenceMap = {7, 6, 5};
 
     void detectFlettCards(Notifier& notifier);
-
-    bool isWilliwakasPresent(int index);
     void detectWilliwakasCards(Notifier& notifier);
 
     std::array<Connector<Flett>, 4> flettConnectors;
-
-    gpiod::chip williwakasPresenceChip;
     std::array<Connector<Williwakas>, 3> williwakasConnectors;
-
-    std::array<gpiod::line, 3> williwakasPresenceLines;
 };
 
 class Nisqually0z : public Nisqually
@@ -239,6 +230,11 @@ class Nisqually1z : public Nisqually
 
     /* Nisqually */
     SysfsI2CBus getFlettSlotI2CBus(int slot) const override;
+
+    /* Device */
+    void plug(Notifier& notifier) override;
+    void unplug(Notifier& notifier,
+                int mode = UNPLUG_REMOVES_INVENTORY) override;
 
   private:
     static constexpr int slotMuxAddress = 0x70;
