@@ -4,6 +4,7 @@
 #include "platforms/rainier.hpp"
 
 #include "inventory.hpp"
+#include "inventory/migrations.hpp"
 
 void Rainier0z::enrollWith(PlatformManager& pm)
 {
@@ -17,6 +18,9 @@ void Rainier0z::detectFrus(Notifier& notifier, Inventory* inventory)
     PublishWhenPresentInventoryDecorator decoratedInventory(inventory);
     Nisqually0z nisqually(&decoratedInventory);
     Ingraham ingraham(inventory, &nisqually);
+
+    Inventory::migrate(inventory, inventory::MigrateNVMeIPZVPDFromSlotToDrive(),
+                       inventory::MigrateNVMeI2CEndpointFromSlotToDrive());
 
     /* Cold-plug devices */
     ingraham.plug(notifier);
@@ -40,6 +44,9 @@ void Rainier1z::detectFrus(Notifier& notifier, Inventory* inventory)
     PublishWhenPresentInventoryDecorator decoratedInventory(inventory);
     Nisqually1z nisqually(&decoratedInventory);
     Ingraham ingraham(&decoratedInventory, &nisqually);
+
+    Inventory::migrate(inventory, inventory::MigrateNVMeIPZVPDFromSlotToDrive(),
+                       inventory::MigrateNVMeI2CEndpointFromSlotToDrive());
 
     /* Cold-plug devices */
     ingraham.plug(notifier);

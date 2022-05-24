@@ -4,6 +4,10 @@
 
 struct MockInventory : public Inventory
 {
+    static void accumulate(std::map<std::string, inventory::ObjectType>& store,
+                           const std::string& path,
+                           const inventory::ObjectType& updates);
+
     void migrate(std::span<inventory::Migration*>&& migrations) override;
 
     std::weak_ptr<dbus::PropertiesChangedListener> addPropertiesChangedListener(

@@ -50,10 +50,14 @@ void FlettNVMeDrive::unplug([[maybe_unused]] Notifier& notifier, int mode)
 
 std::string FlettNVMeDrive::getInventoryPath() const
 {
-    std::string williwakasPath =
+    // https://github.com/ibm-openbmc/openbmc/commit/f2c8a292e46a55705606ff346bdc1ffd9f4628d7
+    const std::string williwakasPath =
         Williwakas::getInventoryPathFor(nisqually, flett->getIndex());
-
-    return williwakasPath + "/" + "nvme" + std::to_string(index);
+    const std::string slotID = "nvme" + std::to_string(index);
+    const std::string backplaneID = "dp" + std::to_string(flett->getIndex());
+    const std::string driveID = "drive" + std::to_string(index);
+    const std::string compositeID = backplaneID + "_" + driveID;
+    return williwakasPath + "/" + slotID + "/" + compositeID;
 }
 
 void FlettNVMeDrive::addToInventory(Inventory* inventory)

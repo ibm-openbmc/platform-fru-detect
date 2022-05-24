@@ -36,6 +36,10 @@ using ObjectType = std::map<std::string, InterfaceType>;
 static constexpr auto INVENTORY_ITEM_IFACE =
     "xyz.openbmc_project.Inventory.Item";
 
+// NOLINTNEXTLINE(readability-identifier-naming)
+static constexpr auto INVENTORY_ITEM_PCIESLOT_IFACE =
+    "xyz.openbmc_project.Inventory.Item.PCIeSlot";
+
 // https://github.com/openbmc/phosphor-dbus-interfaces/blob/08baf48ad5f15774d393fbbf4e9479a0ef3e82d0/yaml/xyz/openbmc_project/Inventory/Decorator/I2CDevice.interface.yaml
 // NOLINTNEXTLINE(readability-identifier-naming)
 static constexpr auto INVENTORY_DECORATOR_I2CDEVICE_IFACE =

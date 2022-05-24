@@ -37,4 +37,26 @@ class Migration
   private:
     std::string migrationName;
 };
+
+class MigrateNVMeIPZVPDFromSlotToDrive : public Migration
+{
+  public:
+    MigrateNVMeIPZVPDFromSlotToDrive() : Migration(__func__)
+    {}
+    ~MigrateNVMeIPZVPDFromSlotToDrive() override = default;
+
+    enum Result migrate(Inventory* inventory, const std::string& path,
+                        const inventory::ObjectType& object) const override;
+};
+
+class MigrateNVMeI2CEndpointFromSlotToDrive : public Migration
+{
+  public:
+    MigrateNVMeI2CEndpointFromSlotToDrive() : Migration(__func__)
+    {}
+    ~MigrateNVMeI2CEndpointFromSlotToDrive() override = default;
+
+    enum Result migrate(Inventory* inventory, const std::string& path,
+                        const inventory::ObjectType& object) const override;
+};
 } // namespace inventory

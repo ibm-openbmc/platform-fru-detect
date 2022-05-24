@@ -3,10 +3,13 @@
 #include "inventory/migrations.hpp"
 #include "mock-inventory.hpp"
 
+#include "inventory/migrations.hpp"
+
 using namespace inventory;
 
-static void accumulate(std::map<std::string, ObjectType>& store,
-                       const std::string& path, const ObjectType& updates)
+void MockInventory::accumulate(std::map<std::string, ObjectType>& store,
+                               const std::string& path,
+                               const ObjectType& updates)
 {
     if (store.contains(path))
     {
