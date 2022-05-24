@@ -1,11 +1,15 @@
 /* SPDX-License-Identifier: Apache-2.0 */
 /* Copyright IBM Corp. 2021 */
+
 #include "inventory.hpp"
+#include "inventory/migrations.hpp"
 
 #include <phosphor-logging/lg2.hpp>
 #include <sdbusplus/bus.hpp>
 #include <sdbusplus/bus/match.hpp>
 #include <sdbusplus/message.hpp>
+
+#include <cstring>
 
 PHOSPHOR_LOG2_USING;
 
@@ -26,12 +30,79 @@ static constexpr auto INVENTORY_MANAGER_OBJECT =
 // NOLINTNEXTLINE(readability-identifier-naming)
 static constexpr auto DBUS_PROPERTY_IFACE = "org.freedesktop.DBus.Properties";
 
+// https://dbus.freedesktop.org/doc/dbus-specification.html#standard-interfaces-objectmanager
+// NOLINTNEXTLINE(readability-identifier-naming)
+static constexpr auto DBUS_OBJECTMANAGER_IFACE =
+    "org.freedesktop.DBus.ObjectManager";
+
 // NOLINTNEXTLINE(readability-identifier-naming)
 static constexpr auto INVENTORY_DECORATOR_ASSET_IFACE =
     "xyz.openbmc_project.Inventory.Decorator.Asset";
 
 using namespace inventory;
 using namespace dbus;
+
+void InventoryManager::migrate(std::span<Migration*>&& migrations)
+{
+    auto call =
+        dbus.new_method_call(INVENTORY_BUS_NAME, INVENTORY_MANAGER_OBJECT,
+                             DBUS_OBJECTMANAGER_IFACE, "GetManagedObjects");
+    try
+    {
+        std::map<sdbusplus::message::object_path, ObjectType> objects;
+        auto reply = dbus.call(call);
+        reply.read(objects);
+
+        for (const auto& [objectPath, object] : objects)
+        {
+            const auto itemPath = extractItemPath({objectPath});
+
+            for (auto migration : migrations)
+            {
+                Migration::Result r =
+                    migration->migrate(this, itemPath, object);
+                switch (r)
+                {
+                    case Migration::Result::INVALID:
+                        debug(
+                            "Migration {MIGRATION_NAME} not applicable on inventory object {OBJECT_PATH}",
+                            "MIGRATION_NAME", migration->name(), "OBJECT_PATH",
+                            itemPath);
+                        break;
+                    case Migration::Result::SUCCESS:
+                        info(
+                            "Applied migration {MIGRATION_NAME} on inventory object {OBJECT_PATH}",
+                            "MIGRATION_NAME", migration->name(), "OBJECT_PATH",
+                            itemPath);
+                        break;
+                    case Migration::Result::FAILED:
+                        warning(
+                            "Failed to apply migration {MIGRATION_NAME} on inventory object {OBJECT_PATH}",
+                            "MIGRATION_NAME", migration->name(), "OBJECT_PATH",
+                            itemPath);
+                        break;
+                }
+            }
+        }
+    }
+    catch (const sdbusplus::exception::exception& ex)
+    {
+        warning(
+            "Failed to fetch inventory objects for migration: {EXCEPTION_DESCRIPTION}",
+            "EXCEPTION_DESCRIPTION", ex);
+        throw;
+    }
+}
+
+std::string InventoryManager::extractItemPath(const std::string& objectPath)
+{
+    if (!objectPath.starts_with(INVENTORY_MANAGER_OBJECT))
+    {
+        return {objectPath};
+    }
+
+    return objectPath.substr(strlen(INVENTORY_MANAGER_OBJECT));
+}
 
 std::weak_ptr<PropertiesChangedListener>
     InventoryManager::addPropertiesChangedListener(

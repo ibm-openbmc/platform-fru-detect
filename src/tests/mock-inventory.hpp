@@ -4,6 +4,8 @@
 
 struct MockInventory : public Inventory
 {
+    void migrate(std::span<inventory::Migration*>&& migrations) override;
+
     std::weak_ptr<dbus::PropertiesChangedListener> addPropertiesChangedListener(
         const std::string& path, const std::string& interface,
         std::function<void(dbus::PropertiesChanged&&)> callback) override;

@@ -4,6 +4,7 @@
 #include "inventory.hpp"
 
 #include <cassert>
+#include <utility>
 
 using namespace inventory;
 using namespace dbus;
@@ -12,6 +13,12 @@ PublishWhenPresentInventoryDecorator::PublishWhenPresentInventoryDecorator(
     Inventory* inventory) :
     inventory(inventory)
 {}
+
+void PublishWhenPresentInventoryDecorator::migrate(
+    std::span<Migration*>&& migrations)
+{
+    inventory->migrate(std::forward<std::span<Migration*>>(migrations));
+}
 
 std::weak_ptr<PropertiesChangedListener>
     PublishWhenPresentInventoryDecorator::addPropertiesChangedListener(
