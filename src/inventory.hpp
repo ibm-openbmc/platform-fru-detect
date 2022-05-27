@@ -9,6 +9,7 @@
 #include <map>
 #include <optional>
 #include <set>
+#include <span>
 #include <string>
 #include <variant>
 #include <vector>
@@ -35,6 +36,10 @@ using ObjectType = std::map<std::string, InterfaceType>;
 static constexpr auto INVENTORY_ITEM_IFACE =
     "xyz.openbmc_project.Inventory.Item";
 
+// NOLINTNEXTLINE(readability-identifier-naming)
+static constexpr auto INVENTORY_ITEM_PCIESLOT_IFACE =
+    "xyz.openbmc_project.Inventory.Item.PCIeSlot";
+
 // https://github.com/openbmc/phosphor-dbus-interfaces/blob/08baf48ad5f15774d393fbbf4e9479a0ef3e82d0/yaml/xyz/openbmc_project/Inventory/Decorator/I2CDevice.interface.yaml
 // NOLINTNEXTLINE(readability-identifier-naming)
 static constexpr auto INVENTORY_DECORATOR_I2CDEVICE_IFACE =
@@ -42,6 +47,8 @@ static constexpr auto INVENTORY_DECORATOR_I2CDEVICE_IFACE =
 
 // NOLINTNEXTLINE(readability-identifier-naming)
 static constexpr auto INVENTORY_IPZVPD_VINI_IFACE = "com.ibm.ipzvpd.VINI";
+
+class Migration;
 
 namespace interfaces
 {
@@ -133,11 +140,23 @@ class VINI : public Interface
 } // namespace interfaces
 } // namespace inventory
 
+template <typename T>
+concept DerivesMigration = std::is_base_of<inventory::Migration, T>::value;
+
 class Inventory
 {
   public:
     Inventory() = default;
     virtual ~Inventory() = default;
+
+    template <DerivesMigration... Ms>
+    static void migrate(Inventory* inventory, Ms&&... impls)
+    {
+        auto migrations = std::to_array<inventory::Migration*>({&impls...});
+        inventory->migrate(migrations);
+    }
+
+    virtual void migrate(std::span<inventory::Migration*>&& migrations) = 0;
 
     virtual std::weak_ptr<dbus::PropertiesChangedListener>
         addPropertiesChangedListener(
@@ -163,6 +182,8 @@ class InventoryManager : public Inventory
     {}
     ~InventoryManager() override = default;
 
+    void migrate(std::span<inventory::Migration*>&& migrations) override;
+
     /* Inventory */
     std::weak_ptr<dbus::PropertiesChangedListener> addPropertiesChangedListener(
         const std::string& path, const std::string& interface,
@@ -182,6 +203,8 @@ class InventoryManager : public Inventory
     virtual void updateObject(const std::string& path,
                               const inventory::ObjectType& updates);
 
+    static std::string extractItemPath(const std::string& objectPath);
+
     sdbusplus::bus::bus& dbus;
     std::set<std::shared_ptr<dbus::PropertiesChangedListener>> listeners;
 };
@@ -192,6 +215,8 @@ class PublishWhenPresentInventoryDecorator : public Inventory
   public:
     PublishWhenPresentInventoryDecorator(Inventory* inventory);
     ~PublishWhenPresentInventoryDecorator() override = default;
+
+    void migrate(std::span<inventory::Migration*>&& migrations) override;
 
     /* Inventory */
     std::weak_ptr<dbus::PropertiesChangedListener> addPropertiesChangedListener(

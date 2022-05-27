@@ -38,7 +38,8 @@ void BasecampNVMeDrive::unplug([[maybe_unused]] Notifier& notifier,
 
 std::string BasecampNVMeDrive::getInventoryPath() const
 {
-    return basecamp->getInventoryPath() + "/" + "nvme" + std::to_string(index);
+    return basecamp->getInventoryPath() + "/" + "nvme" + std::to_string(index) +
+           "/" + "drive" + std::to_string(index);
 }
 
 void BasecampNVMeDrive::addToInventory(Inventory* inventory)

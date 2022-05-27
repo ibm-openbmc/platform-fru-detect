@@ -1,11 +1,15 @@
 /* SPDX-License-Identifier: Apache-2.0 */
 /* Copyright IBM Corp. 2022 */
+#include "inventory/migrations.hpp"
 #include "mock-inventory.hpp"
+
+#include "inventory/migrations.hpp"
 
 using namespace inventory;
 
-static void accumulate(std::map<std::string, ObjectType>& store,
-                       const std::string& path, const ObjectType& updates)
+void MockInventory::accumulate(std::map<std::string, ObjectType>& store,
+                               const std::string& path,
+                               const ObjectType& updates)
 {
     if (store.contains(path))
     {
@@ -31,6 +35,19 @@ static void accumulate(std::map<std::string, ObjectType>& store,
     else
     {
         store[path] = updates;
+    }
+}
+
+void MockInventory::migrate(std::span<inventory::Migration*>&& migrations)
+{
+    auto old = store;
+
+    for (const auto& [path, object] : old)
+    {
+        for (auto migration : migrations)
+        {
+            migration->migrate(this, path, object);
+        }
     }
 }
 

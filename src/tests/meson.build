@@ -14,6 +14,13 @@ test('test-inventory',
 	        sources: [ 'test-inventory.cpp',
 			   'mock-inventory.cpp' ],
 		dependencies: [ inventory_dep, inventory_test_dep, gtest_dep ]))
+
+test('test-inventory-migrations',
+     executable('test-inventory-migrations',
+	        sources: [ 'test-inventory-migrations.cpp',
+			   'mock-inventory.cpp' ],
+	        dependencies: [ inventory_dep, inventory_test_dep, gtest_dep ]))
+
 test('test-nvme',
      executable('test-nvme', 'test-nvme.cpp',
 	        dependencies: [ headers_dep,
