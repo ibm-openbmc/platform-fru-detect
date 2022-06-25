@@ -9,6 +9,7 @@
 #include <sdbusplus/bus/match.hpp>
 #include <sdbusplus/message.hpp>
 
+#include <exception>
 #include <cstring>
 
 PHOSPHOR_LOG2_USING;
@@ -131,14 +132,23 @@ void InventoryManager::updateObject(const std::string& path,
 {
     auto call =
         dbus.new_method_call(INVENTORY_BUS_NAME, INVENTORY_MANAGER_OBJECT,
-                             INVENTORY_MANAGER_IFACE, "Notify");
+                INVENTORY_MANAGER_IFACE, "Notify");
 
     std::map<sdbusplus::message::object_path, ObjectType> inventoryUpdate = {
         {path, updates},
     };
 
     call.append(inventoryUpdate);
-    dbus.call(call);
+
+    try
+    {
+        dbus.call(call);
+    }
+    catch (const sdbusplus::exception::SdBusError& ex)
+    {
+        /* Probably a bit bogus, but sdbusplus doesn't help us differentiate? */
+        std::throw_with_nested(NoSuchInventoryItem(path));
+    }
 }
 
 void InventoryManager::add(const std::string& path,
@@ -169,7 +179,16 @@ void InventoryManager::markPresent(const std::string& path)
                                      DBUS_PROPERTY_IFACE, "Set");
 
     call.append(INVENTORY_ITEM_IFACE, "Present", std::variant<bool>(true));
-    dbus.call(call);
+
+    try
+    {
+        dbus.call(call);
+    }
+    catch (const sdbusplus::exception::SdBusError& ex)
+    {
+        /* Probably a bit bogus, but sdbusplus doesn't help us differentiate? */
+        std::throw_with_nested(NoSuchInventoryItem(path));
+    }
 }
 
 void InventoryManager::markAbsent(const std::string& path)
@@ -180,7 +199,16 @@ void InventoryManager::markAbsent(const std::string& path)
                                      DBUS_PROPERTY_IFACE, "Set");
 
     call.append(INVENTORY_ITEM_IFACE, "Present", std::variant<bool>(false));
-    dbus.call(call);
+
+    try
+    {
+        dbus.call(call);
+    }
+    catch (const sdbusplus::exception::SdBusError& ex)
+    {
+        /* Probably a bit bogus, but sdbusplus doesn't help us differentiate? */
+        std::throw_with_nested(NoSuchInventoryItem(path));
+    }
 }
 
 bool InventoryManager::isPresent(const std::string& path)

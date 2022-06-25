@@ -4,6 +4,7 @@
 
 #include "dbus.hpp"
 
+#include <exception>
 #include <functional>
 #include <list>
 #include <map>
@@ -148,6 +149,24 @@ class VINI : public Interface
 
 template <typename T>
 concept DerivesMigration = std::is_base_of<inventory::Migration, T>::value;
+
+class NoSuchInventoryItem: public std::exception
+{
+  public:
+    NoSuchInventoryItem(const std::string& path) :
+        description("No such inventory item: " + path)
+    {
+    }
+    ~NoSuchInventoryItem() override = default;
+
+    const char* what() const noexcept override
+    {
+        return description.c_str();
+    }
+
+  private:
+      const std::string description;
+};
 
 class Inventory
 {
