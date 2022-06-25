@@ -35,14 +35,9 @@ void PublishWhenPresentInventoryDecorator::removePropertiesChangedListener(
 }
 
 void PublishWhenPresentInventoryDecorator::add(
-    const std::string& path, const interfaces::Interface iface)
+    const std::string& path, interfaces::Interface iface)
 {
-    if (!objectCache.contains(path))
-    {
-        objectCache.try_emplace(path);
-    }
-
-    objectCache[path].push_back(iface);
+    objectCache[path].insert_or_assign(iface.getInterfaceName(), iface);
 
     if (presentCache.contains(path) && presentCache[path])
     {
@@ -51,26 +46,17 @@ void PublishWhenPresentInventoryDecorator::add(
 }
 
 void PublishWhenPresentInventoryDecorator::remove(
-    const std::string& path, const interfaces::Interface iface)
+    const std::string& path, interfaces::Interface iface)
 {
-    if (presentCache.contains(path) && !presentCache[path])
+    if (presentCache.contains(path) && presentCache[path])
+    {
+        // Remove it when it's marked absent
+        objectCache[path].insert_or_assign(iface.getInterfaceName(), iface);
+    }
+    else
     {
         inventory->remove(path, iface);
     }
-
-    if (!objectCache.contains(path))
-    {
-        return;
-    }
-
-    /* Neuter it */
-    ObjectType removed;
-    iface.depopulateObject(removed);
-    auto [k, v] = *(removed.begin());
-    const auto addProps{v};
-    const auto removeProps{v};
-    objectCache[path].emplace_back(k, std::move(addProps),
-                                   std::move(removeProps));
 }
 
 void PublishWhenPresentInventoryDecorator::markPresent(const std::string& path)
@@ -81,7 +67,7 @@ void PublishWhenPresentInventoryDecorator::markPresent(const std::string& path)
 
     if (!alreadyPresent && objectCache.contains(path))
     {
-        for (const auto& iface : objectCache[path])
+        for (const auto& [_, iface] : objectCache[path])
         {
             inventory->add(path, iface);
         }
@@ -100,10 +86,12 @@ void PublishWhenPresentInventoryDecorator::markAbsent(const std::string& path)
     {
         inventory->markAbsent(path);
 
-        for (const auto& iface : objectCache[path])
+        for (const auto& [_, iface] : objectCache[path])
         {
             inventory->remove(path, iface);
         }
+
+        objectCache.erase(path);
     }
 }
 
