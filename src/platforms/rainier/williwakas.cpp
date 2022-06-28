@@ -34,12 +34,20 @@ void WilliwakasNVMeDrive::plug([[maybe_unused]] Notifier& notifier)
 void WilliwakasNVMeDrive::unplug([[maybe_unused]] Notifier& notifier,
                                  [[maybe_unused]] int mode)
 {
-    if (mode == UNPLUG_REMOVES_INVENTORY)
+    try
     {
-        removeFromInventory(inventory);
+        if (mode == UNPLUG_REMOVES_INVENTORY)
+        {
+            removeFromInventory(inventory);
+        }
+        debug("Drive {NVME_ID} unplugged on Williwakas {WILLIWAKAS_ID}", "NVME_ID",
+              index, "WILLIWAKAS_ID", williwakas->getIndex());
     }
-    debug("Drive {NVME_ID} unplugged on Williwakas {WILLIWAKAS_ID}", "NVME_ID",
-          index, "WILLIWAKAS_ID", williwakas->getIndex());
+    catch (const NoSuchInventoryItem& e)
+    {
+        debug("Failed to remove drive {NVME_ID} on Williwakas {WILLIWAKAS_ID} from inventory, ignoring: {EXCEPTION}",
+              "NVME_ID", index, "WILLIWAKAS_ID", williwakas->getIndex(), "EXCEPTION", e);
+    }
 }
 
 std::string WilliwakasNVMeDrive::getInventoryPath() const

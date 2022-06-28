@@ -4,6 +4,7 @@
 
 #include "dbus.hpp"
 
+#include <exception>
 #include <functional>
 #include <list>
 #include <map>
@@ -57,15 +58,16 @@ class Interface
   public:
     Interface(const std::string& interface,
               const InterfaceType&& removeProperties) :
-        interface(interface),
+        name(interface),
         addProperties(std::nullopt), removeProperties(removeProperties)
     {}
     Interface(const std::string& interface, const InterfaceType&& addProperties,
               const InterfaceType&& removeProperties) :
-        interface(interface),
+        name(interface),
         addProperties(addProperties), removeProperties(removeProperties)
     {}
     virtual ~Interface() = default;
+    Interface& operator=(Interface& other) = default;
     bool operator==(const Interface& other) const = default;
 
     void populateObject(ObjectType& object) const
@@ -78,24 +80,29 @@ class Interface
         updateObject(object, removeProperties);
     }
 
+    const std::string& getInterfaceName() const
+    {
+        return name;
+    }
+
   private:
     void updateObject(ObjectType& object, const InterfaceType& updates) const
     {
-        if (!object.contains(interface))
+        if (!object.contains(name))
         {
-            object.try_emplace(interface);
+            object.try_emplace(name);
         }
 
-        InterfaceType& container = object[interface];
+        InterfaceType& container = object[name];
         for (const auto& [property, value] : updates)
         {
             container[property] = value;
         }
     }
 
-    const std::string interface;
-    std::optional<const InterfaceType> addProperties;
-    const InterfaceType removeProperties;
+    std::string name;
+    std::optional<InterfaceType> addProperties;
+    InterfaceType removeProperties;
 };
 
 class I2CDevice : public Interface
@@ -142,6 +149,24 @@ class VINI : public Interface
 
 template <typename T>
 concept DerivesMigration = std::is_base_of<inventory::Migration, T>::value;
+
+class NoSuchInventoryItem: public std::exception
+{
+  public:
+    NoSuchInventoryItem(const std::string& path) :
+        description("No such inventory item: " + path)
+    {
+    }
+    ~NoSuchInventoryItem() override = default;
+
+    const char* what() const noexcept override
+    {
+        return description.c_str();
+    }
+
+  private:
+      const std::string description;
+};
 
 class Inventory
 {
@@ -235,7 +260,7 @@ class PublishWhenPresentInventoryDecorator : public Inventory
 
   private:
     Inventory* inventory;
-    std::map<std::string, std::list<inventory::interfaces::Interface>>
+    std::map<std::string, std::map<std::string, inventory::interfaces::Interface>>
         objectCache;
     std::map<std::string, bool> presentCache;
 };

@@ -34,18 +34,26 @@ void FlettNVMeDrive::plug([[maybe_unused]] Notifier& notifier)
 
 void FlettNVMeDrive::unplug([[maybe_unused]] Notifier& notifier, int mode)
 {
-    if (!drive)
+    try
     {
-        /* Cold-unplug, no drive is present */
-        drive.emplace(getInventoryPath());
+        if (!drive)
+        {
+            /* Cold-unplug, no drive is present */
+            drive.emplace(getInventoryPath());
+        }
+        if (mode == UNPLUG_REMOVES_INVENTORY)
+        {
+            removeFromInventory(inventory);
+        }
+        drive.reset();
+        debug("Drive {NVME_ID} unplugged on Flett {FLETT_ID}", "NVME_ID", index,
+              "FLETT_ID", flett->getIndex());
     }
-    if (mode == UNPLUG_REMOVES_INVENTORY)
+    catch (const NoSuchInventoryItem& e)
     {
-        removeFromInventory(inventory);
+        debug("Failed to remove drive {NVME_ID} on Flett {FLETT_ID} from inventory, ignoring: {EXCEPTION}",
+              "NVME_ID", index, "FLETT_ID", flett->getIndex(), "EXCEPTION", e);
     }
-    drive.reset();
-    debug("Drive {NVME_ID} unplugged on Flett {FLETT_ID}", "NVME_ID", index,
-          "FLETT_ID", flett->getIndex());
 }
 
 std::string FlettNVMeDrive::getInventoryPath() const
