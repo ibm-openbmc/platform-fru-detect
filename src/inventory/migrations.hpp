@@ -18,8 +18,7 @@ class Migration
         FAILED
     };
 
-    Migration(const std::string&& name) : migrationName(name)
-    {}
+    Migration(const std::string&& name) : migrationName(name) {}
     virtual ~Migration() = default;
 
     virtual enum Result migrate([[maybe_unused]] Inventory* inventory,
@@ -41,8 +40,7 @@ class Migration
 class MigrateNVMeIPZVPDFromSlotToDrive : public Migration
 {
   public:
-    MigrateNVMeIPZVPDFromSlotToDrive() : Migration(__func__)
-    {}
+    MigrateNVMeIPZVPDFromSlotToDrive() : Migration(__func__) {}
     ~MigrateNVMeIPZVPDFromSlotToDrive() override = default;
 
     enum Result migrate(Inventory* inventory, const std::string& path,
@@ -52,8 +50,7 @@ class MigrateNVMeIPZVPDFromSlotToDrive : public Migration
 class MigrateNVMeI2CEndpointFromSlotToDrive : public Migration
 {
   public:
-    MigrateNVMeI2CEndpointFromSlotToDrive() : Migration(__func__)
-    {}
+    MigrateNVMeI2CEndpointFromSlotToDrive() : Migration(__func__) {}
     ~MigrateNVMeI2CEndpointFromSlotToDrive() override = default;
 
     enum Result migrate(Inventory* inventory, const std::string& path,

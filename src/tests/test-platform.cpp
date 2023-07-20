@@ -16,8 +16,7 @@ struct MockDeviceState
 class MockDevice : public Device
 {
   public:
-    MockDevice(MockDeviceState* state) : state(state)
-    {}
+    MockDevice(MockDeviceState* state) : state(state) {}
     ~MockDevice() override = default;
 
     void plug([[maybe_unused]] Notifier& notifier) override

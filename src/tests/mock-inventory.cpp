@@ -1,6 +1,5 @@
 /* SPDX-License-Identifier: Apache-2.0 */
 /* Copyright IBM Corp. 2022 */
-#include "inventory/migrations.hpp"
 #include "mock-inventory.hpp"
 
 #include "inventory/migrations.hpp"

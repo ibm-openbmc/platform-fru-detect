@@ -51,8 +51,9 @@ void FlettNVMeDrive::unplug([[maybe_unused]] Notifier& notifier, int mode)
     }
     catch (const NoSuchInventoryItem& e)
     {
-        debug("Failed to remove drive {NVME_ID} on Flett {FLETT_ID} from inventory, ignoring: {EXCEPTION}",
-              "NVME_ID", index, "FLETT_ID", flett->getIndex(), "EXCEPTION", e);
+        debug(
+            "Failed to remove drive {NVME_ID} on Flett {FLETT_ID} from inventory, ignoring: {EXCEPTION}",
+            "NVME_ID", index, "FLETT_ID", flett->getIndex(), "EXCEPTION", e);
     }
 }
 

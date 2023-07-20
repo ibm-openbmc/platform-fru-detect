@@ -71,8 +71,7 @@ std::vector<uint8_t>
     return serial;
 }
 
-BasicNVMeDrive::BasicNVMeDrive(std::string&& path) : inventoryPath(path)
-{}
+BasicNVMeDrive::BasicNVMeDrive(std::string&& path) : inventoryPath(path) {}
 
 BasicNVMeDrive::BasicNVMeDrive(const SysfsI2CBus& bus, std::string&& path) :
     BasicNVMeDrive(bus, std::move(path), BasicNVMeDrive::fetchMetadata(bus))

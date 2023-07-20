@@ -40,13 +40,15 @@ void WilliwakasNVMeDrive::unplug([[maybe_unused]] Notifier& notifier,
         {
             removeFromInventory(inventory);
         }
-        debug("Drive {NVME_ID} unplugged on Williwakas {WILLIWAKAS_ID}", "NVME_ID",
-              index, "WILLIWAKAS_ID", williwakas->getIndex());
+        debug("Drive {NVME_ID} unplugged on Williwakas {WILLIWAKAS_ID}",
+              "NVME_ID", index, "WILLIWAKAS_ID", williwakas->getIndex());
     }
     catch (const NoSuchInventoryItem& e)
     {
-        debug("Failed to remove drive {NVME_ID} on Williwakas {WILLIWAKAS_ID} from inventory, ignoring: {EXCEPTION}",
-              "NVME_ID", index, "WILLIWAKAS_ID", williwakas->getIndex(), "EXCEPTION", e);
+        debug(
+            "Failed to remove drive {NVME_ID} on Williwakas {WILLIWAKAS_ID} from inventory, ignoring: {EXCEPTION}",
+            "NVME_ID", index, "WILLIWAKAS_ID", williwakas->getIndex(),
+            "EXCEPTION", e);
     }
 }
 
@@ -54,8 +56,8 @@ std::string WilliwakasNVMeDrive::getInventoryPath() const
 {
     // https://github.com/ibm-openbmc/openbmc/commit/f2c8a292e46a55705606ff346bdc1ffd9f4628d7
     const std::string slotID = "nvme" + std::to_string(index);
-    const std::string backplaneID =
-        "dp" + std::to_string(williwakas->getIndex());
+    const std::string backplaneID = "dp" +
+                                    std::to_string(williwakas->getIndex());
     const std::string driveID = "drive" + std::to_string(index);
     const std::string compositeID = backplaneID + "_" + driveID;
     return williwakas->getInventoryPath() + "/" + slotID + "/" + compositeID;

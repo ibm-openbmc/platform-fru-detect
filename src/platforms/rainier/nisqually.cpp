@@ -212,8 +212,7 @@ void Nisqually::detectWilliwakasCards(Notifier& notifier)
 
 /* Nisqually0z */
 
-Nisqually0z::Nisqually0z(Inventory* inventory) : Nisqually(inventory)
-{}
+Nisqually0z::Nisqually0z(Inventory* inventory) : Nisqually(inventory) {}
 
 SysfsI2CBus Nisqually0z::getFlettSlotI2CBus(int slot) const
 {
@@ -222,8 +221,7 @@ SysfsI2CBus Nisqually0z::getFlettSlotI2CBus(int slot) const
 
 /* Nisqually1z */
 
-Nisqually1z::Nisqually1z(Inventory* inventory) : Nisqually(inventory)
-{}
+Nisqually1z::Nisqually1z(Inventory* inventory) : Nisqually(inventory) {}
 
 SysfsI2CBus Nisqually1z::getFlettSlotI2CBus(int slot) const
 {

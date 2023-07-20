@@ -150,13 +150,12 @@ class VINI : public Interface
 template <typename T>
 concept DerivesMigration = std::is_base_of<inventory::Migration, T>::value;
 
-class NoSuchInventoryItem: public std::exception
+class NoSuchInventoryItem : public std::exception
 {
   public:
     NoSuchInventoryItem(const std::string& path) :
         description("No such inventory item: " + path)
-    {
-    }
+    {}
     ~NoSuchInventoryItem() override = default;
 
     const char* what() const noexcept override
@@ -165,7 +164,7 @@ class NoSuchInventoryItem: public std::exception
     }
 
   private:
-      const std::string description;
+    const std::string description;
 };
 
 class Inventory
@@ -203,8 +202,7 @@ class Inventory
 class InventoryManager : public Inventory
 {
   public:
-    InventoryManager(sdbusplus::bus::bus& dbus) : dbus(dbus)
-    {}
+    InventoryManager(sdbusplus::bus::bus& dbus) : dbus(dbus) {}
     ~InventoryManager() override = default;
 
     void migrate(std::span<inventory::Migration*>&& migrations) override;
@@ -260,7 +258,8 @@ class PublishWhenPresentInventoryDecorator : public Inventory
 
   private:
     Inventory* inventory;
-    std::map<std::string, std::map<std::string, inventory::interfaces::Interface>>
+    std::map<std::string,
+             std::map<std::string, inventory::interfaces::Interface>>
         objectCache;
     std::map<std::string, bool> presentCache;
 };

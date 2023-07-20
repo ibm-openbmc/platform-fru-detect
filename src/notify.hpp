@@ -28,12 +28,10 @@ class NotifySink
   public:
     virtual ~NotifySink() = default;
 
-    virtual void arm()
-    {}
+    virtual void arm() {}
 
     virtual int getFD() = 0;
     virtual void notify(Notifier& notifier) = 0;
 
-    virtual void disarm()
-    {}
+    virtual void disarm() {}
 };

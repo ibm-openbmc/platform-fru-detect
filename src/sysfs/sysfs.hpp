@@ -14,7 +14,6 @@ class SysfsEntry
     SysfsEntry(const std::filesystem::path& path, bool check = true) :
         path(path)
     {
-
         if (check && !std::filesystem::exists(path))
         {
             lg2::error("sysfs path '{SYSFS_PATH}' does not exist", "SYSFS_PATH",

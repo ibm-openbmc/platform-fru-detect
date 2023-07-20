@@ -128,8 +128,8 @@ void Basecamp::plug(Notifier& notifier)
         auto line = chip.get_line(drivePresenceMap[index]);
         line.request({program_invocation_short_name,
                       gpiod::line::DIRECTION_INPUT, gpiod::line::ACTIVE_LOW});
-        auto presence =
-            BasecampNVMeDrivePresence(std::move(line), getDriveBus(index));
+        auto presence = BasecampNVMeDrivePresence(std::move(line),
+                                                  getDriveBus(index));
         poller.start(notifier, std::move(presence));
     }
 }

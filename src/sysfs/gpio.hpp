@@ -38,7 +38,7 @@ class SysfsGPIOChip : public SysfsEntry
         debug("Inspecting '{SYSFS_PATH}' for associated gpiochip", "SYSFS_PATH",
               entry.getPath().string());
 
-        for (auto const& dirent : fs::directory_iterator{entry.getPath()})
+        for (const auto& dirent : fs::directory_iterator{entry.getPath()})
         {
             if (dirent.path().filename().string().starts_with("gpiochip"))
             {

@@ -5,8 +5,7 @@
 
 #include "sysfs/devicetree.hpp"
 
-PlatformManager::PlatformManager() : model(SysfsDevicetree::getModel())
-{}
+PlatformManager::PlatformManager() : model(SysfsDevicetree::getModel()) {}
 
 const std::string& PlatformManager::getPlatformModel() noexcept
 {

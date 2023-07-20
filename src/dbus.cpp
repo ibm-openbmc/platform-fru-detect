@@ -7,8 +7,7 @@
 #include <sdbusplus/bus/match.hpp>
 #include <sdbusplus/message.hpp>
 
-DBusNotifySink::DBusNotifySink(sdbusplus::bus::bus& dbus) : dbus(dbus)
-{}
+DBusNotifySink::DBusNotifySink(sdbusplus::bus::bus& dbus) : dbus(dbus) {}
 
 int DBusNotifySink::getFD()
 {

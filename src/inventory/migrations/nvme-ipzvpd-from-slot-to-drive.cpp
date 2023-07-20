@@ -35,8 +35,8 @@ Migration::Result
     const auto& rtData = std::get<std::vector<uint8_t>>(viniData.at("RT"));
     const bool isVINI = rtData == std::vector<uint8_t>({'V', 'I', 'N', 'I'});
     const auto& ccData = std::get<std::vector<uint8_t>>(viniData.at("CC"));
-    const bool haveNVMeCC =
-        ccData == std::vector<uint8_t>({'N', 'V', 'M', 'e'});
+    const bool haveNVMeCC = ccData ==
+                            std::vector<uint8_t>({'N', 'V', 'M', 'e'});
 
     if (!(isVINI && haveNVMeCC))
     {
