@@ -6,6 +6,8 @@
 #include "platform.hpp"
 #include "sysfs/i2c.hpp"
 
+#include <gpiod.hpp>
+
 #include <array>
 #include <optional>
 #include <stdexcept>
@@ -61,4 +63,37 @@ class BasicNVMeDrive : public NVMeDrive, FRU
 
     std::optional<std::vector<uint8_t>> manufacturer;
     std::optional<std::vector<uint8_t>> serial;
+};
+
+class NVMeDrivePresence
+{
+  public:
+    NVMeDrivePresence() = delete;
+    NVMeDrivePresence(gpiod::line&& line, SysfsI2CBus bus) :
+        line(line), bus(std::move(bus)), haveEndpoint(false)
+    {}
+
+    bool operator()()
+    {
+        // Once we've observed both GPIO presence and the basic I2C endpoint,
+        // only unplug() the drive if the GPIO indicates the drive is unplugged.
+        // The I2C endpoint will come and go as the host power state changes.
+        if (line.get_value() == 0)
+        {
+            haveEndpoint = false;
+            return false;
+        }
+
+        if (!haveEndpoint)
+        {
+            haveEndpoint = BasicNVMeDrive::isBasicEndpointPresent(bus);
+        }
+
+        return haveEndpoint;
+    }
+
+  private:
+    gpiod::line line;
+    SysfsI2CBus bus;
+    bool haveEndpoint;
 };
