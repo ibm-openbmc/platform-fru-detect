@@ -100,8 +100,7 @@ void Basecamp::plug(Notifier& notifier)
     }
 }
 
-void Basecamp::unplug([[maybe_unused]] Notifier& notifier,
-                      [[maybe_unused]] int mode)
+void Basecamp::unplug(Notifier& notifier, int mode)
 {
     for (auto& poller : polledDriveConnectors)
     {
