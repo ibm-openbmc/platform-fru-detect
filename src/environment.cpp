@@ -31,9 +31,11 @@ void EnvironmentManager::run(PlatformManager& pm, Notifier& notifier,
     }
 }
 
+#if defined(__arm__)
+// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define reg(r) "r" #r
 
-#if defined(__arm__)
+// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define trigger(r, p)                                                          \
     asm volatile("mov " reg(r) ", %0;"                                         \
                                "orr " reg(r) ", " reg(r) ", " reg(r)           \
@@ -41,6 +43,7 @@ void EnvironmentManager::run(PlatformManager& pm, Notifier& notifier,
                  : "r"(p)                                                      \
                  : "memory")
 #else
+// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define trigger(r, p)                                                          \
     (void)(r);                                                                 \
     (void)(p);
