@@ -15,7 +15,7 @@ namespace match
 {
 struct match;
 }
-class bus;
+struct bus;
 } // namespace bus
 namespace message
 {

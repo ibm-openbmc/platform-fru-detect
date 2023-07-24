@@ -20,7 +20,7 @@ namespace sdbusplus
 {
 namespace bus
 {
-class bus;
+struct bus;
 }
 } // namespace sdbusplus
 
