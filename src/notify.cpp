@@ -22,6 +22,12 @@ PHOSPHOR_LOG2_USING;
 
 Notifier::Notifier()
 {
+    // populating epollfd and exitfd using a member initializer exposes a
+    // loss-of-information hazard as bot epoll_create1() and signalfd() set
+    // errno on failure. This may lead the logging to report the errno value set
+    // by a failure of signalfd() as the errno for a failure of epoll_create1().
+    // Instead, silence the preference warning.
+    // NOLINTNEXTLINE(cppcoreguidelines-prefer-member-initializer)
     epollfd = ::epoll_create1(0);
     if (epollfd < 0)
     {
@@ -43,6 +49,7 @@ Notifier::Notifier()
         throw std::system_category().default_error_condition(errno);
     }
 
+    // NOLINTNEXTLINE(cppcoreguidelines-prefer-member-initializer)
     exitfd = signalfd(-1, &mask, 0);
     if (exitfd == -1)
     {

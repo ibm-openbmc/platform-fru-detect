@@ -20,9 +20,8 @@ FileDescriptor::FileDescriptor(const std::filesystem::path& name,
 
 FileDescriptor::FileDescriptor(int fdIn) : fd(fdIn){};
 
-FileDescriptor::FileDescriptor(FileDescriptor&& in) noexcept
+FileDescriptor::FileDescriptor(FileDescriptor&& in) noexcept : fd(in.fd)
 {
-    fd = in.fd;
     in.fd = -1;
 }
 
