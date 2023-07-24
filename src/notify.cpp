@@ -141,7 +141,8 @@ void Notifier::remove(NotifySink* sink)
 
 void Notifier::run()
 {
-    struct epoll_event event;
+    struct epoll_event event
+    {};
     int rc = 0;
 
     for (;;)
@@ -166,7 +167,8 @@ void Notifier::run()
         /* Is it the exitfd sentinel? */
         if (!sink)
         {
-            struct signalfd_siginfo fdsi;
+            struct signalfd_siginfo fdsi
+            {};
 
             ssize_t ingress = read(exitfd, &fdsi, sizeof(fdsi));
             if (ingress != sizeof(fdsi))
