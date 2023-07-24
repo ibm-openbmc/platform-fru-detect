@@ -12,7 +12,7 @@ PHOSPHOR_LOG2_USING;
 std::string SysfsDevicetree::getModel()
 {
     std::filesystem::path path("/sys/firmware/devicetree/base/model");
-    std::ifstream property(path, property.in);
+    std::ifstream property(path, std::ifstream::in);
 
     if (!property.is_open())
     {

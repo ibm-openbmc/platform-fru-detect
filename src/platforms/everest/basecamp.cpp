@@ -17,7 +17,7 @@ BasecampNVMeDrive::BasecampNVMeDrive(Inventory* inventory,
 
 void BasecampNVMeDrive::plug([[maybe_unused]] Notifier& notifier)
 {
-    drive.emplace(basecamp->getDriveBus(index), getInventoryPath());
+    drive.emplace(Basecamp::getDriveBus(index), getInventoryPath());
     addToInventory(inventory);
     debug("Drive {NVME_ID} plugged on Basecamp", "NVME_ID", index);
 }

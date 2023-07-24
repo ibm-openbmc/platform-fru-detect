@@ -88,7 +88,7 @@ bool SysfsI2CBus::isDevicePresent(int address)
 
 SysfsI2CDevice SysfsI2CBus::newDevice(std::string type, int address)
 {
-    std::fstream newDevice(path / "new_device", newDevice.out);
+    std::fstream newDevice(path / "new_device", std::fstream::out);
     if (!newDevice.is_open())
     {
         warning("Failed to open '{SYSFS_I2C_NEW_DEVICE_PATH}'",
@@ -113,7 +113,7 @@ SysfsI2CDevice SysfsI2CBus::newDevice(std::string type, int address)
 
 void SysfsI2CBus::deleteDevice(int address)
 {
-    std::fstream deleteDevice(path / "delete_device", deleteDevice.out);
+    std::fstream deleteDevice(path / "delete_device", std::fstream::out);
     if (!deleteDevice.is_open())
     {
         warning("Failed to open '{SYSFS_I2C_DELETE_DEVICE_PATH}'",
