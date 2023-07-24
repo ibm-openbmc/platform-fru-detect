@@ -14,8 +14,8 @@ class FileDescriptor
     FileDescriptor() = delete;
     FileDescriptor(const FileDescriptor&) = delete;
     FileDescriptor& operator=(const FileDescriptor&) = delete;
-    FileDescriptor(FileDescriptor&&) noexcept;
-    FileDescriptor& operator=(FileDescriptor&&) noexcept;
+    FileDescriptor(FileDescriptor&& in) noexcept;
+    FileDescriptor& operator=(FileDescriptor&& in) noexcept;
 
     explicit FileDescriptor(const std::filesystem::path& name,
                             std::ios_base::openmode mode = std::ios_base::in |
