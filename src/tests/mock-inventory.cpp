@@ -43,7 +43,7 @@ void MockInventory::migrate(std::span<inventory::Migration*>&& migrations)
 
     for (const auto& [path, object] : old)
     {
-        for (auto migration : migrations)
+        for (auto* migration : migrations)
         {
             migration->migrate(this, path, object);
         }

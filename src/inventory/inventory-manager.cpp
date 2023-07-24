@@ -58,7 +58,7 @@ void InventoryManager::migrate(std::span<Migration*>&& migrations)
         {
             const auto itemPath = extractItemPath({objectPath});
 
-            for (auto migration : migrations)
+            for (auto* migration : migrations)
             {
                 Migration::Result r = migration->migrate(this, itemPath,
                                                          object);

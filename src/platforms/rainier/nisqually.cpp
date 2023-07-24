@@ -132,7 +132,7 @@ void Nisqually::detectFlettCards(Notifier& notifier)
     debug("Locating Flett cards");
 
     /* FIXME: do something more ergonomic */
-    for (auto& [connector, slot] : flettConnectorSlotMap)
+    for (const auto& [connector, slot] : flettConnectorSlotMap)
     {
         try
         {
