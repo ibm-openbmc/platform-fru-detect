@@ -91,7 +91,7 @@ class BasecampNVMeDrivePresence
         // Once we've observed both GPIO presence and the basic I2C endpoint,
         // only unplug() the drive if the GPIO indicates the drive is unplugged.
         // The I2C endpoint will come and go as the host power state changes.
-        if (!line.get_value())
+        if (line.get_value() == 0)
         {
             haveEndpoint = false;
             return false;

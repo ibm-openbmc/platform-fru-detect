@@ -165,7 +165,7 @@ void Notifier::run()
         NotifySink* sink = static_cast<NotifySink*>(event.data.ptr);
 
         /* Is it the exitfd sentinel? */
-        if (!sink)
+        if (sink == nullptr)
         {
             struct signalfd_siginfo fdsi
             {};

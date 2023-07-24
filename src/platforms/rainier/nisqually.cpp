@@ -177,7 +177,7 @@ void Nisqually::detectWilliwakasCards(Notifier& notifier)
         line.request({program_invocation_short_name,
                       gpiod::line::DIRECTION_INPUT, gpiod::line::ACTIVE_LOW});
 
-        bool present = line.get_value();
+        bool present = line.get_value() != 0;
 
         line.release();
 
