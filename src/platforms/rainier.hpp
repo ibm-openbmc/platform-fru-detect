@@ -86,7 +86,7 @@ class WilliwakasNVMeDrive : public NVMeDrive, public Device, public FRU
 {
   public:
     explicit WilliwakasNVMeDrive(Inventory* inventory,
-                                 const Williwakas* backplane, int index);
+                                 const Williwakas* williwakas, int index);
     WilliwakasNVMeDrive(const WilliwakasNVMeDrive& other) = delete;
     WilliwakasNVMeDrive(const WilliwakasNVMeDrive&& other) = delete;
     virtual ~WilliwakasNVMeDrive() = default;
@@ -116,7 +116,7 @@ class Williwakas : public Device, public FRU
     static std::string getInventoryPathFor(const Nisqually* nisqually,
                                            int index);
 
-    explicit Williwakas(Inventory* inventory, const Nisqually* backplane,
+    explicit Williwakas(Inventory* inventory, const Nisqually* nisqually,
                         int index);
     Williwakas(const Williwakas& other) = delete;
     Williwakas(const Williwakas&& other) = delete;
