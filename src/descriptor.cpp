@@ -34,7 +34,7 @@ FileDescriptor& FileDescriptor::operator=(FileDescriptor&& in) noexcept
 
 FileDescriptor::~FileDescriptor()
 {
-    if (fd)
+    if (fd >= 0)
     {
         int r = close(fd);
         if (r < 0)
