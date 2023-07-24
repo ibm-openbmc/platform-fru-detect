@@ -44,7 +44,7 @@ FileDescriptor::~FileDescriptor()
     }
 }
 
-int FileDescriptor::descriptor()
+int FileDescriptor::descriptor() const
 {
     return fd;
 }

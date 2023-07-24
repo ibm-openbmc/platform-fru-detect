@@ -24,5 +24,5 @@ class FileDescriptor
     explicit FileDescriptor(int fd);
 
     ~FileDescriptor();
-    int descriptor();
+    int descriptor() const;
 };
