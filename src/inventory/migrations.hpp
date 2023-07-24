@@ -40,7 +40,7 @@ class Migration
 class MigrateNVMeIPZVPDFromSlotToDrive : public Migration
 {
   public:
-    MigrateNVMeIPZVPDFromSlotToDrive() : Migration(__func__) {}
+    MigrateNVMeIPZVPDFromSlotToDrive() : Migration(&__func__[0]) {}
     ~MigrateNVMeIPZVPDFromSlotToDrive() override = default;
 
     enum Result migrate(Inventory* inventory, const std::string& path,
@@ -50,7 +50,7 @@ class MigrateNVMeIPZVPDFromSlotToDrive : public Migration
 class MigrateNVMeI2CEndpointFromSlotToDrive : public Migration
 {
   public:
-    MigrateNVMeI2CEndpointFromSlotToDrive() : Migration(__func__) {}
+    MigrateNVMeI2CEndpointFromSlotToDrive() : Migration(&__func__[0]) {}
     ~MigrateNVMeI2CEndpointFromSlotToDrive() override = default;
 
     enum Result migrate(Inventory* inventory, const std::string& path,
