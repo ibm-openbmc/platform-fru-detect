@@ -108,7 +108,7 @@ SysfsI2CDevice SysfsI2CBus::newDevice(std::string type, int address)
         throw -1;
     }
 
-    return {getDevicePath(address)};
+    return SysfsI2CDevice{getDevicePath(address)};
 }
 
 void SysfsI2CBus::deleteDevice(int address)
@@ -140,7 +140,7 @@ SysfsI2CDevice SysfsI2CBus::requireDevice(std::string type, int address)
         std::filesystem::path path = getDevicePath(address);
         debug("Device already exists at '{SYSFS_I2C_DEVICE_PATH}'",
               "SYSFS_I2C_DEVICE_PATH", path);
-        return {path};
+        return SysfsI2CDevice{path};
     }
 
     return newDevice(std::move(type), address);

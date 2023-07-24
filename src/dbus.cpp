@@ -31,7 +31,7 @@ class PropertiesChangedListener
 {
   public:
     template <typename... Args>
-    PropertiesChangedListener(Args&&... args) : match(args...)
+    explicit PropertiesChangedListener(Args&&... args) : match(args...)
     {}
     PropertiesChangedListener(const PropertiesChangedListener& other) = delete;
     PropertiesChangedListener(PropertiesChangedListener&& other) = default;

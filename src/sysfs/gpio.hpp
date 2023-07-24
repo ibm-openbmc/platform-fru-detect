@@ -14,7 +14,10 @@ PHOSPHOR_LOG2_USING;
 class SysfsGPIOChip : public SysfsEntry
 {
   public:
-    SysfsGPIOChip(const SysfsEntry& entry) :
+    explicit SysfsGPIOChip(const std::filesystem::path& path) :
+        SysfsGPIOChip(SysfsEntry(path))
+    {}
+    explicit SysfsGPIOChip(const SysfsEntry& entry) :
         SysfsEntry(SysfsGPIOChip::getGPIOChipPath(entry))
     {}
 

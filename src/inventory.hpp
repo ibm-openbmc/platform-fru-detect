@@ -154,7 +154,7 @@ concept DerivesMigration = std::is_base_of<inventory::Migration, T>::value;
 class NoSuchInventoryItem : public std::exception
 {
   public:
-    NoSuchInventoryItem(const std::string& path) :
+    explicit NoSuchInventoryItem(const std::string& path) :
         description("No such inventory item: " + path)
     {}
     NoSuchInventoryItem(const NoSuchInventoryItem& other) = default;
@@ -208,7 +208,7 @@ class InventoryManager : public Inventory
     InventoryManager() = delete;
     InventoryManager(const InventoryManager& other) = delete;
     InventoryManager(InventoryManager&& other) = delete;
-    InventoryManager(sdbusplus::bus::bus& dbus) : dbus(dbus) {}
+    explicit InventoryManager(sdbusplus::bus::bus& dbus) : dbus(dbus) {}
     virtual ~InventoryManager() = default;
 
     InventoryManager& operator=(const InventoryManager& other) = delete;
@@ -246,7 +246,7 @@ class PublishWhenPresentInventoryDecorator : public Inventory
 {
   public:
     PublishWhenPresentInventoryDecorator() = delete;
-    PublishWhenPresentInventoryDecorator(Inventory* inventory);
+    explicit PublishWhenPresentInventoryDecorator(Inventory* inventory);
     PublishWhenPresentInventoryDecorator(
         const PublishWhenPresentInventoryDecorator& other) = delete;
     PublishWhenPresentInventoryDecorator(

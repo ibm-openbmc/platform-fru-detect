@@ -37,5 +37,5 @@ int SysfsI2CDevice::getAddress()
 
 SysfsI2CBus SysfsI2CDevice::getBus()
 {
-    return {path.parent_path()};
+    return SysfsI2CBus{path.parent_path()};
 }

@@ -12,7 +12,7 @@ class SysfsEntry
 {
   public:
     SysfsEntry() = delete;
-    SysfsEntry(const std::filesystem::path& path, bool check = true) :
+    explicit SysfsEntry(const std::filesystem::path& path, bool check = true) :
         path(path)
     {
         if (check && !std::filesystem::exists(path))

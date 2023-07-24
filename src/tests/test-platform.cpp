@@ -16,7 +16,7 @@ struct MockDeviceState
 class MockDevice : public Device
 {
   public:
-    MockDevice(MockDeviceState* state) : state(state) {}
+    explicit MockDevice(MockDeviceState* state) : state(state) {}
     MockDevice(const MockDevice& other) = delete;
     MockDevice(MockDevice&& other) = delete;
     virtual ~MockDevice() = default;

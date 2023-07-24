@@ -25,7 +25,7 @@ class BasicNVMeDrive : public NVMeDrive, FRU
   public:
     static bool isBasicEndpointPresent(const SysfsI2CBus& bus);
 
-    BasicNVMeDrive(std::string&& path);
+    explicit BasicNVMeDrive(std::string&& path);
     BasicNVMeDrive(const SysfsI2CBus& bus, std::string&& path);
     BasicNVMeDrive(const SysfsI2CBus& bus, std::string&& path,
                    const std::vector<uint8_t>&& metadata);

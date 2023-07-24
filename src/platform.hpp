@@ -46,7 +46,7 @@ class Connector
 {
   public:
     template <typename... DeviceArgs>
-    Connector(int idx, DeviceArgs&&... args) :
+    explicit Connector(int idx, DeviceArgs&&... args) :
         state(CONNECTOR_UNINITIALISED), idx(idx), device(),
         ctor([this, args...]() mutable {
             device.emplace(std::forward<DeviceArgs>(args)...);
@@ -255,7 +255,8 @@ class PolledConnector
   public:
     PolledConnector() = delete;
     template <typename... DeviceArgs>
-    PolledConnector(int index, DeviceArgs&&... args) : connector(index, args...)
+    explicit PolledConnector(int index, DeviceArgs&&... args) :
+        connector(index, args...)
     {}
     PolledConnector(const PolledConnector& other) = delete;
     PolledConnector(PolledConnector&& other) = delete;

@@ -21,7 +21,7 @@ class Migration
     Migration() = delete;
     Migration(const Migration& other) = default;
     Migration(Migration&& other) = default;
-    Migration(const std::string&& name) : migrationName(name) {}
+    explicit Migration(const std::string&& name) : migrationName(name) {}
     virtual ~Migration() = default;
 
     Migration& operator=(const Migration& other) = default;
