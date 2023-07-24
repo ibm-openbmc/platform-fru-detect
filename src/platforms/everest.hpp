@@ -41,6 +41,8 @@ class BasecampNVMeDrive : public NVMeDrive, public Device, public FRU
 class Basecamp : public Device, public FRU
 {
   public:
+    static SysfsI2CBus getDriveBus(int index);
+
     explicit Basecamp(Inventory* inventory, const Bellavista* bellavista);
     Basecamp(const Basecamp& other) = delete;
     Basecamp(const Basecamp&& other) = delete;
@@ -48,8 +50,6 @@ class Basecamp : public Device, public FRU
 
     Basecamp& operator=(const Basecamp& other) = delete;
     Basecamp& operator=(const Basecamp&& other) = delete;
-
-    SysfsI2CBus getDriveBus(int index) const;
 
     /* Device */
     void plug(Notifier& notifier) override;

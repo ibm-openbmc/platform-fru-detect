@@ -70,7 +70,7 @@ Basecamp::Basecamp(Inventory* inventory, const Bellavista* bellavista) :
     }}
 {}
 
-SysfsI2CBus Basecamp::getDriveBus(int index) const
+SysfsI2CBus Basecamp::getDriveBus(int index)
 {
     SysfsI2CBus root(driveManagementBus);
     SysfsI2CMux driveMux(root, driveMuxMap.at(index));
