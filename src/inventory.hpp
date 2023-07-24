@@ -67,7 +67,7 @@ class Interface
         addProperties(addProperties), removeProperties(removeProperties)
     {}
     virtual ~Interface() = default;
-    Interface& operator=(Interface& other) = default;
+    Interface& operator=(const Interface& other) = default;
     bool operator==(const Interface& other) const = default;
 
     void populateObject(ObjectType& object) const
