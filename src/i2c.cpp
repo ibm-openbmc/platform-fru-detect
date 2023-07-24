@@ -45,7 +45,7 @@ bool isDeviceResponsive(const SysfsI2CBus& bus, int address)
         throw std::system_category().default_error_condition(errno);
     }
 
-    if ((funcs & I2C_FUNC_SMBUS_QUICK) == 0u)
+    if ((funcs & I2C_FUNC_SMBUS_QUICK) == 0U)
     {
         warning(
             "Bus device {I2C_DEV_PATH} doesn't support SMBus quick command capability",
@@ -94,7 +94,7 @@ void oneshotSMBusBlockRead(const SysfsI2CBus& bus, int address, uint8_t command,
         throw std::system_category().default_error_condition(errno);
     }
 
-    if ((funcs & I2C_FUNC_SMBUS_READ_BLOCK_DATA) == 0u)
+    if ((funcs & I2C_FUNC_SMBUS_READ_BLOCK_DATA) == 0U)
     {
         error(
             "Bus device {I2C_DEV_PATH} doesn't support SMBus block read capability",

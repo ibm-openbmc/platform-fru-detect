@@ -52,7 +52,7 @@ void EnvironmentManager::run(PlatformManager& pm, Notifier& notifier,
 #define MAGIC_MMAP_FLAGS                                                       \
     (MAP_PRIVATE | MAP_ANONYMOUS | MAP_LOCKED | MAP_POPULATE)
 
-static const uint64_t magic = 0xd09f7d8134f13f46ull;
+static const uint64_t magic = 0xd09f7d8134f13f46ULL;
 static const struct
 {
     uint64_t magic;
