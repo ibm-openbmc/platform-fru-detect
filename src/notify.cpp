@@ -58,7 +58,10 @@ Notifier::Notifier()
      */
     struct epoll_event event
     {
-        EPOLLIN | EPOLLPRI, nullptr
+        EPOLLIN | EPOLLPRI,
+        {
+            nullptr
+        }
     };
     rc = ::epoll_ctl(epollfd, EPOLL_CTL_ADD, exitfd, &event);
     if (rc == -1)
@@ -85,7 +88,10 @@ void Notifier::add(NotifySink* sink)
     // Initialises ptr of the epoll_data union as it's the first element
     struct epoll_event event
     {
-        EPOLLIN | EPOLLPRI, sink
+        EPOLLIN | EPOLLPRI,
+        {
+            sink
+        }
     };
     int rc = ::epoll_ctl(epollfd, EPOLL_CTL_ADD, sink->getFD(), &event);
     if (rc < 0)
