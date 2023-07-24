@@ -180,7 +180,7 @@ void Notifier::run()
                 throw std::system_category().default_error_condition(EBADMSG);
             }
 
-            if (!(fdsi.ssi_signo == SIGINT || fdsi.ssi_signo == SIGQUIT))
+            if (fdsi.ssi_signo != SIGINT && fdsi.ssi_signo != SIGQUIT)
             {
                 error("signalfd provided unexpected signal: {SIGNAL}", "SIGNAL",
                       fdsi.ssi_signo);
