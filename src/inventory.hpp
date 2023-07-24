@@ -193,9 +193,9 @@ class Inventory
         std::weak_ptr<dbus::PropertiesChangedListener> listener) = 0;
 
     virtual void add(const std::string& path,
-                     const inventory::interfaces::Interface iface) = 0;
+                     inventory::interfaces::Interface iface) = 0;
     virtual void remove(const std::string& path,
-                        const inventory::interfaces::Interface iface) = 0;
+                        inventory::interfaces::Interface iface) = 0;
     virtual void markPresent(const std::string& path) = 0;
     virtual void markAbsent(const std::string& path) = 0;
     virtual bool isPresent(const std::string& path) = 0;
@@ -223,9 +223,9 @@ class InventoryManager : public Inventory
     void removePropertiesChangedListener(
         std::weak_ptr<dbus::PropertiesChangedListener> listener) override;
     void add(const std::string& path,
-             const inventory::interfaces::Interface iface) override;
+             inventory::interfaces::Interface iface) override;
     void remove(const std::string& path,
-                const inventory::interfaces::Interface iface) override;
+                inventory::interfaces::Interface iface) override;
     void markPresent(const std::string& path) override;
     void markAbsent(const std::string& path) override;
     bool isPresent(const std::string& path) override;
@@ -267,9 +267,9 @@ class PublishWhenPresentInventoryDecorator : public Inventory
     void removePropertiesChangedListener(
         std::weak_ptr<dbus::PropertiesChangedListener> listener) override;
     void add(const std::string& path,
-             const inventory::interfaces::Interface iface) override;
+             inventory::interfaces::Interface iface) override;
     void remove(const std::string& path,
-                const inventory::interfaces::Interface iface) override;
+                inventory::interfaces::Interface iface) override;
     void markPresent(const std::string& path) override;
     void markAbsent(const std::string& path) override;
     bool isPresent(const std::string& path) override;
