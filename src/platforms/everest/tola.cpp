@@ -2,8 +2,7 @@
 
 #include "platforms/everest.hpp"
 
-Tola::Tola(Inventory* inventory) : inventory(inventory), bellavista(inventory)
-{}
+Tola::Tola(Inventory* inventory) : bellavista(inventory) {}
 
 void Tola::plug(Notifier& notifier)
 {

@@ -72,7 +72,6 @@ class Basecamp : public Device, public FRU
     static constexpr std::array<int, 10> driveChannelMap = {0, 1, 2, 3, 0,
                                                             1, 2, 3, 0, 1};
 
-    Inventory* inventory;
     const Bellavista* bellavista;
     std::array<PolledConnector<BasecampNVMeDrive>, 10> polledDriveConnectors;
 };
@@ -124,7 +123,6 @@ class Tola : public Device
                 int mode = Device::UNPLUG_REMOVES_INVENTORY) override;
 
   private:
-    Inventory* inventory;
     Bellavista bellavista;
 };
 

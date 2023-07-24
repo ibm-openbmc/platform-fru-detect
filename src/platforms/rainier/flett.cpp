@@ -121,7 +121,7 @@ std::string Flett::getInventoryPathFor(const Nisqually* nisqually, int slot)
 }
 
 Flett::Flett(Inventory* inventory, const Nisqually* nisqually, int slot) :
-    inventory(inventory), nisqually(nisqually), slot(slot),
+    nisqually(nisqually), slot(slot),
     polledDriveConnectors{{
         PolledConnector<FlettNVMeDrive>(0, inventory, this->nisqually, this,
                                         flettChannelDriveMap.at(0)),

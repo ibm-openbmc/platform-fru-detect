@@ -55,7 +55,7 @@ void BasecampNVMeDrive::removeFromInventory(Inventory* inventory)
 }
 
 Basecamp::Basecamp(Inventory* inventory, const Bellavista* bellavista) :
-    inventory(inventory), bellavista(bellavista),
+    bellavista(bellavista),
     polledDriveConnectors{{
         PolledConnector<BasecampNVMeDrive>(0, inventory, this, 0),
         PolledConnector<BasecampNVMeDrive>(1, inventory, this, 1),

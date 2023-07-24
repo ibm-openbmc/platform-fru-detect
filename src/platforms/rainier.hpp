@@ -77,7 +77,6 @@ class Flett : public Device
                 int mode = Device::UNPLUG_REMOVES_INVENTORY) override;
 
   private:
-    Inventory* inventory;
     const Nisqually* nisqually;
     int slot;
     std::array<PolledConnector<FlettNVMeDrive>, 8> polledDriveConnectors;
@@ -245,7 +244,7 @@ class Ingraham : public Device
   public:
     static SysfsI2CBus getPCIeSlotI2CBus(int slot);
 
-    explicit Ingraham(Inventory* inventory, Nisqually* nisqually);
+    explicit Ingraham(Nisqually* nisqually);
     Ingraham(const Ingraham& other) = delete;
     Ingraham(const Ingraham&& other) = delete;
     ~Ingraham() override = default;
@@ -268,7 +267,6 @@ class Ingraham : public Device
         "/sys/bus/i2c/devices/i2c-11", "/sys/bus/i2c/devices/i2c-11",
     };
 
-    Inventory* inventory;
     Nisqually* nisqually;
 };
 
