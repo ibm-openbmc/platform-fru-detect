@@ -169,7 +169,7 @@ void Nisqually::detectWilliwakasCards(Notifier& notifier)
     gpiod::chip williwakasPresenceChip(sysfsChip.getName().string(),
                                        gpiod::chip::OPEN_BY_NAME);
 
-    for (int index :
+    for (unsigned long index :
          std::views::iota(0UL, Nisqually::williwakasPresenceMap.size()))
     {
         int offset = Nisqually::williwakasPresenceMap.at(index);
