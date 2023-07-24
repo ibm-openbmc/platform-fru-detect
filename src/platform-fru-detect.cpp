@@ -19,7 +19,7 @@
 
 PHOSPHOR_LOG2_USING;
 
-int main(void)
+int main()
 {
     PlatformManager pm;
 
