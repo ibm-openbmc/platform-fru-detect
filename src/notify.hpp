@@ -12,7 +12,12 @@ class Notifier
 {
   public:
     Notifier();
+    Notifier(const Notifier& other) = delete;
+    Notifier(Notifier&& other) = delete;
     ~Notifier();
+
+    Notifier& operator=(const Notifier& other) = delete;
+    Notifier& operator=(Notifier&& other) = delete;
 
     void add(NotifySink* sink);
     void remove(NotifySink* sink);
@@ -26,8 +31,6 @@ class Notifier
 class NotifySink
 {
   public:
-    virtual ~NotifySink() = default;
-
     virtual void arm() {}
 
     virtual int getFD() = 0;

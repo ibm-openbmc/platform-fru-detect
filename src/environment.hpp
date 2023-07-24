@@ -12,9 +12,6 @@ class ExecutionEnvironment;
 class EnvironmentManager
 {
   public:
-    EnvironmentManager() = default;
-    ~EnvironmentManager() = default;
-
     void enrollEnvironment(ExecutionEnvironment* env);
     void run(PlatformManager& pm, Notifier& notifier, Inventory* inventory);
 
@@ -25,9 +22,6 @@ class EnvironmentManager
 class ExecutionEnvironment
 {
   public:
-    ExecutionEnvironment() = default;
-    virtual ~ExecutionEnvironment() = default;
-
     virtual bool probe() = 0;
     virtual void run(PlatformManager& pm, Notifier& notifier,
                      Inventory* inventory) = 0;
@@ -38,9 +32,6 @@ class SimicsExecutionEnvironment : public ExecutionEnvironment
   public:
     static bool isSimicsExecutionEnvironment();
 
-    SimicsExecutionEnvironment() = default;
-    ~SimicsExecutionEnvironment() override = default;
-
     /* ExecutionEnvironment */
     bool probe() override;
     void run(PlatformManager& pm, Notifier& notifier,
@@ -50,9 +41,6 @@ class SimicsExecutionEnvironment : public ExecutionEnvironment
 class HardwareExecutionEnvironment : public ExecutionEnvironment
 {
   public:
-    HardwareExecutionEnvironment() = default;
-    ~HardwareExecutionEnvironment() override = default;
-
     /* ExecutionEnvironment */
     bool probe() override;
     void run(PlatformManager& pm, Notifier& notifier,

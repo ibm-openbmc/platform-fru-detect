@@ -17,7 +17,6 @@ class SysfsGPIOChip : public SysfsEntry
     SysfsGPIOChip(const SysfsEntry& entry) :
         SysfsEntry(SysfsGPIOChip::getGPIOChipPath(entry))
     {}
-    ~SysfsGPIOChip() override = default;
 
     static bool hasGPIOChip(const SysfsEntry& entry)
     {

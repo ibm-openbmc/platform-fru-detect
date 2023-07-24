@@ -11,6 +11,7 @@
 class SysfsEntry
 {
   public:
+    SysfsEntry() = delete;
     SysfsEntry(const std::filesystem::path& path, bool check = true) :
         path(path)
     {
@@ -25,8 +26,13 @@ class SysfsEntry
         lg2::debug("Instantiated SysfsEntry for '{SYSFS_PATH}'", "SYSFS_PATH",
                    path.string());
     }
+    SysfsEntry(const SysfsEntry& other) = default;
+    SysfsEntry(SysfsEntry&& other) = default;
 
     virtual ~SysfsEntry() = default;
+
+    SysfsEntry& operator=(const SysfsEntry& other) = default;
+    SysfsEntry& operator=(SysfsEntry&& other) = default;
 
     std::filesystem::path getPath() const
     {

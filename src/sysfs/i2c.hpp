@@ -19,8 +19,16 @@ class SysfsI2CDeviceDriverBindException : public std::exception
         description.append("No driver bound for ");
         description.append(entry.getPath().string());
     }
-
+    SysfsI2CDeviceDriverBindException(
+        const SysfsI2CDeviceDriverBindException& other) = default;
+    SysfsI2CDeviceDriverBindException(
+        SysfsI2CDeviceDriverBindException&& other) = default;
     ~SysfsI2CDeviceDriverBindException() override = default;
+
+    SysfsI2CDeviceDriverBindException&
+        operator=(const SysfsI2CDeviceDriverBindException& other) = default;
+    SysfsI2CDeviceDriverBindException&
+        operator=(SysfsI2CDeviceDriverBindException&& other) = default;
 
     const char* what() const noexcept override
     {
@@ -65,8 +73,6 @@ class SysfsI2CDevice : public SysfsEntry
   public:
     SysfsI2CDevice(const std::filesystem::path& path) : SysfsEntry(path) {}
     SysfsI2CDevice(const SysfsI2CBus& bus, int address);
-    SysfsI2CDevice(const SysfsI2CDevice& device) = default;
-    ~SysfsI2CDevice() override = default;
 
     SysfsI2CBus getBus();
     std::string getID();
@@ -84,8 +90,6 @@ class SysfsI2CMux : public SysfsI2CDevice
     SysfsI2CMux(const SysfsI2CBus& bus, int address) :
         SysfsI2CDevice(bus, address)
     {}
-
-    ~SysfsI2CMux() override = default;
 
     static int extractChannel(std::string& name);
 };

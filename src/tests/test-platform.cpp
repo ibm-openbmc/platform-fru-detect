@@ -17,7 +17,12 @@ class MockDevice : public Device
 {
   public:
     MockDevice(MockDeviceState* state) : state(state) {}
-    ~MockDevice() override = default;
+    MockDevice(const MockDevice& other) = delete;
+    MockDevice(MockDevice&& other) = delete;
+    virtual ~MockDevice() = default;
+
+    MockDevice& operator=(const MockDevice& other) = delete;
+    MockDevice& operator=(MockDevice&& other) = delete;
 
     void plug([[maybe_unused]] Notifier& notifier) override
     {

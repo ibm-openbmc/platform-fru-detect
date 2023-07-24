@@ -15,10 +15,6 @@ class Inventory;
 
 class NVMeDrive
 {
-  public:
-    NVMeDrive() = default;
-    virtual ~NVMeDrive() = default;
-
   protected:
     /* FRU Information Device, NVMe Storage Device (non-Carrier) */
     static constexpr int eepromAddress = 0x53;
@@ -33,7 +29,12 @@ class BasicNVMeDrive : public NVMeDrive, FRU
     BasicNVMeDrive(const SysfsI2CBus& bus, std::string&& path);
     BasicNVMeDrive(const SysfsI2CBus& bus, std::string&& path,
                    const std::vector<uint8_t>&& metadata);
-    ~BasicNVMeDrive() override = default;
+    BasicNVMeDrive(const BasicNVMeDrive& other) = delete;
+    BasicNVMeDrive(BasicNVMeDrive&& other) = delete;
+    virtual ~BasicNVMeDrive() = default;
+
+    BasicNVMeDrive& operator=(const BasicNVMeDrive& other) = delete;
+    BasicNVMeDrive& operator=(BasicNVMeDrive&& other) = delete;
 
     /* FRU */
     std::string getInventoryPath() const override;

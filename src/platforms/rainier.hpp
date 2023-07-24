@@ -31,7 +31,7 @@ class FlettNVMeDrive : public NVMeDrive, public Device, public FRU
                             const Flett* flett, int index);
     FlettNVMeDrive(const FlettNVMeDrive& other) = delete;
     FlettNVMeDrive(const FlettNVMeDrive&& other) = delete;
-    ~FlettNVMeDrive() override = default;
+    virtual ~FlettNVMeDrive() = default;
 
     FlettNVMeDrive& operator=(const FlettNVMeDrive& other) = delete;
     FlettNVMeDrive& operator=(const FlettNVMeDrive&& other) = delete;
@@ -63,7 +63,7 @@ class Flett : public Device
     explicit Flett(Inventory* inventory, const Nisqually* nisqually, int slot);
     Flett(const Flett& other) = delete;
     Flett(const Flett&& other) = delete;
-    ~Flett() override = default;
+    virtual ~Flett() = default;
 
     Flett& operator=(const Flett& other) = delete;
     Flett& operator=(const Flett&& other) = delete;
@@ -89,7 +89,7 @@ class WilliwakasNVMeDrive : public NVMeDrive, public Device, public FRU
                                  const Williwakas* backplane, int index);
     WilliwakasNVMeDrive(const WilliwakasNVMeDrive& other) = delete;
     WilliwakasNVMeDrive(const WilliwakasNVMeDrive&& other) = delete;
-    ~WilliwakasNVMeDrive() override = default;
+    virtual ~WilliwakasNVMeDrive() = default;
 
     WilliwakasNVMeDrive& operator=(const WilliwakasNVMeDrive& other) = delete;
     WilliwakasNVMeDrive& operator=(const WilliwakasNVMeDrive&& other) = delete;
@@ -120,7 +120,7 @@ class Williwakas : public Device, public FRU
                         int index);
     Williwakas(const Williwakas& other) = delete;
     Williwakas(const Williwakas&& other) = delete;
-    ~Williwakas() override = default;
+    virtual ~Williwakas() = default;
 
     Williwakas& operator=(const Williwakas& other) = delete;
     Williwakas& operator=(const Williwakas&& other) = delete;
@@ -167,7 +167,7 @@ class Nisqually : public Device, FRU
     explicit Nisqually(Inventory* inventory);
     Nisqually(const Nisqually& other) = delete;
     Nisqually(const Nisqually&& other) = delete;
-    ~Nisqually() override = default;
+    virtual ~Nisqually() = default;
 
     Nisqually& operator=(const Nisqually& other) = delete;
     Nisqually& operator=(const Nisqually&& other) = delete;
@@ -247,7 +247,7 @@ class Ingraham : public Device
     explicit Ingraham(Nisqually* nisqually);
     Ingraham(const Ingraham& other) = delete;
     Ingraham(const Ingraham&& other) = delete;
-    ~Ingraham() override = default;
+    virtual ~Ingraham() = default;
 
     Ingraham& operator=(const Ingraham& other) = delete;
     Ingraham& operator=(const Ingraham&& other) = delete;
@@ -273,9 +273,6 @@ class Ingraham : public Device
 class Rainier0z : public Platform
 {
   public:
-    Rainier0z() = default;
-    ~Rainier0z() override = default;
-
     void enrollWith(PlatformManager& pm) override;
     void detectFrus(Notifier& notifier, Inventory* inventory) override;
 };
@@ -283,9 +280,6 @@ class Rainier0z : public Platform
 class Rainier1z : public Platform
 {
   public:
-    Rainier1z() = default;
-    ~Rainier1z() override = default;
-
     void enrollWith(PlatformManager& pm) override;
     void detectFrus(Notifier& notifier, Inventory* inventory) override;
 };
