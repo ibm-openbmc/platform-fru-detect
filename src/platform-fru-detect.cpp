@@ -23,14 +23,14 @@ int main()
 {
     PlatformManager pm;
 
+    Everest everest;
+    everest.enrollWith(pm);
+
     Rainier0z rainier0z;
     rainier0z.enrollWith(pm);
 
     Rainier1z rainier1z;
     rainier1z.enrollWith(pm);
-
-    Everest everest;
-    everest.enrollWith(pm);
 
     if (!pm.isSupportedPlatform())
     {
