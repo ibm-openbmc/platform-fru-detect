@@ -11,10 +11,10 @@
 class SysfsEntry
 {
   public:
-    SysfsEntry(const std::filesystem::path& path, bool check = true) :
+    SysfsEntry() = delete;
+    explicit SysfsEntry(const std::filesystem::path& path, bool check = true) :
         path(path)
     {
-
         if (check && !std::filesystem::exists(path))
         {
             lg2::error("sysfs path '{SYSFS_PATH}' does not exist", "SYSFS_PATH",
@@ -26,8 +26,13 @@ class SysfsEntry
         lg2::debug("Instantiated SysfsEntry for '{SYSFS_PATH}'", "SYSFS_PATH",
                    path.string());
     }
+    SysfsEntry(const SysfsEntry& other) = default;
+    SysfsEntry(SysfsEntry&& other) = default;
 
     virtual ~SysfsEntry() = default;
+
+    SysfsEntry& operator=(const SysfsEntry& other) = default;
+    SysfsEntry& operator=(SysfsEntry&& other) = default;
 
     std::filesystem::path getPath() const
     {

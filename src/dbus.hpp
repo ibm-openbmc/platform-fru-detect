@@ -15,7 +15,7 @@ namespace match
 {
 struct match;
 }
-class bus;
+struct bus;
 } // namespace bus
 namespace message
 {
@@ -28,7 +28,12 @@ class DBusNotifySink : public NotifySink
   public:
     explicit DBusNotifySink(sdbusplus::bus::bus& dbus);
     DBusNotifySink() = delete;
-    ~DBusNotifySink() override = default;
+    DBusNotifySink(const DBusNotifySink& other) = delete;
+    DBusNotifySink(DBusNotifySink&& other) = delete;
+    virtual ~DBusNotifySink() = default;
+
+    DBusNotifySink& operator=(const DBusNotifySink& other) = delete;
+    DBusNotifySink& operator=(DBusNotifySink&& other) = delete;
 
     /* NotifySink */
     int getFD() override;
@@ -46,7 +51,13 @@ class PropertiesChanged
     explicit PropertiesChanged(sdbusplus::message::message& message) :
         message(message)
     {}
+    PropertiesChanged() = delete;
+    PropertiesChanged(const PropertiesChanged& other) = delete;
+    PropertiesChanged(PropertiesChanged&& other) = delete;
     ~PropertiesChanged() = default;
+
+    PropertiesChanged& operator=(const PropertiesChanged& other) = delete;
+    PropertiesChanged& operator=(PropertiesChanged&& other) = delete;
 
     template <typename... Args>
     void read(Args&&... args);

@@ -35,7 +35,7 @@ void PublishWhenPresentInventoryDecorator::removePropertiesChangedListener(
 }
 
 void PublishWhenPresentInventoryDecorator::add(
-    const std::string& path, interfaces::Interface iface)
+    const std::string& path, const interfaces::Interface iface)
 {
     objectCache[path].insert_or_assign(iface.getInterfaceName(), iface);
 
@@ -46,7 +46,7 @@ void PublishWhenPresentInventoryDecorator::add(
 }
 
 void PublishWhenPresentInventoryDecorator::remove(
-    const std::string& path, interfaces::Interface iface)
+    const std::string& path, const interfaces::Interface iface)
 {
     if (presentCache.contains(path) && presentCache[path])
     {

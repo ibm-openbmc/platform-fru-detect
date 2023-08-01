@@ -4,6 +4,7 @@
 #include "environment.hpp"
 #include "inventory.hpp"
 #include "platform.hpp"
+#include "platforms/bonnell.hpp"
 #include "platforms/everest.hpp"
 #include "platforms/rainier.hpp"
 
@@ -19,18 +20,21 @@
 
 PHOSPHOR_LOG2_USING;
 
-int main(void)
+int main()
 {
     PlatformManager pm;
+
+    Bonnell bonnell;
+    bonnell.enrollWith(pm);
+
+    Everest everest;
+    everest.enrollWith(pm);
 
     Rainier0z rainier0z;
     rainier0z.enrollWith(pm);
 
     Rainier1z rainier1z;
     rainier1z.enrollWith(pm);
-
-    Everest everest;
-    everest.enrollWith(pm);
 
     if (!pm.isSupportedPlatform())
     {

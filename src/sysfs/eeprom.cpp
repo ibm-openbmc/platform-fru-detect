@@ -11,5 +11,5 @@ bool SysfsEEPROM::isEEPROM(const std::filesystem::path& path)
 
 SysfsI2CDevice SysfsEEPROM::getDevice()
 {
-    return {path.parent_path()};
+    return SysfsI2CDevice{path.parent_path()};
 }

@@ -14,13 +14,21 @@ class SysfsI2CDevice;
 class SysfsI2CDeviceDriverBindException : public std::exception
 {
   public:
-    SysfsI2CDeviceDriverBindException(const SysfsEntry& entry)
+    explicit SysfsI2CDeviceDriverBindException(const SysfsEntry& entry)
     {
         description.append("No driver bound for ");
         description.append(entry.getPath().string());
     }
-
+    SysfsI2CDeviceDriverBindException(
+        const SysfsI2CDeviceDriverBindException& other) = default;
+    SysfsI2CDeviceDriverBindException(
+        SysfsI2CDeviceDriverBindException&& other) = default;
     ~SysfsI2CDeviceDriverBindException() override = default;
+
+    SysfsI2CDeviceDriverBindException&
+        operator=(const SysfsI2CDeviceDriverBindException& other) = default;
+    SysfsI2CDeviceDriverBindException&
+        operator=(SysfsI2CDeviceDriverBindException&& other) = default;
 
     const char* what() const noexcept override
     {
@@ -34,7 +42,7 @@ class SysfsI2CDeviceDriverBindException : public std::exception
 class SysfsI2CBus : public SysfsEntry
 {
   public:
-    SysfsI2CBus(const std::filesystem::path& path, bool check = true) :
+    explicit SysfsI2CBus(const std::filesystem::path& path, bool check = true) :
         SysfsEntry(path, check)
     {}
     SysfsI2CBus(const SysfsI2CMux& mux, int channel);
@@ -63,11 +71,10 @@ class SysfsI2CBus : public SysfsEntry
 class SysfsI2CDevice : public SysfsEntry
 {
   public:
-    SysfsI2CDevice(const std::filesystem::path& path) : SysfsEntry(path)
+    explicit SysfsI2CDevice(const std::filesystem::path& path) :
+        SysfsEntry(path)
     {}
     SysfsI2CDevice(const SysfsI2CBus& bus, int address);
-    SysfsI2CDevice(const SysfsI2CDevice& device) = default;
-    ~SysfsI2CDevice() override = default;
 
     SysfsI2CBus getBus();
     std::string getID();
@@ -80,15 +87,14 @@ class SysfsI2CDevice : public SysfsEntry
 class SysfsI2CMux : public SysfsI2CDevice
 {
   public:
-    SysfsI2CMux(const SysfsI2CDevice& device) : SysfsI2CDevice(device)
+    explicit SysfsI2CMux(const SysfsI2CDevice& device) : SysfsI2CDevice(device)
     {}
-    SysfsI2CMux(const std::filesystem::path& path) : SysfsI2CDevice(path)
+    explicit SysfsI2CMux(const std::filesystem::path& path) :
+        SysfsI2CDevice(path)
     {}
     SysfsI2CMux(const SysfsI2CBus& bus, int address) :
         SysfsI2CDevice(bus, address)
     {}
-
-    ~SysfsI2CMux() override = default;
 
     static int extractChannel(std::string& name);
 };

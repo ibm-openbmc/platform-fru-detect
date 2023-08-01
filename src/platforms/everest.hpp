@@ -14,7 +14,12 @@ class BasecampNVMeDrive : public NVMeDrive, public Device, public FRU
   public:
     BasecampNVMeDrive(Inventory* inventory, const Basecamp* basecamp,
                       int index);
-    ~BasecampNVMeDrive() override = default;
+    BasecampNVMeDrive(const BasecampNVMeDrive& other) = delete;
+    BasecampNVMeDrive(BasecampNVMeDrive&& other) = delete;
+    virtual ~BasecampNVMeDrive() = default;
+
+    BasecampNVMeDrive& operator=(const BasecampNVMeDrive& other) = delete;
+    BasecampNVMeDrive& operator=(BasecampNVMeDrive&& other) = delete;
 
     /* Device */
     void plug(Notifier& notifier) override;
@@ -36,15 +41,15 @@ class BasecampNVMeDrive : public NVMeDrive, public Device, public FRU
 class Basecamp : public Device, public FRU
 {
   public:
+    static SysfsI2CBus getDriveBus(int index);
+
     explicit Basecamp(Inventory* inventory, const Bellavista* bellavista);
     Basecamp(const Basecamp& other) = delete;
     Basecamp(const Basecamp&& other) = delete;
-    ~Basecamp() override = default;
+    virtual ~Basecamp() = default;
 
     Basecamp& operator=(const Basecamp& other) = delete;
     Basecamp& operator=(const Basecamp&& other) = delete;
-
-    SysfsI2CBus getDriveBus(int index) const;
 
     /* Device */
     void plug(Notifier& notifier) override;
@@ -72,7 +77,6 @@ class Basecamp : public Device, public FRU
     static constexpr std::array<int, 10> driveChannelMap = {0, 1, 2, 3, 0,
                                                             1, 2, 3, 0, 1};
 
-    Inventory* inventory;
     const Bellavista* bellavista;
     std::array<PolledConnector<BasecampNVMeDrive>, 10> polledDriveConnectors;
 };
@@ -83,7 +87,7 @@ class Bellavista : public Device, public FRU
     explicit Bellavista(Inventory* inventory);
     Bellavista(const Bellavista& other) = delete;
     Bellavista(const Bellavista&& other) = delete;
-    ~Bellavista() override = default;
+    virtual ~Bellavista() = default;
 
     Bellavista& operator=(const Bellavista& other) = delete;
     Bellavista& operator=(const Bellavista&& other) = delete;
@@ -113,7 +117,7 @@ class Tola : public Device
     explicit Tola(Inventory* inventory);
     Tola(const Tola& other) = delete;
     Tola(const Tola&& other) = delete;
-    ~Tola() override = default;
+    virtual ~Tola() = default;
 
     Tola& operator=(const Tola& other) = delete;
     Tola& operator=(const Tola&& other) = delete;
@@ -124,16 +128,12 @@ class Tola : public Device
                 int mode = Device::UNPLUG_REMOVES_INVENTORY) override;
 
   private:
-    Inventory* inventory;
     Bellavista bellavista;
 };
 
 class Everest : public Platform
 {
   public:
-    Everest() = default;
-    ~Everest() override = default;
-
     /* Platform */
     void enrollWith(PlatformManager& pm) override;
     void detectFrus(Notifier& notifier, Inventory* inventory) override;

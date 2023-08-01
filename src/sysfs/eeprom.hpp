@@ -12,15 +12,17 @@ class SysfsEEPROM : public SysfsEntry
   public:
     static bool isEEPROM(const std::filesystem::path& path);
 
-    SysfsEEPROM(const SysfsEEPROM& eeprom) : SysfsEntry(eeprom.path)
+    explicit SysfsEEPROM(const std::filesystem::path& path) : SysfsEntry(path)
     {}
-    SysfsEEPROM(const std::filesystem::path& path) : SysfsEntry(path)
-    {}
-    SysfsEEPROM(const SysfsI2CDevice& device) :
+    explicit SysfsEEPROM(const SysfsI2CDevice& device) :
         SysfsEntry(device.getPath() / "eeprom")
     {}
+    SysfsEEPROM(const SysfsEEPROM& eeprom) = default;
+    SysfsEEPROM(SysfsEEPROM&& eeprom) = delete;
+    ~SysfsEEPROM() override = default;
 
-    SysfsEEPROM(SysfsEEPROM& other) = default;
+    SysfsEEPROM& operator=(const SysfsEEPROM& other) = default;
+    SysfsEEPROM& operator=(SysfsEEPROM&& other) = delete;
 
     SysfsI2CDevice getDevice();
 };

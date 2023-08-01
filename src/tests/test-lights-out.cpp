@@ -20,7 +20,6 @@ class MockNVMeDrive : public NVMeDrive, public FRU, public Device
              std::vector<uint8_t>({'A', 'B', 'C', 'D'})),
         index(index)
     {}
-    ~MockNVMeDrive() override = default;
 
     static std::string getInventoryPathFor(int index)
     {
@@ -57,7 +56,14 @@ class MockWilliwakasNVMeDrive : public MockNVMeDrive
     MockWilliwakasNVMeDrive(Inventory* inventory, int index) :
         MockNVMeDrive(inventory, index)
     {}
-    ~MockWilliwakasNVMeDrive() override = default;
+    MockWilliwakasNVMeDrive(const MockWilliwakasNVMeDrive& other) = delete;
+    MockWilliwakasNVMeDrive(MockWilliwakasNVMeDrive&& other) = delete;
+    virtual ~MockWilliwakasNVMeDrive() = default;
+
+    MockWilliwakasNVMeDrive&
+        operator=(const MockWilliwakasNVMeDrive& other) = delete;
+    MockWilliwakasNVMeDrive&
+        operator=(MockWilliwakasNVMeDrive&& other) = delete;
 
     void addToInventory(Inventory* inventory) override
     {
@@ -78,7 +84,12 @@ class MockFlettNVMeDrive : public MockNVMeDrive
     MockFlettNVMeDrive(Inventory* inventory, int index) :
         MockNVMeDrive(inventory, index)
     {}
-    ~MockFlettNVMeDrive() override = default;
+    MockFlettNVMeDrive(const MockFlettNVMeDrive& other) = delete;
+    MockFlettNVMeDrive(MockFlettNVMeDrive&& other) = delete;
+    virtual ~MockFlettNVMeDrive() = default;
+
+    MockFlettNVMeDrive& operator=(const MockFlettNVMeDrive& other) = delete;
+    MockFlettNVMeDrive& operator=(MockFlettNVMeDrive&& other) = delete;
 
     void addToInventory(Inventory* inventory) override
     {

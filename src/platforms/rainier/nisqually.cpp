@@ -132,7 +132,7 @@ void Nisqually::detectFlettCards(Notifier& notifier)
     debug("Locating Flett cards");
 
     /* FIXME: do something more ergonomic */
-    for (auto& [connector, slot] : flettConnectorSlotMap)
+    for (const auto& [connector, slot] : flettConnectorSlotMap)
     {
         try
         {
@@ -169,7 +169,7 @@ void Nisqually::detectWilliwakasCards(Notifier& notifier)
     gpiod::chip williwakasPresenceChip(sysfsChip.getName().string(),
                                        gpiod::chip::OPEN_BY_NAME);
 
-    for (int index :
+    for (unsigned long index :
          std::views::iota(0UL, Nisqually::williwakasPresenceMap.size()))
     {
         int offset = Nisqually::williwakasPresenceMap.at(index);
@@ -177,7 +177,7 @@ void Nisqually::detectWilliwakasCards(Notifier& notifier)
         line.request({program_invocation_short_name,
                       gpiod::line::DIRECTION_INPUT, gpiod::line::ACTIVE_LOW});
 
-        bool present = line.get_value();
+        bool present = line.get_value() != 0;
 
         line.release();
 
@@ -212,8 +212,7 @@ void Nisqually::detectWilliwakasCards(Notifier& notifier)
 
 /* Nisqually0z */
 
-Nisqually0z::Nisqually0z(Inventory* inventory) : Nisqually(inventory)
-{}
+Nisqually0z::Nisqually0z(Inventory* inventory) : Nisqually(inventory) {}
 
 SysfsI2CBus Nisqually0z::getFlettSlotI2CBus(int slot) const
 {
@@ -222,8 +221,7 @@ SysfsI2CBus Nisqually0z::getFlettSlotI2CBus(int slot) const
 
 /* Nisqually1z */
 
-Nisqually1z::Nisqually1z(Inventory* inventory) : Nisqually(inventory)
-{}
+Nisqually1z::Nisqually1z(Inventory* inventory) : Nisqually(inventory) {}
 
 SysfsI2CBus Nisqually1z::getFlettSlotI2CBus(int slot) const
 {

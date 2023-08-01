@@ -51,8 +51,9 @@ void FlettNVMeDrive::unplug([[maybe_unused]] Notifier& notifier, int mode)
     }
     catch (const NoSuchInventoryItem& e)
     {
-        debug("Failed to remove drive {NVME_ID} on Flett {FLETT_ID} from inventory, ignoring: {EXCEPTION}",
-              "NVME_ID", index, "FLETT_ID", flett->getIndex(), "EXCEPTION", e);
+        debug(
+            "Failed to remove drive {NVME_ID} on Flett {FLETT_ID} from inventory, ignoring: {EXCEPTION}",
+            "NVME_ID", index, "FLETT_ID", flett->getIndex(), "EXCEPTION", e);
     }
 }
 
@@ -120,7 +121,7 @@ std::string Flett::getInventoryPathFor(const Nisqually* nisqually, int slot)
 }
 
 Flett::Flett(Inventory* inventory, const Nisqually* nisqually, int slot) :
-    inventory(inventory), nisqually(nisqually), slot(slot),
+    nisqually(nisqually), slot(slot),
     polledDriveConnectors{{
         PolledConnector<FlettNVMeDrive>(0, inventory, this->nisqually, this,
                                         flettChannelDriveMap.at(0)),

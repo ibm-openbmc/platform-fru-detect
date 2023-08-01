@@ -1,6 +1,5 @@
 /* SPDX-License-Identifier: Apache-2.0 */
 /* Copyright IBM Corp. 2022 */
-#include "inventory/migrations.hpp"
 #include "mock-inventory.hpp"
 
 #include "inventory/migrations.hpp"
@@ -44,7 +43,7 @@ void MockInventory::migrate(std::span<inventory::Migration*>&& migrations)
 
     for (const auto& [path, object] : old)
     {
-        for (auto migration : migrations)
+        for (auto* migration : migrations)
         {
             migration->migrate(this, path, object);
         }

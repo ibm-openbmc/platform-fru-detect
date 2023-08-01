@@ -7,8 +7,7 @@
 #include <sdbusplus/bus/match.hpp>
 #include <sdbusplus/message.hpp>
 
-DBusNotifySink::DBusNotifySink(sdbusplus::bus::bus& dbus) : dbus(dbus)
-{}
+DBusNotifySink::DBusNotifySink(sdbusplus::bus::bus& dbus) : dbus(dbus) {}
 
 int DBusNotifySink::getFD()
 {
@@ -32,9 +31,16 @@ class PropertiesChangedListener
 {
   public:
     template <typename... Args>
-    PropertiesChangedListener(Args&&... args) : match(args...)
+    explicit PropertiesChangedListener(Args&&... args) : match(args...)
     {}
+    PropertiesChangedListener(const PropertiesChangedListener& other) = delete;
+    PropertiesChangedListener(PropertiesChangedListener&& other) = default;
     ~PropertiesChangedListener() = default;
+
+    PropertiesChangedListener&
+        operator=(const PropertiesChangedListener& other) = delete;
+    PropertiesChangedListener&
+        operator=(PropertiesChangedListener&& other) = default;
 
   private:
     sdbusplus::bus::match::match match;

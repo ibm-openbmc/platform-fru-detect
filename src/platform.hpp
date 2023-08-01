@@ -33,8 +33,6 @@ class Device
         UNPLUG_REMOVES_INVENTORY,
     };
 
-    virtual ~Device() = default;
-
     virtual void plug(Notifier& notifier) = 0;
     virtual void unplug(Notifier& notifier,
                         int mode = UNPLUG_REMOVES_INVENTORY) = 0;
@@ -48,13 +46,18 @@ class Connector
 {
   public:
     template <typename... DeviceArgs>
-    Connector(int idx, DeviceArgs&&... args) :
+    explicit Connector(int idx, DeviceArgs&&... args) :
         state(CONNECTOR_UNINITIALISED), idx(idx), device(),
         ctor([this, args...]() mutable {
             device.emplace(std::forward<DeviceArgs>(args)...);
         })
     {}
+    Connector(const Connector<T>& other) = delete;
+    Connector(Connector<T>&& other) = delete;
     ~Connector() = default;
+
+    Connector& operator=(const Connector<T>& other) = delete;
+    Connector& operator=(Connector<T>&& other) = delete;
 
     void populate(Notifier& notifier)
     {
@@ -115,9 +118,6 @@ class Connector
 class FRU
 {
   public:
-    FRU() = default;
-    virtual ~FRU() = default;
-
     virtual std::string getInventoryPath() const = 0;
     virtual void addToInventory(Inventory* inventory) = 0;
     virtual void removeFromInventory(Inventory* inventory) = 0;
@@ -139,10 +139,14 @@ class PolledDevicePresence : public NotifySink
         connector(connector),
         poll(poll), timerfd(-1)
     {}
-    ~PolledDevicePresence() override = default;
+    PolledDevicePresence(const PolledDevicePresence<T>& other) = default;
+    PolledDevicePresence(PolledDevicePresence<T>&& other) noexcept = default;
+    virtual ~PolledDevicePresence() = default;
 
     PolledDevicePresence<T>&
         operator=(const PolledDevicePresence<T>& other) = default;
+    PolledDevicePresence<T>&
+        operator=(PolledDevicePresence<T>&& other) noexcept = default;
 
     /* NotifySink */
     void arm() override
@@ -251,9 +255,15 @@ class PolledConnector
   public:
     PolledConnector() = delete;
     template <typename... DeviceArgs>
-    PolledConnector(int index, DeviceArgs&&... args) : connector(index, args...)
+    explicit PolledConnector(int index, DeviceArgs&&... args) :
+        connector(index, args...)
     {}
+    PolledConnector(const PolledConnector& other) = delete;
+    PolledConnector(PolledConnector&& other) = delete;
     ~PolledConnector() = default;
+
+    PolledConnector& operator=(const PolledConnector& other) = delete;
+    PolledConnector& operator=(PolledConnector&& other) = delete;
 
     void start(Notifier& notifier, std::function<bool()>&& probe)
     {
@@ -287,12 +297,17 @@ class PlatformManager
 {
   public:
     PlatformManager();
+    PlatformManager(const PlatformManager& other) = delete;
+    PlatformManager(PlatformManager&& other) = delete;
     ~PlatformManager() = default;
+
+    PlatformManager& operator=(const PlatformManager& other) = delete;
+    PlatformManager& operator=(PlatformManager&& other) = delete;
 
     const std::string& getPlatformModel() noexcept;
     void enrollPlatform(const std::string& model, Platform* platform);
     bool isSupportedPlatform() noexcept;
-    void detectPlatformFrus(Notifier& notifier, Inventory*);
+    void detectPlatformFrus(Notifier& notifier, Inventory* inventory);
 
   private:
     std::map<std::string, Platform*> platforms;
@@ -302,9 +317,6 @@ class PlatformManager
 class Platform
 {
   public:
-    Platform() = default;
-    virtual ~Platform() = default;
-
     virtual void enrollWith(PlatformManager& pm) = 0;
     virtual void detectFrus(Notifier& notifier, Inventory* inventory) = 0;
 };

@@ -31,9 +31,11 @@ void EnvironmentManager::run(PlatformManager& pm, Notifier& notifier,
     }
 }
 
+#if defined(__arm__)
+// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define reg(r) "r" #r
 
-#if defined(__arm__)
+// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define trigger(r, p)                                                          \
     asm volatile("mov " reg(r) ", %0;"                                         \
                                "orr " reg(r) ", " reg(r) ", " reg(r)           \
@@ -41,6 +43,7 @@ void EnvironmentManager::run(PlatformManager& pm, Notifier& notifier,
                  : "r"(p)                                                      \
                  : "memory")
 #else
+// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define trigger(r, p)                                                          \
     (void)(r);                                                                 \
     (void)(p);
@@ -49,7 +52,7 @@ void EnvironmentManager::run(PlatformManager& pm, Notifier& notifier,
 #define MAGIC_MMAP_FLAGS                                                       \
     (MAP_PRIVATE | MAP_ANONYMOUS | MAP_LOCKED | MAP_POPULATE)
 
-static const uint64_t magic = 0xd09f7d8134f13f46ull;
+static const uint64_t magic = 0xd09f7d8134f13f46ULL;
 static const struct
 {
     uint64_t magic;
@@ -66,9 +69,9 @@ static const struct
 bool SimicsExecutionEnvironment::isSimicsExecutionEnvironment()
 {
     long page = ::sysconf(_SC_PAGESIZE);
-    void* region =
-        ::mmap(nullptr, page, PROT_READ | PROT_WRITE, MAGIC_MMAP_FLAGS, -1, 0);
-    if (!region)
+    void* region = ::mmap(nullptr, page, PROT_READ | PROT_WRITE,
+                          MAGIC_MMAP_FLAGS, -1, 0);
+    if (region == nullptr)
     {
         error("Failed to map buffer: {ERRNO_DESCRIPTION}", "ERRNO_DESCRIPTION",
               ::strerror(errno), "ERRNO", errno);

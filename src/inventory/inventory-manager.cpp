@@ -9,8 +9,8 @@
 #include <sdbusplus/bus/match.hpp>
 #include <sdbusplus/message.hpp>
 
-#include <exception>
 #include <cstring>
+#include <exception>
 
 PHOSPHOR_LOG2_USING;
 
@@ -58,10 +58,10 @@ void InventoryManager::migrate(std::span<Migration*>&& migrations)
         {
             const auto itemPath = extractItemPath({objectPath});
 
-            for (auto migration : migrations)
+            for (auto* migration : migrations)
             {
-                Migration::Result r =
-                    migration->migrate(this, itemPath, object);
+                Migration::Result r = migration->migrate(this, itemPath,
+                                                         object);
                 switch (r)
                 {
                     case Migration::Result::INVALID:
@@ -130,9 +130,9 @@ void InventoryManager::removePropertiesChangedListener(
 void InventoryManager::updateObject(const std::string& path,
                                     const ObjectType& updates)
 {
-    auto call =
-        dbus.new_method_call(INVENTORY_BUS_NAME, INVENTORY_MANAGER_OBJECT,
-                INVENTORY_MANAGER_IFACE, "Notify");
+    auto call = dbus.new_method_call(INVENTORY_BUS_NAME,
+                                     INVENTORY_MANAGER_OBJECT,
+                                     INVENTORY_MANAGER_IFACE, "Notify");
 
     std::map<sdbusplus::message::object_path, ObjectType> inventoryUpdate = {
         {path, updates},

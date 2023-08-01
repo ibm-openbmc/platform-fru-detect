@@ -14,10 +14,12 @@ PHOSPHOR_LOG2_USING;
 class SysfsGPIOChip : public SysfsEntry
 {
   public:
-    SysfsGPIOChip(const SysfsEntry& entry) :
+    explicit SysfsGPIOChip(const std::filesystem::path& path) :
+        SysfsGPIOChip(SysfsEntry(path))
+    {}
+    explicit SysfsGPIOChip(const SysfsEntry& entry) :
         SysfsEntry(SysfsGPIOChip::getGPIOChipPath(entry))
     {}
-    ~SysfsGPIOChip() override = default;
 
     static bool hasGPIOChip(const SysfsEntry& entry)
     {
@@ -38,7 +40,7 @@ class SysfsGPIOChip : public SysfsEntry
         debug("Inspecting '{SYSFS_PATH}' for associated gpiochip", "SYSFS_PATH",
               entry.getPath().string());
 
-        for (auto const& dirent : fs::directory_iterator{entry.getPath()})
+        for (const auto& dirent : fs::directory_iterator{entry.getPath()})
         {
             if (dirent.path().filename().string().starts_with("gpiochip"))
             {

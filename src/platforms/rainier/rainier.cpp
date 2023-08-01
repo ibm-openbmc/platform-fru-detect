@@ -17,7 +17,7 @@ void Rainier0z::detectFrus(Notifier& notifier, Inventory* inventory)
 {
     PublishWhenPresentInventoryDecorator decoratedInventory(inventory);
     Nisqually0z nisqually(&decoratedInventory);
-    Ingraham ingraham(inventory, &nisqually);
+    Ingraham ingraham(&nisqually);
 
     Inventory::migrate(inventory, inventory::MigrateNVMeIPZVPDFromSlotToDrive(),
                        inventory::MigrateNVMeI2CEndpointFromSlotToDrive());
@@ -43,7 +43,7 @@ void Rainier1z::detectFrus(Notifier& notifier, Inventory* inventory)
 {
     PublishWhenPresentInventoryDecorator decoratedInventory(inventory);
     Nisqually1z nisqually(&decoratedInventory);
-    Ingraham ingraham(&decoratedInventory, &nisqually);
+    Ingraham ingraham(&nisqually);
 
     Inventory::migrate(inventory, inventory::MigrateNVMeIPZVPDFromSlotToDrive(),
                        inventory::MigrateNVMeI2CEndpointFromSlotToDrive());

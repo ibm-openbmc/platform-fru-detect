@@ -20,7 +20,7 @@ namespace sdbusplus
 {
 namespace bus
 {
-class bus;
+struct bus;
 }
 } // namespace sdbusplus
 
@@ -66,8 +66,11 @@ class Interface
         name(interface),
         addProperties(addProperties), removeProperties(removeProperties)
     {}
+    Interface(const Interface& other) = default;
+    Interface(Interface&& other) = default;
     virtual ~Interface() = default;
-    Interface& operator=(Interface& other) = default;
+    Interface& operator=(const Interface& other) = default;
+    Interface& operator=(Interface&& other) = default;
     bool operator==(const Interface& other) const = default;
 
     void populateObject(ObjectType& object) const
@@ -120,7 +123,6 @@ class I2CDevice : public Interface
                   {{"Bus", static_cast<size_t>(INT_MAX)},
                    {"Address", static_cast<size_t>(0)}})
     {}
-    ~I2CDevice() override = default;
 };
 
 class VINI : public Interface
@@ -142,7 +144,6 @@ class VINI : public Interface
                    {"CC", std::vector<uint8_t>(0)},
                    {"SN", std::vector<uint8_t>(0)}})
     {}
-    ~VINI() override = default;
 };
 } // namespace interfaces
 } // namespace inventory
@@ -150,14 +151,18 @@ class VINI : public Interface
 template <typename T>
 concept DerivesMigration = std::is_base_of<inventory::Migration, T>::value;
 
-class NoSuchInventoryItem: public std::exception
+class NoSuchInventoryItem : public std::exception
 {
   public:
-    NoSuchInventoryItem(const std::string& path) :
+    explicit NoSuchInventoryItem(const std::string& path) :
         description("No such inventory item: " + path)
-    {
-    }
+    {}
+    NoSuchInventoryItem(const NoSuchInventoryItem& other) = default;
+    NoSuchInventoryItem(NoSuchInventoryItem&& other) = default;
     ~NoSuchInventoryItem() override = default;
+
+    NoSuchInventoryItem& operator=(const NoSuchInventoryItem& other) = delete;
+    NoSuchInventoryItem& operator=(NoSuchInventoryItem&& other) = delete;
 
     const char* what() const noexcept override
     {
@@ -165,15 +170,12 @@ class NoSuchInventoryItem: public std::exception
     }
 
   private:
-      const std::string description;
+    const std::string description;
 };
 
 class Inventory
 {
   public:
-    Inventory() = default;
-    virtual ~Inventory() = default;
-
     template <DerivesMigration... Ms>
     static void migrate(Inventory* inventory, Ms&&... impls)
     {
@@ -191,9 +193,9 @@ class Inventory
         std::weak_ptr<dbus::PropertiesChangedListener> listener) = 0;
 
     virtual void add(const std::string& path,
-                     const inventory::interfaces::Interface iface) = 0;
+                     inventory::interfaces::Interface iface) = 0;
     virtual void remove(const std::string& path,
-                        const inventory::interfaces::Interface iface) = 0;
+                        inventory::interfaces::Interface iface) = 0;
     virtual void markPresent(const std::string& path) = 0;
     virtual void markAbsent(const std::string& path) = 0;
     virtual bool isPresent(const std::string& path) = 0;
@@ -203,9 +205,14 @@ class Inventory
 class InventoryManager : public Inventory
 {
   public:
-    InventoryManager(sdbusplus::bus::bus& dbus) : dbus(dbus)
-    {}
-    ~InventoryManager() override = default;
+    InventoryManager() = delete;
+    InventoryManager(const InventoryManager& other) = delete;
+    InventoryManager(InventoryManager&& other) = delete;
+    explicit InventoryManager(sdbusplus::bus::bus& dbus) : dbus(dbus) {}
+    virtual ~InventoryManager() = default;
+
+    InventoryManager& operator=(const InventoryManager& other) = delete;
+    InventoryManager& operator=(InventoryManager&& other) = delete;
 
     void migrate(std::span<inventory::Migration*>&& migrations) override;
 
@@ -216,9 +223,9 @@ class InventoryManager : public Inventory
     void removePropertiesChangedListener(
         std::weak_ptr<dbus::PropertiesChangedListener> listener) override;
     void add(const std::string& path,
-             const inventory::interfaces::Interface iface) override;
+             inventory::interfaces::Interface iface) override;
     void remove(const std::string& path,
-                const inventory::interfaces::Interface iface) override;
+                inventory::interfaces::Interface iface) override;
     void markPresent(const std::string& path) override;
     void markAbsent(const std::string& path) override;
     bool isPresent(const std::string& path) override;
@@ -238,8 +245,18 @@ class InventoryManager : public Inventory
 class PublishWhenPresentInventoryDecorator : public Inventory
 {
   public:
-    PublishWhenPresentInventoryDecorator(Inventory* inventory);
-    ~PublishWhenPresentInventoryDecorator() override = default;
+    PublishWhenPresentInventoryDecorator() = delete;
+    explicit PublishWhenPresentInventoryDecorator(Inventory* inventory);
+    PublishWhenPresentInventoryDecorator(
+        const PublishWhenPresentInventoryDecorator& other) = delete;
+    PublishWhenPresentInventoryDecorator(
+        PublishWhenPresentInventoryDecorator&& other) = delete;
+    virtual ~PublishWhenPresentInventoryDecorator() = default;
+
+    PublishWhenPresentInventoryDecorator&
+        operator=(const PublishWhenPresentInventoryDecorator& other) = delete;
+    PublishWhenPresentInventoryDecorator&
+        operator=(PublishWhenPresentInventoryDecorator&& other) = delete;
 
     void migrate(std::span<inventory::Migration*>&& migrations) override;
 
@@ -250,9 +267,9 @@ class PublishWhenPresentInventoryDecorator : public Inventory
     void removePropertiesChangedListener(
         std::weak_ptr<dbus::PropertiesChangedListener> listener) override;
     void add(const std::string& path,
-             const inventory::interfaces::Interface iface) override;
+             inventory::interfaces::Interface iface) override;
     void remove(const std::string& path,
-                const inventory::interfaces::Interface iface) override;
+                inventory::interfaces::Interface iface) override;
     void markPresent(const std::string& path) override;
     void markAbsent(const std::string& path) override;
     bool isPresent(const std::string& path) override;
@@ -260,7 +277,8 @@ class PublishWhenPresentInventoryDecorator : public Inventory
 
   private:
     Inventory* inventory;
-    std::map<std::string, std::map<std::string, inventory::interfaces::Interface>>
+    std::map<std::string,
+             std::map<std::string, inventory::interfaces::Interface>>
         objectCache;
     std::map<std::string, bool> presentCache;
 };

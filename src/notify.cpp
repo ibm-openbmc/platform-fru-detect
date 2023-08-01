@@ -22,6 +22,12 @@ PHOSPHOR_LOG2_USING;
 
 Notifier::Notifier()
 {
+    // populating epollfd and exitfd using a member initializer exposes a
+    // loss-of-information hazard as bot epoll_create1() and signalfd() set
+    // errno on failure. This may lead the logging to report the errno value set
+    // by a failure of signalfd() as the errno for a failure of epoll_create1().
+    // Instead, silence the preference warning.
+    // NOLINTNEXTLINE(cppcoreguidelines-prefer-member-initializer)
     epollfd = ::epoll_create1(0);
     if (epollfd < 0)
     {
@@ -43,6 +49,7 @@ Notifier::Notifier()
         throw std::system_category().default_error_condition(errno);
     }
 
+    // NOLINTNEXTLINE(cppcoreguidelines-prefer-member-initializer)
     exitfd = signalfd(-1, &mask, 0);
     if (exitfd == -1)
     {
@@ -58,7 +65,10 @@ Notifier::Notifier()
      */
     struct epoll_event event
     {
-        EPOLLIN | EPOLLPRI, nullptr
+        EPOLLIN | EPOLLPRI,
+        {
+            nullptr
+        }
     };
     rc = ::epoll_ctl(epollfd, EPOLL_CTL_ADD, exitfd, &event);
     if (rc == -1)
@@ -85,7 +95,10 @@ void Notifier::add(NotifySink* sink)
     // Initialises ptr of the epoll_data union as it's the first element
     struct epoll_event event
     {
-        EPOLLIN | EPOLLPRI, sink
+        EPOLLIN | EPOLLPRI,
+        {
+            sink
+        }
     };
     int rc = ::epoll_ctl(epollfd, EPOLL_CTL_ADD, sink->getFD(), &event);
     if (rc < 0)
@@ -128,7 +141,8 @@ void Notifier::remove(NotifySink* sink)
 
 void Notifier::run()
 {
-    struct epoll_event event;
+    struct epoll_event event
+    {};
     int rc = 0;
 
     for (;;)
@@ -151,9 +165,10 @@ void Notifier::run()
         NotifySink* sink = static_cast<NotifySink*>(event.data.ptr);
 
         /* Is it the exitfd sentinel? */
-        if (!sink)
+        if (sink == nullptr)
         {
-            struct signalfd_siginfo fdsi;
+            struct signalfd_siginfo fdsi
+            {};
 
             ssize_t ingress = read(exitfd, &fdsi, sizeof(fdsi));
             if (ingress != sizeof(fdsi))
@@ -165,7 +180,7 @@ void Notifier::run()
                 throw std::system_category().default_error_condition(EBADMSG);
             }
 
-            if (!(fdsi.ssi_signo == SIGINT || fdsi.ssi_signo == SIGQUIT))
+            if (fdsi.ssi_signo != SIGINT && fdsi.ssi_signo != SIGQUIT)
             {
                 error("signalfd provided unexpected signal: {SIGNAL}", "SIGNAL",
                       fdsi.ssi_signo);
