@@ -2,10 +2,13 @@
 Description=Detect undiscoverable platform FRUs
 Wants=xyz.openbmc_project.Inventory.Manager.service
 After=xyz.openbmc_project.Inventory.Manager.service
+Wants=system-vpd.service
+After=system-vpd.service
+After=wait-vpd-parsers.service
 
 [Service]
 Type=simple
 ExecStart=/usr/bin/platform-fru-detect
 
 [Install]
-WantedBy=default.target
+WantedBy=multi-user.target
