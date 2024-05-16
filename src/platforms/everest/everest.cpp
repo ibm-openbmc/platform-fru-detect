@@ -7,6 +7,7 @@
 void Everest::enrollWith(PlatformManager& pm)
 {
     pm.enrollPlatform("Everest", this);
+    pm.enrollPlatform("Fuji", this);
 }
 
 void Everest::detectFrus(Notifier& notifier, Inventory* inventory)
