@@ -37,6 +37,9 @@ void Rainier1z::enrollWith(PlatformManager& pm)
     pm.enrollPlatform("Rainier 1S4U", this);
     pm.enrollPlatform("Rainier 4U", this);
     pm.enrollPlatform("Rainier 2U", this);
+    pm.enrollPlatform("Blueridge 1S4U", this);
+    pm.enrollPlatform("Blueridge 4U", this);
+    pm.enrollPlatform("Blueridge 2U", this);
 }
 
 void Rainier1z::detectFrus(Notifier& notifier, Inventory* inventory)
