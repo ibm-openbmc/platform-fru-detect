@@ -2,8 +2,8 @@
 Description=Detect undiscoverable platform FRUs
 Wants=xyz.openbmc_project.Inventory.Manager.service
 After=xyz.openbmc_project.Inventory.Manager.service
-Wants=system-vpd.service
-After=system-vpd.service
+Wants=vpd-manager.service
+After=vpd-manager.service
 After=wait-vpd-parsers.service
 After=obmc-clear-all-fault-leds-and-remove-crit-association@true.service
 
