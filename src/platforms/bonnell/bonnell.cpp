@@ -5,6 +5,7 @@
 void Bonnell::enrollWith(PlatformManager& pm)
 {
     pm.enrollPlatform("Bonnell", this);
+    pm.enrollPlatform("Balcones", this);
 }
 
 void Bonnell::detectFrus(Notifier& notifier, Inventory* inventory)
