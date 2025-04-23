@@ -19,5 +19,5 @@ void Bonnell::detectFrus(Notifier& notifier, Inventory* inventory)
     notifier.run();
 
     /* Clean up the application state but leave the inventory in-tact */
-    pennybacker.unplug(notifier, pennybacker.UNPLUG_RETAINS_INVENTORY);
+    pennybacker.unplug(notifier, Pennybacker::UNPLUG_RETAINS_INVENTORY);
 }

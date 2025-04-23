@@ -32,7 +32,7 @@ void Rainier0z::detectFrus(Notifier& notifier, Inventory* inventory)
     notifier.run();
 
     /* Clean up the application state but leave the inventory in-tact. */
-    ingraham.unplug(notifier, ingraham.UNPLUG_RETAINS_INVENTORY);
+    ingraham.unplug(notifier, Ingraham::UNPLUG_RETAINS_INVENTORY);
 }
 
 void Rainier1z::enrollWith(PlatformManager& pm)
@@ -61,5 +61,5 @@ void Rainier1z::detectFrus(Notifier& notifier, Inventory* inventory)
     notifier.run();
 
     /* Clean up the application state but leave the inventory in-tact. */
-    ingraham.unplug(notifier, ingraham.UNPLUG_RETAINS_INVENTORY);
+    ingraham.unplug(notifier, Ingraham::UNPLUG_RETAINS_INVENTORY);
 }

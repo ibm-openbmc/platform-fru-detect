@@ -11,8 +11,7 @@ PHOSPHOR_LOG2_USING;
 
 BasecampNVMeDrive::BasecampNVMeDrive(Inventory* inventory,
                                      const Basecamp* basecamp, int index) :
-    inventory(inventory),
-    basecamp(basecamp), index(index)
+    inventory(inventory), basecamp(basecamp), index(index)
 {}
 
 void BasecampNVMeDrive::plug([[maybe_unused]] Notifier& notifier)

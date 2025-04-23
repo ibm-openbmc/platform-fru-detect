@@ -20,8 +20,7 @@ PHOSPHOR_LOG2_USING;
 WilliwakasNVMeDrive::WilliwakasNVMeDrive(Inventory* inventory,
                                          const Williwakas* williwakas,
                                          int index) :
-    NVMeDrive(),
-    inventory(inventory), williwakas(williwakas), index(index)
+    NVMeDrive(), inventory(inventory), williwakas(williwakas), index(index)
 {}
 
 void WilliwakasNVMeDrive::plug([[maybe_unused]] Notifier& notifier)
@@ -88,8 +87,7 @@ std::string Williwakas::getInventoryPathFor(const Nisqually* nisqually,
 
 Williwakas::Williwakas(Inventory* inventory, const Nisqually* nisqually,
                        int index) :
-    inventory(inventory),
-    nisqually(nisqually), index(index),
+    inventory(inventory), nisqually(nisqually), index(index),
     polledDriveConnectors{{
         PolledConnector<WilliwakasNVMeDrive>(0, inventory, this, 0),
         PolledConnector<WilliwakasNVMeDrive>(1, inventory, this, 1),

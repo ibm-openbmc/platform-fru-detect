@@ -63,13 +63,7 @@ Notifier::Notifier()
      * CAUTION: We're using nullptr as a sentinel for the signalfd. This saves
      * the source noise of creating a NotifySink class for it.
      */
-    struct epoll_event event
-    {
-        EPOLLIN | EPOLLPRI,
-        {
-            nullptr
-        }
-    };
+    struct epoll_event event{EPOLLIN | EPOLLPRI, {nullptr}};
     rc = ::epoll_ctl(epollfd, EPOLL_CTL_ADD, exitfd, &event);
     if (rc == -1)
     {
@@ -93,13 +87,7 @@ void Notifier::add(NotifySink* sink)
     sink->arm();
 
     // Initialises ptr of the epoll_data union as it's the first element
-    struct epoll_event event
-    {
-        EPOLLIN | EPOLLPRI,
-        {
-            sink
-        }
-    };
+    struct epoll_event event{EPOLLIN | EPOLLPRI, {sink}};
     int rc = ::epoll_ctl(epollfd, EPOLL_CTL_ADD, sink->getFD(), &event);
     if (rc < 0)
     {
@@ -141,8 +129,7 @@ void Notifier::remove(NotifySink* sink)
 
 void Notifier::run()
 {
-    struct epoll_event event
-    {};
+    struct epoll_event event{};
     int rc = 0;
 
     for (;;)
@@ -167,8 +154,7 @@ void Notifier::run()
         /* Is it the exitfd sentinel? */
         if (sink == nullptr)
         {
-            struct signalfd_siginfo fdsi
-            {};
+            struct signalfd_siginfo fdsi{};
 
             ssize_t ingress = read(exitfd, &fdsi, sizeof(fdsi));
             if (ingress != sizeof(fdsi))

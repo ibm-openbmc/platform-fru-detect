@@ -1,8 +1,8 @@
 subdir('migrations')
 
-inventory_src = [
-    'inventory-manager.cpp',
-    'publish-when-present.cpp'
-]
+inventory_src = ['inventory-manager.cpp', 'publish-when-present.cpp']
 
-inventory_dep = declare_dependency(sources: inventory_src, dependencies: migrations_dep)
+inventory_dep = declare_dependency(
+    sources: inventory_src,
+    dependencies: migrations_dep,
+)

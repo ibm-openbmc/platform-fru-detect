@@ -13,14 +13,17 @@ namespace bus
 {
 namespace match
 {
+// NOLINTNEXTLINE(readability-identifier-naming)
 struct match;
-}
+} // namespace match
+// NOLINTNEXTLINE(readability-identifier-naming)
 struct bus;
 } // namespace bus
 namespace message
 {
+// NOLINTNEXTLINE(readability-identifier-naming)
 class message;
-}
+} // namespace message
 } // namespace sdbusplus
 
 class DBusNotifySink : public NotifySink
