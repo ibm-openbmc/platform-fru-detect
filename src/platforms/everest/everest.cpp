@@ -24,5 +24,5 @@ void Everest::detectFrus(Notifier& notifier, Inventory* inventory)
     notifier.run();
 
     /* Clean up the application state but leave the inventory in-tact. */
-    tola.unplug(notifier, tola.UNPLUG_RETAINS_INVENTORY);
+    tola.unplug(notifier, Tola::UNPLUG_RETAINS_INVENTORY);
 }

@@ -136,8 +136,7 @@ class PolledDevicePresence : public NotifySink
     PolledDevicePresence() = delete;
     PolledDevicePresence(Connector<T>* connector,
                          const std::function<bool()>& poll) :
-        connector(connector),
-        poll(poll), timerfd(-1)
+        connector(connector), poll(poll), timerfd(-1)
     {}
     PolledDevicePresence(const PolledDevicePresence<T>& other) = default;
     PolledDevicePresence(PolledDevicePresence<T>&& other) noexcept = default;
@@ -158,16 +157,9 @@ class PolledDevicePresence : public NotifySink
         {
             lg2::error("Failed to create timerfd: {ERRNO_DESCRIPTION}",
                        "ERRNO_DESCRIPTION", ::strerror(errno), "ERRNO", errno);
-            std::system_category().default_error_condition(errno);
         }
 
-        struct itimerspec interval
-        {
-            {1, 0},
-            {
-                1, 0
-            }
-        };
+        struct itimerspec interval{{1, 0}, {1, 0}};
 
         int rc = ::timerfd_settime(timerfd, 0, &interval, nullptr);
         if (rc == -1)
@@ -177,7 +169,6 @@ class PolledDevicePresence : public NotifySink
             lg2::error(
                 "Failed to set interval for timerfd: {ERRNO_DESCRIPTION}",
                 "ERRNO_DESCRIPTION", ::strerror(errno), "ERRNO", errno);
-            std::system_category().default_error_condition(errno);
         }
     }
 
@@ -231,7 +222,6 @@ class PolledDevicePresence : public NotifySink
                     "Failed to read from timerfd {TIMER_FD}: {ERRNO_DESCRIPTION}",
                     "TIMER_FD", this->timerfd, "ERRNO_DESCRIPTION",
                     ::strerror(errno), "ERRNO", errno);
-                std::system_category().default_error_condition(errno);
             }
             else
             {

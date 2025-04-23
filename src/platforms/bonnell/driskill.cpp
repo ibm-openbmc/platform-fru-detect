@@ -5,8 +5,7 @@
 
 DriskillNVMeDrive::DriskillNVMeDrive(Inventory* inventory,
                                      const Driskill* driskill, int index) :
-    inventory(inventory),
-    driskill(driskill), index(index)
+    inventory(inventory), driskill(driskill), index(index)
 {}
 
 void DriskillNVMeDrive::plug([[maybe_unused]] Notifier& notifier)

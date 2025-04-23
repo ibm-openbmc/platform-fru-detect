@@ -79,8 +79,7 @@ BasicNVMeDrive::BasicNVMeDrive(const SysfsI2CBus& bus, std::string&& path) :
 
 BasicNVMeDrive::BasicNVMeDrive(const SysfsI2CBus& bus, std::string&& path,
                                const std::vector<uint8_t>&& metadata) :
-    NVMeDrive(),
-    inventoryPath(path), basic(bus.getAddress(), eepromAddress),
+    NVMeDrive(), inventoryPath(path), basic(bus.getAddress(), eepromAddress),
     vini(std::vector<uint8_t>({'N', 'V', 'M', 'e'}),
          BasicNVMeDrive::extractSerial(metadata)),
     manufacturer(BasicNVMeDrive::extractManufacturer(metadata)),

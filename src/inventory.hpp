@@ -58,13 +58,13 @@ class Interface
   public:
     Interface(const std::string& interface,
               const InterfaceType&& removeProperties) :
-        name(interface),
-        addProperties(std::nullopt), removeProperties(removeProperties)
+        name(interface), addProperties(std::nullopt),
+        removeProperties(removeProperties)
     {}
     Interface(const std::string& interface, const InterfaceType&& addProperties,
               const InterfaceType&& removeProperties) :
-        name(interface),
-        addProperties(addProperties), removeProperties(removeProperties)
+        name(interface), addProperties(addProperties),
+        removeProperties(removeProperties)
     {}
     Interface(const Interface& other) = default;
     Interface(Interface&& other) = default;

@@ -1,5 +1,3 @@
-bonnell_dep = declare_dependency(sources: [
-	'bonnell.cpp',
-	'driskill.cpp',
-	'pennybacker.cpp'
-])
+bonnell_dep = declare_dependency(
+    sources: ['bonnell.cpp', 'driskill.cpp', 'pennybacker.cpp'],
+)

@@ -10,8 +10,7 @@ using namespace inventory;
 using namespace dbus;
 
 PublishWhenPresentInventoryDecorator::PublishWhenPresentInventoryDecorator(
-    Inventory* inventory) :
-    inventory(inventory)
+    Inventory* inventory) : inventory(inventory)
 {}
 
 void PublishWhenPresentInventoryDecorator::migrate(

@@ -19,8 +19,7 @@ PHOSPHOR_LOG2_USING;
 
 FlettNVMeDrive::FlettNVMeDrive(Inventory* inventory, const Nisqually* nisqually,
                                const Flett* flett, int index) :
-    inventory(inventory),
-    nisqually(nisqually), flett(flett), index(index)
+    inventory(inventory), nisqually(nisqually), flett(flett), index(index)
 {}
 
 void FlettNVMeDrive::plug([[maybe_unused]] Notifier& notifier)
